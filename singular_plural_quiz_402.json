@@ -1,0 +1,111 @@
+{
+  "id": 402,
+  "themeId": 4,
+  "name": "Writing and Reading Conversation Singular/plural – Quiz 2",
+  "description": "Practice Singular and Plural vocabulary and grammar in conversation scenarios (reading/writing).",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Translate into French 'Come on, let's go to the firefighters' ball tonight!'",
+      "options": [
+        "A. Viens, on va au bal des pompierx ce soir !",
+        "B. Viens, on va au bal ce soir !",
+        "C. Viens, on va au bal des pompiers ce soir !",
+        "D. Venez, on va au bal des pompiers ce soir !"
+      ],
+      "correctAnswer": "C. Viens, on va au bal des pompiers ce soir !",
+      "explanation": "On July 14, French national celebration, many people go to the firefighters' balls."
+    },
+    {
+      "question": "Translate into French 'Wait, I saw in the newspaper that it was canceled.'",
+      "options": [
+        "A. Attends, j'ai vu dans les journaux que c'était annulé.",
+        "B. Attends, j'ai vu dans les journau que c'était annulé.",
+        "C. Attends, j'ai vu dans les journaus que c'était annulé.",
+        "D. Attends, j'ai vu dans la presse que c'était annulé."
+      ],
+      "correctAnswer": "A. Attends, j'ai vu dans les journaux que c'était annulé."
+    },
+    {
+      "question": "Translate into French 'Oh no, it was under renovation but now it's all good. All the fire stations are open.'",
+      "options": [
+        "A. Ah non, c'était en travaux mais maintenant, c'est bon. Toutes les casernes sont ouvertes.",
+        "B. Ah non, c'était en travail mais maintenant, c'est bon. Toutes les casernes sont ouvertes.",
+        "C. Ah non, c'était en travaux mais maintenant, c'est bon. Tout est ouvert.",
+        "D. Ah non, c'était en travos mais maintenant, c'est bon. Toutes les casernes sont ouvertes."
+      ],
+      "correctAnswer": "A. Ah non, c'était en travaux mais maintenant, c'est bon. Toutes les casernes sont ouvertes."
+    },
+    {
+      "question": "Translate into French 'Great. We are going to party with our friends'",
+      "options": [
+        "A. Super. On va pouvoir faire la fête avec notre copains.",
+        "B. Super. On va pouvoir faire la fête avec nos copains.",
+        "C. Super. On va pouvoir faire la fête avec les copainx.",
+        "D. Super. On va pouvoir faire la fête avec les copaints."
+      ],
+      "correctAnswer": "B. Super. On va pouvoir faire la fête avec nos copains.",
+      "explanation": "Another translation could have been \"On va pouvoir faire la fête avec les copains.\""
+    },
+    {
+      "question": "Translate into French 'Alright, let's get ready. Choose your favourite perfume from all of mine.'",
+      "options": [
+        "A. On se prépare alors. Choisis parmi toues mes parfums celui que tu préfères.",
+        "B. On se prépare alors. Choisis parmi toutes mes parfums celui que tu préfères.",
+        "C. On se prépare alors. Choisis parmi tous mes parfums celui que tu préfères.",
+        "D. On se prépare alors. Choisis parmi tout mes parfums celui que tu préfères."
+      ],
+      "correctAnswer": "C. On se prépare alors. Choisis parmi tous mes parfums celui que tu préfères."
+    },
+    {
+      "question": "Translate into French 'I love your fashion style choices.'",
+      "options": [
+        "A. Génial. J'adore tes choix vestimentaire.",
+        "B. Génial. J'adore tes chois vestimentaires.",
+        "C. Génial. J'adore tes choixes vestimentaires.",
+        "D. Génial. J'adore tes choix vestimentaires."
+      ],
+      "correctAnswer": "D. Génial. J'adore tes choix vestimentaires."
+    },
+    {
+      "question": "Translate into French 'I can't believe my eyes. You have my favorite perfume!'",
+      "options": [
+        "A. Je n'en crois pas mes yeux. Tu as mon parfum préféré !",
+        "B. Je n'en crois pas mon oeil. Tu as mon parfum préféré !",
+        "C. Je n'en crois pas mes yeus. Tu as mon parfum préféré !",
+        "D. Je n'y crois pas. Tu as mon parfum préféré !"
+      ],
+      "correctAnswer": "A. Je n'en crois pas mes yeux. Tu as mon parfum préféré !"
+    },
+    {
+      "question": "Translate into French 'Yes, you told me you liked it a few months ago.'",
+      "options": [
+        "A. Oui tu m'avais dit que tu l'aimais bien il y a quelque mois.",
+        "B. Oui tu m'avais dit que tu l'aimais bien il y a quelques moix.",
+        "C. Oui tu m'avais dit que tu l'aimais bien il y a quelques moits.",
+        "D. Oui tu m'avais dit que tu l'aimais bien il y a quelques mois."
+      ],
+      "correctAnswer": "D. Oui tu m'avais dit que tu l'aimais bien il y a quelques mois."
+    },
+    {
+      "question": "Translate into French 'Oh, thank you! You're the best. You can choose any of my hats.'",
+      "options": [
+        "A. Ah merci. Tu es la meilleure. Tu peux choisir n'importe lequel de mes chapeaux.",
+        "B. Ah merci. Tu es la meilleure. Tu peux choisir n'importe lequel des chapeaux.",
+        "C. Ah merci. Tu es la meilleure. Tu peux choisir n'importe lequel de mes chapeaus.",
+        "D. Ah merci. Tu es la meilleure. Tu peux choisir n'importe lesquel de mes chapeaux."
+      ],
+      "correctAnswer": "A. Ah merci. Tu es la meilleure. Tu peux choisir n'importe lequel de mes chapeaux."
+    },
+    {
+      "question": "Translate into French 'Just two more pieces of jewelry, my lucky stones, and a flag, and we're off to the firefighters' ball!'",
+      "options": [
+        "A. Encore deux bijous, mes cailloux porte-bonheur et un drapeau, et nous voilà parties au bal des pompiers !",
+        "B. Encore deux bijoux, mes cailloux porte-bonheur et un drapeau, et nous voilà parties au bal des pompiers !",
+        "C. Encore deux bijoux, mes caillous porte-bonheur et un drapeau, et nous voilà parties au bal des pompiers !",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. Encore deux bijoux, mes cailloux porte-bonheur et un drapeau, et nous voilà parties au bal des pompiers !"
+    }
+  ]
+}

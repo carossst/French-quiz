@@ -1,0 +1,120 @@
+{
+  "id": 205,
+  "themeId": 2,
+  "name": "Writing and Reading & Listening Conversation Numbers - Quiz 5",
+  "description": "Combine writing/reading and listening skills focusing on Numbers conversation.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Bonjour, j'aimerais prendre rendez-vous ___ s'il vous plaît ? (fill the blank)",
+      "options": [
+        "A. pour mardi janvier deux-milles vingts-six",
+        "B. pour mardi di janvier deux-milles vingt-six",
+        "C. pour mardi douze janvier deux-mille vingt-six",
+        "D. pour mardi dix janvier deux-mille vingt-six"
+      ],
+      "correctAnswer": "D. pour mardi dix janvier deux-mille vingt-six",
+      "explanation": "for Tuesday, January 10, 2026"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ah vous avez vous tromper de numéro.",
+        "B. Ah vous avez dû vous tromper. C'est pas le bon numéro.",
+        "C. Ah vous avez dû vous tromper de numéro.",
+        "D. Ah vous avez le bon numéro."
+      ],
+      "correctAnswer": "C. Ah vous avez dû vous tromper de numéro.",
+      "audio": "TYI_Numbers_5_2.mp3",
+      "explanation": "Oh, you must have the wrong number."
+    },
+    {
+      "question": "Ah zut. Ce n'est pas le ___ ? (fill the blank)",
+      "options": [
+        "A. zéros un, quarante-deux, cinquante-cinq, quatre-vingt-dix-neuf, soixante-seize",
+        "B. zéro un, quarante-deux, cinquante-cinq, quatre-vingt-dix-neuf, soixante-seize",
+        "C. zéro uns, quarante-deux, cinquante-cinq, quatre-vingt-dix-neuf, soixante-seize",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. zéro un, quarante-deux, cinquante-cinq, quatre-vingt-dix-neuf, soixante-seize",
+      "explanation": "01 42 55 99 76"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Non. Ce n'est pas ça.",
+        "B. Non. Ce n'est pas le 01 43 25 97 76",
+        "C. Non. C'est le 01 24 55 99 76",
+        "D. Non. Ce n'est pas le 01 42 55 99 76"
+      ],
+      "correctAnswer": "D. Non. Ce n'est pas le 01 42 55 99 76",
+      "audio": "TYI_Numbers_5_4.mp3",
+      "explanation": "No. It's not the 01 42 55 99 76."
+    },
+    {
+      "question": "Merci. Désolée pour le ___. (fill the blank)",
+      "options": [
+        "A. faux numéro",
+        "B. mauvais numéro",
+        "C. numéro incorrect",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Allo, bonsoir, j'aimerais un rendez-vous le mardi 10 janvier 2036, s'il vous plaît ?",
+        "B. Allo, bonjour, j'aimerais prendre rendez-vous pour le mardi 10 février 2046, s'il vous plaît ?",
+        "C. Allo, bonjour, j'aimerais prendre rendez-vous pour le mardi 10 janvier 2026, s'il vous plaît ?",
+        "D. Bonjour, je veux un rendez-vous pour le mardi 10 janvier 2016."
+      ],
+      "correctAnswer": "C. Allo, bonjour, j'aimerais prendre rendez-vous pour le mardi 10 janvier 2026, s'il vous plaît ?",
+      "audio": "TYI_Numbers_5_6.mp3",
+      "explanation": "Hello, I would like to make an appointment for Tuesday, January 10, 2026, please."
+    },
+    {
+      "question": "Oui à quelle heure ? J'ai___. (fill the blank)",
+      "options": [
+        "A. 15h ou 16h de disponible ce jour-là",
+        "B. 3h ou 4h de disponible ce jour-là",
+        "C. 15 heures ou 16 heures de disponible ce jour-là",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Et quinze heures trente, c'est possible ?",
+        "B. Et quatre heures trente, c'est possible ?",
+        "C. Et trois heures, c'est possible ?",
+        "D. Et neuf heures, c'est ok ?"
+      ],
+      "correctAnswer": "A. Et quinze heures trente, c'est possible ?",
+      "audio": "TYI_Numbers_5_8.mp3"
+    },
+    {
+      "question": "Oui c'est noté. Votre date de naissance, c'est bien le ___ ? (fill the blank)",
+      "options": [
+        "A. 19 janvier 2002",
+        "B. dix-neufs janvier 2022",
+        "C. dix-neufs janvier deux-milles vingt-deux",
+        "D. 19 janvier 2000"
+      ],
+      "correctAnswer": "A. 19 janvier 2002"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Non. Merci pour le rendez-vous.",
+        "B. Oui. Exactement. Merci pour le rendez-vous. Bonne journée.",
+        "C. Oui. Merci mon rendez-vous. Bonne soirée.",
+        "D. Oui. Exactement. Bonne journée."
+      ],
+      "correctAnswer": "B. Oui. Exactement. Merci pour le rendez-vous. Bonne journée.",
+      "audio": "TYI_Numbers_5_10.mp3",
+      "explanation": "Yes, exactly. Thank you for the appointment. Have a good day."
+    }
+  ]
+}

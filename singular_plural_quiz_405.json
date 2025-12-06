@@ -1,0 +1,123 @@
+{
+  "id": 405,
+  "themeId": 4,
+  "name": "Writing and Reading & Listening Conversation Singular/plural – Quiz 5",
+  "description": "Combine writing/reading and listening skills focusing on Singular and Plural conversation.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Tu as vu les ___ pour le concert ? (fill the blank)",
+      "options": [
+        "A. nouvelles affiches",
+        "B. nouveaux posters",
+        "C. nouveaux flyers",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Des nouvelles affiches ?",
+        "B. Des affiches ? Tu as vu ça où ?",
+        "C. Des nouvelles affiches ? Tu les as vues où ?",
+        "D. Des nouvelles affiches ? Où ?"
+      ],
+      "correctAnswer": "C. Des nouvelles affiches ? Tu les as vues où ?",
+      "audio": "TYF_Singular_Plural_5_2.mp3",
+      "explanation": "New posters? Where have you seen them?"
+    },
+    {
+      "question": "Elles sont partout dans le quartier ! Elles sont vraiment ___. (fill the blank)",
+      "options": [
+        "A. colorer",
+        "B. colorés",
+        "C. colorées",
+        "D. All of the above"
+      ],
+      "correctAnswer": "C. colorées",
+      "explanation": "Elles sont partout dans le quartier ! Elles sont vraiment colorées. (They're everywhere in the neighborhood! They're really colorful)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Les couleurs, ça attire l'œil.",
+        "B. Les couleurs, ça attire l'attention. Qui joue ?",
+        "C. Les couleurs, ça attire l'œil. Quels groupes jouent ?",
+        "D. Les couleurs, ça attire les yeux. Quels groupes jouent ?"
+      ],
+      "correctAnswer": "C. Les couleurs, ça attire l'œil. Quels groupes jouent ?",
+      "audio": "TYF_Singular_Plural_5_4.mp3",
+      "explanation": "The colors are eye-catching. Which bands are playing?"
+    },
+    {
+      "question": "Un de nos ___ . (fill the blank)",
+      "options": [
+        "A. chanteures préférés",
+        "B. chanteurs préférés",
+        "C. chanteur préféré",
+        "D. chants préférés"
+      ],
+      "correctAnswer": "B. chanteurs préférés",
+      "explanation": "Un de nos chanteurs préférés. (One of our favourite singers.)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ah super ! On y va ensemble ?",
+        "B. Ah on y va ensemble ?",
+        "C. Ah super ! On y va ?",
+        "D. Ah super ! Tu viens avec moi ?"
+      ],
+      "correctAnswer": "A. Ah super ! On y va ensemble ?",
+      "audio": "TYF_Singular_Plural_5_6.mp3",
+      "explanation": "Oh cool! Let's go together?"
+    },
+    {
+      "question": "Bonne idée ! On peut acheter ___. (fill the blank)",
+      "options": [
+        "A. les billets en lignes",
+        "B. les billets on ligne",
+        "C. les billets en ligne",
+        "D. les billetx en ligne"
+      ],
+      "correctAnswer": "C. les billets en ligne",
+      "explanation": "Bonne idée ! On peut acheter les billets en ligne. (Great idea! We can buy the tickets online.)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Super ! On peut aussi inviter Pierre et François.",
+        "B. Super ! Pierre et François adorent la musique.",
+        "C. Super ! On peut aussi inviter Pierre et François. Ils adorent la musique.",
+        "D. Super ! On peut inviter Pierre et François. Il aiment la musique."
+      ],
+      "correctAnswer": "C. Super ! On peut aussi inviter Pierre et François. Ils adorent la musique.",
+      "audio": "TYF_Singular_Plural_5_8.mp3",
+      "explanation": "Great! We can also invite Pierre et François, they love music"
+    },
+    {
+      "question": "Ça marche. Tu prends les billets et je m'occupe de ___? (fill the blank)",
+      "options": [
+        "A. les inviter",
+        "B. leur envoyer un message",
+        "C. les prévenir",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Ça marche. Tu prends les billets et je m'occupe de les inviter ? (It's a deal. You get the tickets and I'll take care of the invitations?)\nÇa marche. Tu prends les billets et je m'occupe de leur envoyer un message ? ( It's a deal. You get the tickets and I'll send them a message?)\nÇa marche. Tu prends les billets et je m'occupe de les prévenir ? (It's a deal. You get the tickets and I'll tell them?)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Parfait. On fait comme ça.",
+        "B. Parfait. On fait comme ça. Gros bisous.",
+        "C. On fait ça. Gros bisous.",
+        "D. Bof. On ne fait pas comme ça."
+      ],
+      "correctAnswer": "B. Parfait. On fait comme ça. Gros bisous.",
+      "audio": "TYF_Singular_Plural_5_10.mp3",
+      "explanation": "Perfect. Let's do that. Big kisses"
+    }
+  ]
+}

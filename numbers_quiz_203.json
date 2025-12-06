@@ -1,0 +1,129 @@
+{
+  "id": 203,
+  "themeId": 2,
+  "name": "Listening Numbers â€“ Quiz 3",
+  "description": "Practice listening comprehension focusing on Numbers vocabulary and phrases.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Quatorze euros",
+        "B. Quatoze euros",
+        "C. Quinze euros",
+        "D. Quatre euros"
+      ],
+      "correctAnswer": "A. Quatorze euros",
+      "audio": "TYI_Numbers_3_1.mp3",
+      "explanation": "14 euros"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Cinquante-quatreu",
+        "B. Cinquante-cinq",
+        "C. Cinquante-quatre",
+        "D. Cinquante-cinque"
+      ],
+      "correctAnswer": "C. Cinquante-quatre",
+      "audio": "TYI_Numbers_3_2.mp3",
+      "explanation": "54"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Soixante-dice",
+        "B. Soixante-dix",
+        "C. Soixante",
+        "D. Soixantes-dix"
+      ],
+      "correctAnswer": "B. Soixante-dix",
+      "audio": "TYI_Numbers_3_3.mp3",
+      "explanation": "70"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Sick cent",
+        "B. Cent",
+        "C. Cinq cents",
+        "D. Six cents"
+      ],
+      "correctAnswer": "D. Six cents",
+      "audio": "TYI_Numbers_3_4.mp3",
+      "explanation": "600"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Seize",
+        "B. Treize",
+        "C. Seizes",
+        "D. A l'aise"
+      ],
+      "correctAnswer": "A. Seize",
+      "audio": "TYI_Numbers_3_5.mp3",
+      "explanation": "16"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Quatre-vingt-neuf",
+        "B. Quatreu-vingts-dix-neuf",
+        "C. Quatre-vingts-dix-neufs",
+        "D. Quatre-vingt-dix-neuf"
+      ],
+      "correctAnswer": "D. Quatre-vingt-dix-neuf",
+      "audio": "TYI_Numbers_3_6.mp3",
+      "explanation": "99"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Deux mille vingt et un",
+        "B. Deux milles vingt et un",
+        "C. Deux mille vingts et un",
+        "D. Deux mille vingts et uns"
+      ],
+      "correctAnswer": "A. Deux mille vingt et un",
+      "audio": "TYI_Numbers_3_7.mp3",
+      "explanation": "2021"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Mille-sept-cent-quatre-vingt-neuf",
+        "B. Mille cent quatre-vingt-neuf",
+        "C. Mille cent cinquante-vingt-neuf",
+        "D. Mille cents quatre-vingt-neuf"
+      ],
+      "correctAnswer": "A. Mille-sept-cent-quatre-vingt-neuf",
+      "audio": "TYI_Numbers_3_8.mp3",
+      "explanation": "1789"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Un million cinquante-trois milles",
+        "B. Un million quarante-trois milles",
+        "C. Un million cent quarante-fois milles",
+        "D. Un-million-cent-quarante-trois mille"
+      ],
+      "correctAnswer": "D. Un-million-cent-quarante-trois mille",
+      "audio": "TYI_Numbers_3_9.mp3",
+      "explanation": "1 000 143 000/one million one hundred forty-three thousand\nUn million cent quarante-trois mille is also correct."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Mille milliads",
+        "B. Milles milliards",
+        "C. Mille milliads",
+        "D. Mille milliards"
+      ],
+      "correctAnswer": "D. Mille milliards",
+      "audio": "TYI_Numbers_3_10.mp3",
+      "explanation": "1 000 000 000 000/one trillion"
+    }
+  ]
+}

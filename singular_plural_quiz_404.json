@@ -1,0 +1,129 @@
+{
+  "id": 404,
+  "themeId": 4,
+  "name": "Listening Conversation Singular/plural – Quiz 4",
+  "description": "Practice listening comprehension in conversation scenarios using Singular and Plural vocabulary.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Je vais faire deux scanners demain.",
+        "B. Je vais faire de scanners.",
+        "C. Je vais me faire scanner.",
+        "D. Je fais des scanners demain."
+      ],
+      "correctAnswer": "A. Je vais faire deux scanners demain.",
+      "audio": "TYF_Singular_Plural_4_1.mp3",
+      "explanation": "I am going to have two scans tomorrow."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ou cela ?",
+        "B. Où ?",
+        "C. Où ça ?",
+        "D. Ou ce sera ?"
+      ],
+      "correctAnswer": "C. Où ça ?",
+      "audio": "TYF_Singular_Plural_4_2.mp3",
+      "explanation": "Where?"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Dans des hôpitaux.",
+        "B. Dans des hôpitals différents.",
+        "C. Dans deux hôpitaux différents.",
+        "D. Dans trois hôpitaux différents."
+      ],
+      "correctAnswer": "C. Dans deux hôpitaux différents.",
+      "audio": "TYF_Singular_Plural_4_3.mp3",
+      "explanation": "In two different hospitals."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Pourquoi faire le même examen ?",
+        "B. Pourquoi le même examen dans établissements ?",
+        "C. Pourquoi faire le même examen dans plusieurs établissements ?",
+        "D. Pourquoi faire l'examen dans plusieurs endroits ?"
+      ],
+      "correctAnswer": "C. Pourquoi faire le même examen dans plusieurs établissements ?",
+      "audio": "TYF_Singular_Plural_4_4.mp3",
+      "explanation": "Why do the same exam in several facilities?"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. C'est pour un scanner et une IRM.",
+        "B. C'est pour un scanner et une IRM. Ce ne sont pas les mêmes machines.",
+        "C. C'est pour un scanner et une IRM. Ce sont les mêmes machines.",
+        "D. Ce n'est pas la même machine."
+      ],
+      "correctAnswer": "B. C'est pour un scanner et une IRM. Ce ne sont pas les mêmes machines.",
+      "audio": "TYF_Singular_Plural_4_5.mp3",
+      "explanation": "It's for a CT scan and an MRI. They are not the same machines."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ah oui. J'avais découvert avec une IRM.",
+        "B. Ah oui. J'avais découvert l'endométriose avec un scanner.",
+        "C. Ah oui. J'avais découvert mon endométriose avec une IRM.",
+        "D. Ah oui. J'avais découvert mon endométriose comme ça."
+      ],
+      "correctAnswer": "C. Ah oui. J'avais découvert mon endométriose avec une IRM.",
+      "audio": "TYF_Singular_Plural_4_6.mp3",
+      "explanation": "Ah, yes. I discovered my endometriosis with an MRI."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. On a de la chance.",
+        "B. On a de la chance de pouvoir faire ces examens en France.",
+        "C. On a de la chance de faire les examens ici.",
+        "D. Quelle chance de pouvoir faire ces examens en France !"
+      ],
+      "correctAnswer": "B. On a de la chance de pouvoir faire ces examens en France.",
+      "audio": "TYF_Singular_Plural_4_7.mp3",
+      "explanation": "We're lucky to be able to get those exams in France."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Oui. Beaucoup de chance.",
+        "B. Oui. Quand tu vois ailleurs, ça ne fait pas peur.",
+        "C. Oui. Beaucoup de chance. Quand tu vois certaines autres payes, quelle peur!",
+        "D. Oui. Beaucoup de chance. Quand tu vois d'autres pays, ça fait peur."
+      ],
+      "correctAnswer": "D. Oui. Beaucoup de chance. Quand tu vois d'autres pays, ça fait peur.",
+      "audio": "TYF_Singular_Plural_4_8.mp3",
+      "explanation": "Yes, we are very fortunate. When you look at some other countries, it's scary."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Et nos frais dentaires et oculaires sont bien remboursés.",
+        "B. Et nos frais dentaires et oculaires ne sont pas super bien remboursés mais c'est mieux que rien.",
+        "C. Et nos frais dentaires et oculaires ne sont pas super bien remboursés.",
+        "D. Et c'est mieux que rien."
+      ],
+      "correctAnswer": "B. Et nos frais dentaires et oculaires ne sont pas super bien remboursés mais c'est mieux que rien.",
+      "audio": "TYF_Singular_Plural_4_9.mp3",
+      "explanation": "Our dental and vision care expenses aren't reimbursed very well, but it's better than nothing."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. T'as raison. Bon courage pour les rendez-vous médicaux !",
+        "B. T'as raison. Tu me tiendras au courant.",
+        "C. T'as raison. Bon courage pour les rendez-vous ! Tu me au courant.",
+        "D. T'as raison. Bon courage pour les rendez-vous médicaux! Tu me tiendras au courant."
+      ],
+      "correctAnswer": "D. T'as raison. Bon courage pour les rendez-vous médicaux! Tu me tiendras au courant.",
+      "audio": "TYF_Singular_Plural_4_10.mp3",
+      "explanation": "You're right. Good luck with your medical appointments! Keep me updated."
+    }
+  ]
+}

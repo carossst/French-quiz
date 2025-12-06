@@ -1,0 +1,124 @@
+{
+  "id": 305,
+  "themeId": 3,
+  "name": "Writing and Reading & Listening Conversation Gender - Quiz 5",
+  "description": "Combine writing/reading and listening skills focusing on Gender conversation.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Bonjour ___ chat, comment ça va ? (fill the blank)",
+      "options": [
+        "A. ma",
+        "B. ton",
+        "C. lui",
+        "D. mon"
+      ],
+      "correctAnswer": "D. mon",
+      "explanation": "Bonjour mon chat, comment ça va ? (Hello my cat, how are you?)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ah s'il pouvait me parler !",
+        "B. Ah si seulement !",
+        "C. Ah si seulement il pouvait parler !",
+        "D. Ah si seulement ça parle !"
+      ],
+      "correctAnswer": "C. Ah si seulement il pouvait parler !",
+      "audio": "TYI_Gender_5_2.mp3",
+      "explanation": "Oh, if only he could speak!"
+    },
+    {
+      "question": "Oui. J'aimerais bien savoir ce ___ pense. (fill the blank)",
+      "options": [
+        "A. qu'il",
+        "B. que le chat",
+        "C. que ce chat",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Oui. J'aimerais bien savoir ce qu'il pense. (Yes. I'd like to know what he thinks.)\nOui. J'aimerais bien savoir ce que le chat pense. (Yes. I'd love to know what the cat thinks.)\nOui. J'aimerais bien savoir ce que ce chat pense. (Yes. I'd love to know what this cat thinks.)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Il réagit à la voix.",
+        "B. Moi aussi parfois.",
+        "C. Aussi, il réagit à ma voix.",
+        "D. Moi-aussi. Il réagit à ma voix parfois."
+      ],
+      "correctAnswer": "D. Moi-aussi. Il réagit à ma voix parfois.",
+      "audio": "TYI_Gender_5_4.mp3",
+      "explanation": "Me too. He reacts to my voice sometimes."
+    },
+    {
+      "question": "Oui, à ___ aussi. (fill the blank)",
+      "options": [
+        "A. la mienne",
+        "B. sa voix",
+        "C. la notre",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. la mienne",
+      "explanation": "Oui, à la mienne aussi. (Yes, to mine as well.)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. La fin de l'histoire, c'est qu'il espère avoir à manger.",
+        "B. Mais bon, le fin mot de l'histoire, c'est qu'il espère toujours avoir à manger.",
+        "C. Mais bon, l'histoire, c'est qu'elle espère avoir à manger.",
+        "D. Elle espère toujours avoir à manger."
+      ],
+      "correctAnswer": "B. Mais bon, le fin mot de l'histoire, c'est qu'il espère toujours avoir à manger.",
+      "audio": "TYI_Gender_5_6.mp3",
+      "explanation": "But the bottom line is that he's still hoping to get something to eat."
+    },
+    {
+      "question": "Parfois, j'ai l'impression que c'est le chat ___. (fill the blank)",
+      "options": [
+        "A. qui fait le loi à la maison",
+        "B. qui fait le loi à la maisone",
+        "C. qui fait la loi à la maison",
+        "D. All of the above"
+      ],
+      "correctAnswer": "C. qui fait la loi à la maison",
+      "explanation": "Parfois, j'ai l'impression que c'est le chat qui fait la loi à la maison. (Sometimes, I feel like the cat is the boss of the house.)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. C'est l'heure de lui donner à manger ?",
+        "B. C'est cela, c'est l'heure de lui donner à manger.",
+        "C. D'ailleurs, c'est pas son heure pour lui donner à manger ?",
+        "D. C'est ça. D'ailleurs, c'est pas l'heure de lui donner à manger ?"
+      ],
+      "correctAnswer": "D. C'est ça. D'ailleurs, c'est pas l'heure de lui donner à manger ?",
+      "audio": "TYI_Gender_5_8.mp3",
+      "explanation": "That's right. Speaking of which, isn't it time to feed him?"
+    },
+    {
+      "question": "Ah oui, tu as raison. Il est ___. (fill the blank)",
+      "options": [
+        "A. l'heure de le nourrir",
+        "B. l'heure de lui donner à manger",
+        "C. l'heure de donner à manger au chat",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Ah oui, tu as raison. Il est l'heure de le nourrir. (Ah yes, you're right. Time to feed him.)\nAh oui, tu as raison. Il est l'heure de lui donner à manger. (Ah yes, you're right. Time to feed him.)\nAh oui, tu as raison. Il est l'heure de donner à manger au chat. (Ah yes, you're right. Time to feed the cat.)"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. C'est ton heure de manger. Miam.",
+        "B. Coucou le chat, c'est l'heure de manger. Miam. Miam.",
+        "C. Coucou, viens manger. Viens.",
+        "D. Coucou le chat, c'est l'heure de Miam, Miam."
+      ],
+      "correctAnswer": "B. Coucou le chat, c'est l'heure de manger. Miam. Miam.",
+      "audio": "TYI_Gender_5_10.mp3",
+      "explanation": "Hi kitty, it's time to eat. Yum. Yum."
+    }
+  ]
+}

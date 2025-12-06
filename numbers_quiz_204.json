@@ -1,0 +1,129 @@
+{
+  "id": 204,
+  "themeId": 2,
+  "name": "Listening Conversation Numbers â€“ Quiz 4",
+  "description": "Practice listening comprehension in conversation scenarios using Numbers vocabulary.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Bonjour, une baguette et deux croissants s'il vous plaît ?",
+        "B. Bonjour, un baguette et deux croissants s'il vous plaît ?",
+        "C. Bonjour, une baguette et des croissants s'il vous plaît ?",
+        "D. Bonjour, une baguette et trois croissants s'il vous plaît ?"
+      ],
+      "correctAnswer": "A. Bonjour, une baguette et deux croissants s'il vous plaît ?",
+      "audio": "TYI_Numbers_4_1.mp3",
+      "explanation": "Good morning/Hi, can I have one baguette and two croissants, please?"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. VoilÃ . Ã‡a fait trois euros cinq s'il vous plaÃ®t.",
+        "B. VoilÃ . Ã‡a fait trois euros cinquante s'il vous plaÃ®t.",
+        "C. VoilÃ . Ã‡a fait trois euros et cinquante centimes s'il vous plaÃ®t.",
+        "D. All of the above."
+      ],
+      "correctAnswer": "B. VoilÃ . Ã‡a fait trois euros cinquante s'il vous plaÃ®t.",
+      "audio": "TYI_Numbers_4_2.mp3",
+      "explanation": "Here it is. 3 euros and fifty cents please."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Tenez, quatre euros.",
+        "B. Tenez, cinq euros.",
+        "C. Tiens, quatre euros.",
+        "D. Tenez, quatorze euros."
+      ],
+      "correctAnswer": "A. Tenez, quatre euros.",
+      "audio": "TYI_Numbers_4_3.mp3",
+      "explanation": "Here you go, four euros."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Merci. Je vous rends quarante centimes.",
+        "B. Merci. Je vous rends cinq centimes.",
+        "C. Merci. Je vous rends cinquante centimes.",
+        "D. Merci. Je vous rends cinquante cents."
+      ],
+      "correctAnswer": "C. Merci. Je vous rends cinquante centimes.",
+      "audio": "TYI_Numbers_4_4.mp3",
+      "explanation": "Thank you. Here's your fifty cents change."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Merci. Et cinq merveilleux s'il vous plaît.",
+        "B. Merci. Et cinq merveilles aussi s'il vous plaît ?",
+        "C. Merci. Hello un merveilleux aussi.",
+        "D. Merci. Et quatre merveilleux aussi s'il vous plaît ?"
+      ],
+      "correctAnswer": "A. Merci. Et cinq merveilleux s'il vous plaît.",
+      "audio": "TYI_Numbers_4_5.mp3",
+      "explanation": "Thank you. And five merveilleux, please.\nThe merveilleux is a traditional cake from the North of France made of light meringue and chocolate whipped cream coated with shavings of dark chocolate."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ah. Vous avez une autre boulangerie à 1,2 kilomètres.",
+        "B. Ah désolée. Je viens de le vendre. Vous avez une boulangerie à 1,2 kilomètres.",
+        "C. Ah oui. Je vous vends le dernier dans dix minutes.",
+        "D. Ah désolée. Je viens de vendre le dernier il y a dix minutes. Vous avez une autre boulangerie à 1,2 kilomètre."
+      ],
+      "correctAnswer": "D. Ah désolée. Je viens de vendre le dernier il y a dix minutes. Vous avez une autre boulangerie à 1,2 kilomètre.",
+      "audio": "TYI_Numbers_4_6.mp3",
+      "explanation": "Oh, I'm sorry. I just sold the last one ten minutes ago. There is another bakery 1.2 kilometer away."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Merci. Je ne vais pas y aller. C'est quoi comme boulangerie ?",
+        "B. Merci. Je vais y aller. C'est nouveau cette boulangerie ?",
+        "C. Merci. Je vais y aller. C'est quoi la boulangerie ?",
+        "D. Merci. Je vais y aller. Je la connais la boulangerie."
+      ],
+      "correctAnswer": "B. Merci. Je vais y aller. C'est nouveau cette boulangerie ?",
+      "audio": "TYI_Numbers_4_7.mp3",
+      "explanation": "Thank you. I'll go there. Is this bakery new?"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Non. Elle a ouvert il y a deux mois. C'est un jeune couple dans la pâtisserie.",
+        "B. Oui. Elle a ouvert il y a neuf mois. C'est un vieux couple qui se lance dans la pâtisserie.",
+        "C. Oui. Elle a ouvert il y a deux mois. C'est un jeune couple qui se lance dans la pâtisserie.",
+        "D. Non. Elle existe depuis plusieurs mois."
+      ],
+      "correctAnswer": "C. Oui. Elle a ouvert il y a deux mois. C'est un jeune couple qui se lance dans la pâtisserie.",
+      "audio": "TYI_Numbers_4_8.mp3",
+      "explanation": "Yes, it opened two months ago. It's a young couple who is starting in the pastry business."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Jeune comment ? La cinquantaine ?",
+        "B. Jeune comment ? La trentaine ?",
+        "C. Jeune comment ? La vingtaine ?",
+        "D. Jeune comment ?"
+      ],
+      "correctAnswer": "B. Jeune comment ? La trentaine ?",
+      "audio": "TYI_Numbers_4_9.mp3",
+      "explanation": "How young? In their thirties?"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Je pense oui. Cinquante/Cinquante-cinq ans environ.",
+        "B. Je pense que non. Trente-cinq ans seulement.",
+        "C. Je pense oui. Quarante-cinq ans environ.",
+        "D. Je pense oui. Trente/Trente-cinq ans environ."
+      ],
+      "correctAnswer": "D. Je pense oui. Trente/Trente-cinq ans environ.",
+      "audio": "TYI_Numbers_4_10.mp3",
+      "explanation": "I think so. Around thirty/thirty-five years old"
+    }
+  ]
+}

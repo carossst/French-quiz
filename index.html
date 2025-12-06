@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Your French - Authentic Daily French Quizzes</title>
+
+
+  <meta name="description"
+    content="Test Your French with interactive quizzes! Free Colors theme + premium content. Privacy-first learning with gamification.">
+  <meta name="keywords"
+    content="test french, french quiz, french lessons, interactive learning, gamification, language learning, CECR evaluation">
+  <meta name="author" content="Test Your French Team">
+
+  <meta name="theme-color" content="#111f46">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Test Your French">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Test Your French - Interactive French Learning">
+  <meta property="og:description"
+    content="Test Your French with interactive quizzes! Free Colors theme + premium content. Privacy-first learning with gamification.">
+  <meta property="og:url" content="https://carossst.github.io/French-quiz/">
+
+  <meta property="og:site_name" content="Test Your French">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Test Your French",
+    "operatingSystem": "All",
+    "applicationCategory": "EducationApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "12.00",
+      "priceCurrency": "USD"
+    },
+    "url": "https://carossst.github.io/French-quiz/",
+    "description": "Test your real French level with authentic, daily French quizzes.",
+    "inLanguage": "en",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "213"
+    }
+  }
+  </script>
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192x192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="preload" href="style.css" as="style">
+  <link rel="stylesheet" href="style.css">
+
+
+
+
+  <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://js.stripe.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https:;
+  connect-src 'self' https://api.stripe.com https://buy.stripe.com;
+  font-src 'self';
+  worker-src 'self';
+  base-uri 'self';
+  form-action 'self' https://buy.stripe.com;
+  frame-ancestors 'none';
+  frame-src https://js.stripe.com https://buy.stripe.com;
+">
+
+
+
+</head>
+
+<body class="bg-gray-50">
+
+  <div id="xp-header" class="text-base md:text-sm text-gray-700 space-y-1 max-w-xs mx-auto text-center">
+    <div class="text-base font-bold text-blue-700">
+      â­ Level <span id="user-level">1</span>
+    </div>
+
+    <div class="flex items-center justify-center gap-2">
+      <div id="user-fp" class="font-semibold text-gray-800">46 French Points</div>
+      <div id="daily-chest-wrapper">ðŸŽ</div>
+    </div>
+
+    <a href="https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02" id="premium-unlock-btn"> ðŸ’Ž Unlock All Themes - $12
+    </a>
+
+  </div>
+
+  <div id="app-container" role="main" aria-live="polite" aria-label="Test Your French application content"></div>
+
+
+  <div id="daily-reward-toast" class="fixed top-20 right-5 z-50 pointer-events-none max-w-sm" aria-live="polite"></div>
+  <div id="badges-notification" class="fixed top-5 right-5 z-50" aria-live="polite"></div>
+  <div id="fp-gain-notification"
+    class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
+    aria-live="polite"></div>
+
+  <script src="./config.js" defer></script>
+  <script src="./resourceManager.js" defer></script>
+  <script src="./storage.js" defer></script>
+  <script src="./quizManager.js" defer></script>
+  <script src="./ui-features.js" defer></script>
+  <script src="./ui-charts.js" defer></script>
+  <script src="./ui-core.js" defer></script>
+  <script src="./main.js" defer></script>
+  <script src="./email.js" defer></script>
+  <script src="./noscript.js" defer></script>
+  <script src="./fallback.js" defer></script>
+
+
+
+  <!-- Pour navigateurs SANS JavaScript -->
+  <noscript>
+    <div class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+      <div class="text-center max-w-md mx-auto px-4">
+        <div class="text-6xl mb-4">âš ï¸</div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">JavaScript Required</h2>
+        <p class="text-gray-600 mb-6">
+          Test Your French requires JavaScript to function.
+          Please enable JavaScript in your browser settings and refresh the page.
+        </p>
+      </div>
+    </div>
+  </noscript>
+
+  <!-- Pour navigateurs avec JS bloquÃ© temporairement (ex: CSP, bug, etc.) -->
+  <div id="js-failed" class="hidden fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+    <div class="text-center max-w-md mx-auto px-4">
+      <div class="text-6xl mb-4">âš ï¸</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Something went wrong</h2>
+      <p class="text-gray-600 mb-6">
+        JavaScript seems to be blocked or failed to load.<br>
+        Please try refreshing the page.
+      </p>
+      <button id="reload-btn" aria-label="Refresh the page to reload Test Your French"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+        Refresh Page
+      </button>
+    </div>
+  </div>
+
+
+
+
+
+  <footer class="text-xs text-gray-500 text-center py-6 mt-10">
+    <a href="./privacy.html" aria-label="Read privacy policy">Privacy</a> Â·
+    <a href="./terms.html" aria-label="Read terms of service">Terms</a> Â·
+    <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com" href="#" class="underline">Contact</a>
+    v3.0
+  </footer>
+
+
+
+
+
+</body>
+
+</html>

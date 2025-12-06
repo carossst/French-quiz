@@ -1,0 +1,129 @@
+{
+  "id": 303,
+  "themeId": 3,
+  "name": "Listening Gender â€“ Quiz 3",
+  "description": "Practice listening comprehension focusing on Gender vocabulary and phrases.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Une amie",
+        "B. Un ami",
+        "C. Une année",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Une amie",
+      "audio": "TYI_Gender_3_1.mp3",
+      "explanation": "A friend"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. La tourelle",
+        "B. Le tour",
+        "C. La tour",
+        "D. Le tourniquet"
+      ],
+      "correctAnswer": "C. La tour",
+      "audio": "TYI_Gender_3_2.mp3",
+      "explanation": "The tower"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. La poubelle",
+        "B. Le beaubelle",
+        "C. La boubelle",
+        "D. Le poubelle"
+      ],
+      "correctAnswer": "A. La poubelle",
+      "audio": "TYI_Gender_3_3.mp3",
+      "explanation": "Trash\nFrom the surname Poubelle, named after Eugène Poubelle, prefect of the Seine (i.e. chief administrator of Paris), who promulgated an ordinance in 1884 that all apartments should have trash cans."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Elle n'est pas grande.",
+        "B. Elle est grand.",
+        "C. Il est grand.",
+        "D. Elle est grande."
+      ],
+      "correctAnswer": "D. Elle est grande.",
+      "audio": "TYI_Gender_3_4.mp3",
+      "explanation": "She's tall"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Le beurre est mou.",
+        "B. Le beurre a moulu.",
+        "C. Le beurre a mu.",
+        "D. Le beurre est tout mou."
+      ],
+      "correctAnswer": "A. Le beurre est mou.",
+      "audio": "TYI_Gender_3_5.mp3",
+      "explanation": "The butter is soft"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Les montagnes sont belles.",
+        "B. La montagne est trop belle.",
+        "C. Le mont est assez beau.",
+        "D. La montagne est belle."
+      ],
+      "correctAnswer": "D. La montagne est belle.",
+      "audio": "TYI_Gender_3_6.mp3",
+      "explanation": "The mountain is beautiful"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. La loi de la jungle",
+        "B. La loi de la ville",
+        "C. Les lois de la jungle",
+        "D. Ta loi de ta jungle"
+      ],
+      "correctAnswer": "A. La loi de la jungle",
+      "audio": "TYI_Gender_3_7.mp3",
+      "explanation": "The law of the jungle"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Elles sont parties faire une randonnée.",
+        "B. Elles ne sont pas parties faire une randonnée.",
+        "C. Elles sont parties faire de la randonnée en montagne.",
+        "D. Ils sont partis faire une randonnée."
+      ],
+      "correctAnswer": "A. Elles sont parties faire une randonnée.",
+      "audio": "TYI_Gender_3_8.mp3",
+      "explanation": "They went on a hike"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Sa casquette et sa short sont assorties.",
+        "B. Sa casquette et son short sont bien assortis.",
+        "C. Son casquette et sa short sont bien assorties.",
+        "D. Son casquette et son short sont bien assortis."
+      ],
+      "correctAnswer": "B. Sa casquette et son short sont bien assortis.",
+      "audio": "TYI_Gender_3_9.mp3",
+      "explanation": "Her hat and her shorts go well together"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. J'aime son assureur.",
+        "B. J'aime sa assurance.",
+        "C. J'aime son assurance.",
+        "D. Je n'aime pas son assurance."
+      ],
+      "correctAnswer": "C. J'aime son assurance.",
+      "audio": "TYI_Gender_3_10.mp3",
+      "explanation": "I like her/his assertiveness"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "id": 202,
+  "themeId": 2,
+  "name": "Writing and Reading Conversation Numbers â€“ Quiz 2",
+  "description": "Practice Numbers vocabulary and grammar in conversation scenarios (reading/writing).",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Translate into French '3 shipping options, none of them free, and the cheapest is still 8.50 euros.'",
+      "options": [
+        "A. Trois options de livraison, aucune gratuite, et la moins chère est toujours à huit cinquante euros ?",
+        "B. Trois options de livraison, aucune gratuite, et la moins chère est toujours à huit euros cinquante ?",
+        "C. Trois options de livraison, aucune gratuite, et la moins chère est toujours à huit euros cinquantes ?",
+        "D. All of the above."
+      ],
+      "correctAnswer": "B. Trois options de livraison, aucune gratuite, et la moins chère est toujours à huit euros cinquante ?"
+    },
+    {
+      "question": "Translate into French 'I know. I paid 13 euros on Tuesday the 7th to get my package!'",
+      "options": [
+        "A. Je sais. J'ai payé treize euros le mardi sept pour récupérer mon colis !",
+        "B. Je sais. J'ai payé treize euro le mardi sept pour récupérer mon colis !",
+        "C. Je sais. J'ai payé treizes euros le mardi sept pour récupérer mon colis !",
+        "D. Je sais. J'ai payé treizes euro le mardi sept pour récupérer mon colis !"
+      ],
+      "correctAnswer": "A. Je sais. J'ai payé treize euros le mardi sept pour récupérer mon colis !"
+    },
+    {
+      "question": "Translate into French 'They advertise \"Free Shipping Over â‚¬40!\" But who wants to spend 40 euros on this?'",
+      "options": [
+        "A. Ils font de la publicité pour la 'livraison gratuite à partir de quarante euros!' Mais qui a envie de dépenser quarante euros pour ça ?",
+        "B. Ils font de la publicité pour la 'livraison gratuite à partir de quarantes euros!' Mais qui a envie de dépenser quarante euros pour ça ?",
+        "C. Ils font de la publicité pour la 'livraison gratuite à partir de quarantes euro!' Mais qui a envie de dépenser quarante euros pour ça ?",
+        "D. Ils font de la publicité pour la 'livraison gratuite à partir de quarante euro!' Mais qui a envie de dépenser quarante euros pour ça ?"
+      ],
+      "correctAnswer": "A. Ils font de la publicité pour la 'livraison gratuite à partir de quarante euros!' Mais qui a envie de dépenser quarante euros pour ça ?"
+    },
+    {
+      "question": "Translate into French 'I know the feeling. Speaking of big numbers, did you see the lottery results last night?'",
+      "options": [
+        "A. A. Je te comprends. En parlant chiffres, as-tu regardé les résultats du loto ?",
+        "B. Je te comprends. En parlant de gros, as-tu regardé les résultats du loto hier soir ?",
+        "C. Je te comprends. En parlant de gros chiffres, as-tu regardé les résultats du loto hier soir ?",
+        "D. Je te comprends. En parlant, as-tu regardé les résultats du loto hier soir ?"
+      ],
+      "correctAnswer": "C. Je te comprends. En parlant de gros chiffres, as-tu regardé les résultats du loto hier soir ?"
+    },
+    {
+      "question": "Translate into French 'I saw. The jackpot was a whopping â‚¬33,333,000'",
+      "options": [
+        "A. Le jackpot était de trente-trois millions.",
+        "B. Le jackpot était de trente-trois millions trois cents trente milles euros.",
+        "C. J'ai vu. Le jackpot était de trente-trois millions trois cent trente-trois mille euros.",
+        "D. J'ai vu. Le jackpot était de trente-trois million trois cent trente-trois mille euros."
+      ],
+      "correctAnswer": "C. J'ai vu. Le jackpot était de trente-trois millions trois cent trente-trois mille euros."
+    },
+    {
+      "question": "Translate into French 'With that money, I could quit my job and go on vacation in 20 different countries.'",
+      "options": [
+        "A. Avec cet argent, je pourrais démissionner de mon travail et partir en vacances dans vingt pays différents.",
+        "B. Avec sept argent, je pourrais démissionner de mon travail et partir en vacances dans vingt pays différents.",
+        "C. Avec cet argent, je pourrais démissionner de mon travail et partir en vacances dans vingts pays différents.",
+        "D. Avec sept argent, je pourrais démissionner de mon travail et partir en vacances dans vingts pays différents en deux ans."
+      ],
+      "correctAnswer": "A. Avec cet argent, je pourrais démissionner de mon travail et partir en vacances dans vingt pays différents."
+    },
+    {
+      "question": "Translate into French 'And hire a personal trainer and a massage therapist who would charge 110 euros per hour or more'",
+      "options": [
+        "A. Et engager une coach sportif et une masseuse qui me factureraient cents dix euros de l'heure ou plus !",
+        "B. Et engager une coach sportif et une masseuse qui me factureraient cents dixx euros de l'heure ou plus !",
+        "C. Et engager une coach sportif et une masseuse qui me factureraient cents dix euro de l'heure ou plus !",
+        "D. Et engager une coach sportif et une masseuse qui me factureraient cent dix euros de l'heure ou plus !"
+      ],
+      "correctAnswer": "D. Et engager une coach sportif et une masseuse qui me factureraient cent dix euros de l'heure ou plus !"
+    },
+    {
+      "question": "Translate into French 'Exactly! Too bad the odds of winning are something like 1 in 17 million!'",
+      "options": [
+        "A. Exactement ! Dommage que les chances de gagner soient de l'ordre de une chance sur dix-sept million !",
+        "B. Exactement ! Dommage que les chances de gagner soient de l'ordre de une chance sur dix-sept millions !",
+        "C. Exactement ! Dommage que les chances de gagner soient de l'ordre de une chance sur dix-septs million !",
+        "D. Exactement ! Dommage que les chances de gagner soient de l'ordre de un chance sur dix-sept million !"
+      ],
+      "correctAnswer": "B. Exactement ! Dommage que les chances de gagner soient de l'ordre de une chance sur dix-sept millions !"
+    },
+    {
+      "question": "Translate into French 'I would open a bookstore and I'd offer a \"Buy One, Get One 50% Off\" deal every other week!'",
+      "options": [
+        "A. J'ouvrirais une librairie et je proposerais une offre 'Achetez-en un, obtenez le deuxième à moitié prix' toutes les deux semaines !",
+        "B. J'ouvrirais un librairie et je proposerais une offre toutes les deux semaines !",
+        "C. J'ouvrirais librairie et proposerais 'Achetez-en un, obtenez le deuxième à moitié prix' toutes les deux semaines !",
+        "D. Je proposerais une offre toutes les deux semaines !"
+      ],
+      "correctAnswer": "A. J'ouvrirais une librairie et je proposerais une offre 'Achetez-en un, obtenez le deuxième à moitié prix' toutes les deux semaines !"
+    },
+    {
+      "question": "Translate into French 'I'm going to buy 12 lottery tickets now! It's my lucky number!'",
+      "options": [
+        "A. Je vais acheter douzes billets de loterie maintenant ! C'est mon chiffre porte-bonheur !",
+        "B. Je vais acheter douse billets de loterie maintenant ! C'est mon chiffre porte-bonheur !",
+        "C. Je vais acheter douze billets de loterie maintenant ! C'est mon chiffre porte-bonheur !",
+        "D. Je vais acheter douses billets de loterie maintenant ! C'est mon chiffre porte-bonheur !"
+      ],
+      "correctAnswer": "C. Je vais acheter douze billets de loterie maintenant ! C'est mon chiffre porte-bonheur !"
+    }
+  ]
+}

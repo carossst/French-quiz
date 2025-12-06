@@ -1,0 +1,129 @@
+{
+  "id": 403,
+  "themeId": 4,
+  "name": "Listening Singular/plural – Quiz 3",
+  "description": "Practice listening comprehension focusing on Singular and Plural vocabulary and phrases.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Des lampes",
+        "B. Tes lampes",
+        "C. Des lampons",
+        "D. Des champes"
+      ],
+      "correctAnswer": "A. Des lampes",
+      "audio": "TYF_Singular_Plural_3_1.mp3",
+      "explanation": "lamps"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Des armées",
+        "B. De tant d'années",
+        "C. Des années",
+        "D. Trois années"
+      ],
+      "correctAnswer": "C. Des années",
+      "audio": "TYF_Singular_Plural_3_2.mp3",
+      "explanation": "years"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Quelque peinture",
+        "B. Quelques aquarelles",
+        "C. Des peintures",
+        "D. Quelques peintures"
+      ],
+      "correctAnswer": "D. Quelques peintures",
+      "audio": "TYF_Singular_Plural_3_3.mp3",
+      "explanation": "A few paintings"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Je crois",
+        "B. Deux croix",
+        "C. Les corbeaux",
+        "D. Des croix"
+      ],
+      "correctAnswer": "D. Des croix",
+      "audio": "TYF_Singular_Plural_3_4.mp3",
+      "explanation": "crosses"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Les bateaux",
+        "B. Les beaux jours",
+        "C. Les blaireaux",
+        "D. Les baleines"
+      ],
+      "correctAnswer": "A. Les bateaux",
+      "audio": "TYF_Singular_Plural_3_5.mp3",
+      "explanation": "boats"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Des bouts",
+        "B. Deux clous",
+        "C. Des écrous",
+        "D. Des clous"
+      ],
+      "correctAnswer": "D. Des clous",
+      "audio": "TYF_Singular_Plural_3_6.mp3",
+      "explanation": "nails"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Les loups",
+        "B. Des loupiots",
+        "C. Les louves",
+        "D. Les loutres"
+      ],
+      "correctAnswer": "A. Les loups",
+      "audio": "TYF_Singular_Plural_3_7.mp3",
+      "explanation": "wolves"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Aux puces",
+        "B. Les puces",
+        "C. Aux pucerons",
+        "D. Au marché aux puces"
+      ],
+      "correctAnswer": "A. Aux puces",
+      "audio": "TYF_Singular_Plural_3_8.mp3",
+      "explanation": "at the flea market"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Tous les étudiants",
+        "B. Toutes les étudiantes",
+        "C. J'aime étudier",
+        "D. Tout en étudiant"
+      ],
+      "correctAnswer": "B. Toutes les étudiantes",
+      "audio": "TYF_Singular_Plural_3_9.mp3",
+      "explanation": "All feminine students"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Les crayons",
+        "B. Tous les croyants",
+        "C. Tous les crayons",
+        "D. Toutes les crayones"
+      ],
+      "correctAnswer": "C. Tous les crayons",
+      "audio": "TYF_Singular_Plural_3_10.mp3",
+      "explanation": "All the pencils"
+    }
+  ]
+}

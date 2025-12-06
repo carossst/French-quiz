@@ -1,0 +1,110 @@
+{
+  "id": 302,
+  "themeId": 3,
+  "name": "Writing and Reading Conversation Gender â€“ Quiz 2",
+  "description": "Practice Gender vocabulary and grammar in conversation scenarios (reading/writing).",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Translate into French 'Did you see what Charlie posted on social media? Her new outfit is amazing!'",
+      "options": [
+        "A. Tu as vu ce que Charlie a posté sur les réseaux sociaux ? Son nouvelle tenue est incroyable !",
+        "B. Tu as vu ce que Charlie a posté sur les réseaux sociaux ? Sa nouvelle tenue est incroyable !",
+        "C. Tu as vu ce que Charlie a posté sur les réseaux sociaux ? Sa nouvelle tenu est incroyable !",
+        "D. All of the above."
+      ],
+      "correctAnswer": "B. Tu as vu ce que Charlie a posté sur les réseaux sociaux ? Sa nouvelle tenue est incroyable !"
+    },
+    {
+      "question": "Translate into French 'Her dress is incredible! She's so stylish.'",
+      "options": [
+        "A. Sa robe est incroyable ! Elle a vraiment la classe.",
+        "B. Sa robbe est incroyable ! Elle a vraiment la classe.",
+        "C. Son robe est incroyable ! Elle a vraiment la classe.",
+        "D. Ses robes sont incroyables ! Elle a vraiment la classe."
+      ],
+      "correctAnswer": "A. Sa robe est incroyable ! Elle a vraiment la classe."
+    },
+    {
+      "question": "Translate into French ' I've also read that her brother knows how to tailor his own clothes.'",
+      "options": [
+        "A. J'ai aussi lu que son frère sait faire ses propres vêtements.",
+        "B. J'ai aussi lu que sa frère sait faire ses propres vêtements.",
+        "C. J'ai aussi lu que ses frères savent faire leurs propres vêtements.",
+        "D. J'ai aussi lu que la frère sait faire ses propres vêtements."
+      ],
+      "correctAnswer": "A. J'ai aussi lu que son frère sait faire ses propres vêtements."
+    },
+    {
+      "question": "Translate into French 'I wish I knew how to do that. My daughter always comes home with ripped pants at the knees.'",
+      "options": [
+        "A. J'aimerais bien savoir faire ça, moi ! Ma fille rentre toujours à le maison avec des genoux troués sur ses pantalons.",
+        "B. J'aimerais bien savoir faire ça, moi ! Ma fille rentre toujours à la maison avec les genoux de ses pantalons troués.",
+        "C. J'aimerais bien savoir faire ça, moi ! Mon fille rentre toujours à la maison avec les genoux de ses pantalons troués.",
+        "D. J'aimerais bien savoir, moi ! Ma fille rentre toujours avec les genoux de son pantalon troués."
+      ],
+      "correctAnswer": "B. J'aimerais bien savoir faire ça, moi ! Ma fille rentre toujours à la maison avec les genoux de ses pantalons troués."
+    },
+    {
+      "question": "Translate into French 'And my son manages to tear all his tee-shirts.'",
+      "options": [
+        "A. Et mon fils arrive à trouer tous les tee-shirts.",
+        "B. Et ma fils arrive à trouer tous ses tee-shirts.",
+        "C. Et mon fils arrive à trouer tous ses tee-shirts.",
+        "D. Et ma fils arrive à trouer tous les tee-shirts."
+      ],
+      "correctAnswer": "C. Et mon fils arrive à trouer tous ses tee-shirts."
+    },
+    {
+      "question": "Translate into French 'I always try to mend my children's clothes but they always want new clothes.'",
+      "options": [
+        "A. J'essaie toujours de réparer les vêtements de mes enfants, mais ils veulent toujours des habits neufs.",
+        "B. J'essaie de réparer leurs vêtements de mes enfants, mais ils veulent toujours des habits neufs.",
+        "C. J'essaie toujours réparer leurs vêtements de mes enfants, mais ils veulent toujours des habits neuves.",
+        "D. J'essaie toujours de réparer les vêtements de mes enfants, mais ils veulent toujours des habits neuves."
+      ],
+      "correctAnswer": "A. J'essaie toujours de réparer les vêtements de mes enfants, mais ils veulent toujours des habits neufs."
+    },
+    {
+      "question": "Translate into French 'I take them to my favorite second-hand store first.'",
+      "options": [
+        "A. Je leurs emmène d'abord dans mon magasin d'occasion préféré.",
+        "B. Je les emmène d'abord dans mon magasin d'occasion préféré.",
+        "C. Je leur emmène d'abord mon magasin d'occasion préféré.",
+        "D. Je les emmène d'abord dans ma magasine d'occasion préférée."
+      ],
+      "correctAnswer": "B. Je les emmène d'abord dans mon magasin d'occasion préféré."
+    },
+    {
+      "question": "Translate into French 'Me too! I go with each of them separately so they can choose their pants, dresses, tee-shirts, etc.'",
+      "options": [
+        "A. Moi aussi ! J'y vais avec chacune d'eux séparément pour qu'ils puissent choisir leurs pantalons, robes, tee-shirts, etc.",
+        "B. Moi aussi ! J'y vais avec chacun d'eux séparément pour qu'ils puissent choisir leurs pantalons, robes, tee-shirts, etc.",
+        "C. Moi aussi ! J'y vais avec chacunes d'elles séparément pour qu'ils puissent choisir leurs pantalons, robes, tee-shirts, etc.",
+        "D. Moi aussi ! J'y vais avec chacun d'elles séparément pour qu'ils puissent choisir leurs pantalons, robes, tee-shirts, etc."
+      ],
+      "correctAnswer": "B. Moi aussi ! J'y vais avec chacun d'eux séparément pour qu'ils puissent choisir leurs pantalons, robes, tee-shirts, etc."
+    },
+    {
+      "question": "Translate into French 'Mine always pick on each other in stores.'",
+      "options": [
+        "A. Les miens se chamaillent toujours dans les magasins.",
+        "B. Les miennes se chamaillent toujours dans les magasins.",
+        "C. Miens se chamaillent toujours dans les magasins.",
+        "D. Miennes se chamaillent toujours dans les magasins."
+      ],
+      "correctAnswer": "A. Les miens se chamaillent toujours dans les magasins."
+    },
+    {
+      "question": "Translate into French 'Speaking of children, I need to go and get my daughter and her friend from school. See you soon!'",
+      "options": [
+        "A. En parlant de Ã§a, je dois aller chercher ma fille et son amie Ã  l'Ã©cole. Ã€ bientÃ´t !",
+        "B. En parlant de Ã§a, je dois aller chercher ma fille et son ami Ã  l'Ã©cole. Ã€ bientÃ´t !",
+        "C. En parlant de Ã§a, je dois aller chercher ma fille et son ami-e Ã  l'Ã©cole. Ã€ bientÃ´t !",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Given the context, it's not possible to know which gender her friend is. It's possible to spell with a hyphen before the 'e' to manifest the two possibilities."
+    }
+  ]
+}

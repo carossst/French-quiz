@@ -1,0 +1,111 @@
+{
+  "id": 301,
+  "themeId": 3,
+  "name": "Writing and Reading Gender â€“ Quiz 1",
+  "description": "Practice Gender vocabulary and grammar through writing and reading exercises.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "How do you say \"She\"?",
+      "options": [
+        "A. Elle",
+        "B. Sa",
+        "C. Lui",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Elle"
+    },
+    {
+      "question": "How do you say \"He\"?",
+      "options": [
+        "A. Lui",
+        "B. Il",
+        "C. Ils",
+        "D. Leur"
+      ],
+      "correctAnswer": "B. Il"
+    },
+    {
+      "question": "How do you say \"They\"? (plural, feminine)",
+      "options": [
+        "A. Elle",
+        "B. Elles",
+        "C. Ellent",
+        "D. Eles"
+      ],
+      "correctAnswer": "B. Elles"
+    },
+    {
+      "question": "How do you say \"His\"?",
+      "options": [
+        "A. Son",
+        "B. Sa",
+        "C. Le",
+        "D. Lui"
+      ],
+      "correctAnswer": "A. Son"
+    },
+    {
+      "question": "How do you say \"The\"? (singular, feminine)",
+      "options": [
+        "A. Sa",
+        "B. Leur",
+        "C. La",
+        "D. Les"
+      ],
+      "correctAnswer": "C. La"
+    },
+    {
+      "question": "How do you say \"The\"? (singular, masculine)",
+      "options": [
+        "A. Lui",
+        "B. Les",
+        "C. Son",
+        "D. Le"
+      ],
+      "correctAnswer": "D. Le"
+    },
+    {
+      "question": "How do you say \"Her motorcycle\"?",
+      "options": [
+        "A. Sa moto",
+        "B. La moto",
+        "C. Son moto",
+        "D. Elle moto"
+      ],
+      "correctAnswer": "A. Sa moto"
+    },
+    {
+      "question": "How do you say \"His death\"?",
+      "options": [
+        "A. Son mort",
+        "B. Sa mort",
+        "C. Leur mort",
+        "D. Il est mort"
+      ],
+      "correctAnswer": "B. Sa mort"
+    },
+    {
+      "question": "How do you say \"her hair\" ?",
+      "options": [
+        "A. Son cheveux",
+        "B. Sa cheveu",
+        "C. Ses cheveux",
+        "D. Leur cheveu"
+      ],
+      "correctAnswer": "C. Ses cheveux",
+      "explanation": "French uses the singular form (cheveu) to refer to a single strand of hair, while the plural form (cheveux) refers to all the hair on one's head."
+    },
+    {
+      "question": "How do you say \"They\"? (plural, non binary)",
+      "options": [
+        "A. Iels",
+        "B. Yels",
+        "C. Elils",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "This spelling is not mainstream but one might encounter it in France."
+    }
+  ]
+}

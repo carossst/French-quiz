@@ -1,0 +1,117 @@
+{
+  "id": 401,
+  "themeId": 4,
+  "name": "Writing and Reading Singular/plural â€“ Quiz 1",
+  "description": "Practice Singular and Plural vocabulary and grammar through writing and reading exercises.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "How do you say \"tests\"?",
+      "options": [
+        "A. Les tests",
+        "B. Les testes",
+        "C. Les textes",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Les tests"
+    },
+    {
+      "question": "How do you say \"chocolates\"?",
+      "options": [
+        "A. Les chocolats",
+        "B. Les chocolatx",
+        "C. Les chocolates",
+        "D. Les chocolatex"
+      ],
+      "correctAnswer": "A. Les chocolats"
+    },
+    {
+      "question": "How do you say \"arms\"?",
+      "options": [
+        "A. Vos bras",
+        "B. Tes bras",
+        "C. Les bras",
+        "D. All of the above"
+      ],
+      "correctAnswer": "C. Les bras",
+      "explanation": "When a noun ends with S like bras, the ending does not change when plural."
+    },
+    {
+      "question": "How do you say \"countries\"?",
+      "options": [
+        "A. Les payes",
+        "B. Les pays",
+        "C. Les payent",
+        "D. Les payies"
+      ],
+      "correctAnswer": "B. Les pays",
+      "explanation": "When a noun ends with YS like pays, the ending does not change when plural."
+    },
+    {
+      "question": "How do you say \"birds\"?",
+      "options": [
+        "A. Les oisox",
+        "B. Les oises",
+        "C. Les oiseaux",
+        "D. Les oiseaus"
+      ],
+      "correctAnswer": "C. Les oiseaux",
+      "explanation": "When a noun ends with EAU, it ends with an X when plural. There are exceptions like landeau (landaus/baby carriages)."
+    },
+    {
+      "question": "How do you say \"kisses\"?",
+      "options": [
+        "A. Les bisoux",
+        "B. Les bisous",
+        "C. Les bisoûs",
+        "D. Les biso'us"
+      ],
+      "correctAnswer": "B. Les bisous",
+      "explanation": "Nouns ending in OU take an S when plural. There are exceptions like poux (lice), bijoux (jewels), chous (cabbages), genous (knees), etc."
+    },
+    {
+      "question": "How do you say \"lice\"?",
+      "options": [
+        "A. Les pouxes",
+        "B. Les pouxs",
+        "C. Les pous",
+        "D. Les poux"
+      ],
+      "correctAnswer": "D. Les poux",
+      "explanation": "Nouns ending in OU take an S when plural. There are exceptions like poux (lice), bijoux (jewels), chous (cabbages), genous (knees), etc."
+    },
+    {
+      "question": "How do you say \"hair\"? (plural)",
+      "options": [
+        "A. Les chevaux",
+        "B. Le cheveu",
+        "C. Les cheveus",
+        "D. Les cheveux"
+      ],
+      "correctAnswer": "D. Les cheveux",
+      "explanation": "When a noun ends with EU, it ends with an X when plural. There are exceptions like bleu (bleus/bruises)."
+    },
+    {
+      "question": "How do you say \"plants\"?",
+      "options": [
+        "A. Les plants",
+        "B. Les plantx",
+        "C. Les plantes",
+        "D. Les planteux"
+      ],
+      "correctAnswer": "C. Les plantes",
+      "explanation": "Nouns ending with an E like plante (plant) take an S when plural."
+    },
+    {
+      "question": "How do you say \"kids\" ?",
+      "options": [
+        "A. Les enfants",
+        "B. Les enfantes",
+        "C. Les enfantx",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Les enfants",
+      "explanation": "Nouns ending with a consonant will take an S when plural."
+    }
+  ]
+}

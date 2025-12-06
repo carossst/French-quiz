@@ -1,0 +1,129 @@
+{
+  "id": 304,
+  "themeId": 3,
+  "name": "Listening Conversation Gender â€“ Quiz 4",
+  "description": "Practice listening comprehension in conversation scenarios using Gender vocabulary.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. J'ai vu mon avocate hier.",
+        "B. J'ai vu ma avocate hier.",
+        "C. J'ai vu mon avocat hier.",
+        "D. J'ai vu ma avocat hier."
+      ],
+      "correctAnswer": "A. J'ai vu mon avocate hier.",
+      "audio": "TYI_Gender_4_1.mp3",
+      "explanation": "I saw my lawyer yesterday"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Cela allait être long pour ma divorce.",
+        "B. Elle m'a dit que ça allait être très très long.",
+        "C. Elle m'a dit que ça allait être long pour mon divorce.",
+        "D. Elle m'a dit que ça n'allait pas être long pour le divorce."
+      ],
+      "correctAnswer": "C. Elle m'a dit que ça allait être long pour mon divorce.",
+      "audio": "TYI_Gender_4_2.mp3",
+      "explanation": "She told me that my divorce would take a long time"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. C'est vraiment difficile de vivre une divorce.",
+        "B. Ah zut. C'est difficile de vivre les divorces aujourd'hui.",
+        "C. Ah zut. Désolée pour toi. C'est vraiment difficile de vivre un divorce.",
+        "D. Ah zut. Désolée pour toi. C'est très facile de vivre une divorce."
+      ],
+      "correctAnswer": "C. Ah zut. Désolée pour toi. C'est vraiment difficile de vivre un divorce.",
+      "audio": "TYI_Gender_4_3.mp3",
+      "explanation": "Oh shoot. I'm so sorry to hear that. Going through a divorce is truly tough."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. J'aimerais bien que la justice aille plus vite.",
+        "B. Merci. La justice doit être plus rapide.",
+        "C. Merci. J'aimerais bien que la justice soit plus rapide.",
+        "D. Merci. J'aimerais que les juges soient plus grands."
+      ],
+      "correctAnswer": "C. Merci. J'aimerais bien que la justice soit plus rapide.",
+      "audio": "TYI_Gender_4_4.mp3",
+      "explanation": "Thank you. I wish justice was faster."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Oui et c'est compliqué quand on a deux ou trois enfants.",
+        "B. Oui et c'est compliqué quand on a des jeunes enfants.",
+        "C. Non, c'est moins compliqué avec deux jeunes fils.",
+        "D. Oui et c'est compliqué quoi on a des enfants."
+      ],
+      "correctAnswer": "B. Oui et c'est compliqué quand on a des jeunes enfants.",
+      "audio": "TYI_Gender_4_5.mp3",
+      "explanation": "Yes, and it's especially complicated when you have young children."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ma fille et mon fils vivent bien notre divorce.",
+        "B. Mes enfants ne se rendent pas compte du divorce.",
+        "C. Mes filles et mes fils ne vivent pas notre divorce.",
+        "D. Ma fille et mon fils ne vivent pas bien notre divorce."
+      ],
+      "correctAnswer": "D. Ma fille et mon fils ne vivent pas bien notre divorce.",
+      "audio": "TYI_Gender_4_6.mp3",
+      "explanation": "My daughter and my son are not coping well with our divorce."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Vivement que tu termines tout ça.",
+        "B. Vivement que ça se termine. Tu fais comment pour tenir ?",
+        "C. Elle fait comment pour tout tenir ?",
+        "D. Vivement que ça le termine. Vous faites comment pour tenir ?"
+      ],
+      "correctAnswer": "B. Vivement que ça se termine. Tu fais comment pour tenir ?",
+      "audio": "TYI_Gender_4_7.mp3",
+      "explanation": "I can't wait for this to be over. How do you cope?"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Mon avocate communique beaucoup avec moi et cela me rassure.",
+        "B. Mon avocate communique beaucoup avec moi.",
+        "C. Mon avocate me rassure.",
+        "D. Mon avocate communique et cela me rassure."
+      ],
+      "correctAnswer": "A. Mon avocate communique beaucoup avec moi et cela me rassure.",
+      "audio": "TYI_Gender_4_8.mp3",
+      "explanation": "My lawyer communicates a lot with me and that reassures me."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Tant mieux pour toi.",
+        "B. Quand j'ai divorcé l'année dernière.",
+        "C. Tant mieux pour toi. Quand j'ai divorcé l'année dernière, mon avocate était très réactive.",
+        "D. Tant mieux pour toi. Quand j'ai divorcé l'année dernière, mon avocat n'était pas très réactif."
+      ],
+      "correctAnswer": "D. Tant mieux pour toi. Quand j'ai divorcé l'année dernière, mon avocat n'était pas très réactif.",
+      "audio": "TYI_Gender_4_9.mp3",
+      "explanation": "That's good for you. When I divorced last year, my lawyer wasn't very responsive."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Il faut tenir ! Allez santé !",
+        "B. A la tienne ! Allez santé !",
+        "C. Enfin bref. Il faut la santé !",
+        "D. Enfin bref. Il faut tenir ! Allez santé !"
+      ],
+      "correctAnswer": "D. Enfin bref. Il faut tenir ! Allez santé !",
+      "audio": "TYI_Gender_4_10.mp3",
+      "explanation": "Well, enough about that. We've got to keep going! Cheers!"
+    }
+  ]
+}

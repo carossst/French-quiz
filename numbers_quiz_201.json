@@ -1,0 +1,119 @@
+{
+  "id": 201,
+  "themeId": 2,
+  "name": "Writing and Reading Numbers - Quiz 1",
+  "description": "Practice Numbers vocabulary and grammar through writing and reading exercises.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "How do you say \"10\"?",
+      "options": [
+        "A. Dix",
+        "B. Dis",
+        "C. Dixe",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Dix",
+      "explanation": "The number 10 is often associated with perfection, like in the expression obtenir la note parfaite de dix sur dix (to get the perfect score of ten out of ten)."
+    },
+    {
+      "question": "How do you say \"99\"?",
+      "options": [
+        "A. Quatrevingtdixneuf",
+        "B. Quatre vingt-dix-neuf",
+        "C. Quatre-vingt-dix-neuf",
+        "D. Quatre vingt dix neufs"
+      ],
+      "correctAnswer": "C. Quatre-vingt-dix-neuf",
+      "explanation": "Using hyphens in quatre-vingt-dix-neuf helps avoid confusion with individual numbers. Without hyphens, it could be interpreted as quatre (four), vingt (twenty), dix (ten), and neuf (nine) all separate."
+    },
+    {
+      "question": "How do you say \"150\"?",
+      "options": [
+        "A. Cent-cinquantes",
+        "B. Cents-cinquante",
+        "C. Cents cinquantes",
+        "D. Cent-cinquante"
+      ],
+      "correctAnswer": "D. Cent-cinquante",
+      "explanation": "Hyphens are placed between all the words that make up a number, regardless of its value. This simplified rule has been in effect since 1990."
+    },
+    {
+      "question": "How do you say \"100 000\"?",
+      "options": [
+        "A. Cent-mille",
+        "B. Cents-milles",
+        "C. Cents-mile",
+        "D. Cent-miles"
+      ],
+      "correctAnswer": "A. Cent-mille",
+      "explanation": "Mille (thousand) is an invariable noun, meaning it remains in its singular form regardless of the context or the quantity it represents. It never takes a plural ending."
+    },
+    {
+      "question": "How do you say \"7 millions\"?",
+      "options": [
+        "A. Sept million",
+        "B. Sept millions",
+        "C. Septs millions",
+        "D. Septs million"
+      ],
+      "correctAnswer": "B. Sept millions",
+      "explanation": "Million s'accorde (agrees) in number when it is used after a number greater than one. This means that the word takes the plural form millions when preceded by a number like deux (two), trois (three), quatre (four), etc."
+    },
+    {
+      "question": "How do you say \"80\"?",
+      "options": [
+        "A. Quatre-vingts",
+        "B. Quatres-vingts",
+        "C. Quatreu-vingts",
+        "D. Quatre-vingtes"
+      ],
+      "correctAnswer": "A. Quatre-vingts",
+      "explanation": "The word vingt (twenty) is written in the plural form only in the number quatre-vingts (four-twenties)."
+    },
+    {
+      "question": "How do you say \"5 billion\"?",
+      "options": [
+        "A. Cinq milliars",
+        "B. Cinq milliardes",
+        "C. Cinqs milliard",
+        "D. Cinq milliards"
+      ],
+      "correctAnswer": "D. Cinq milliards",
+      "explanation": "Milliard follows the standard pluralization rule for common nouns and has an -s at the end when referring to more than one billion."
+    },
+    {
+      "question": "How do you say \"25%\"?",
+      "options": [
+        "A. Vingt-cinq pour cents",
+        "B. Vingt-cinq pour cent",
+        "C. Vingt-cinqs pour cents",
+        "D. Vingts-cinq pour cents"
+      ],
+      "correctAnswer": "B. Vingt-cinq pour cent",
+      "explanation": "Pour cent means \"per hundred\" or \"percent\" and it indicates that the value is a proportion of a larger quantity, in this case, 100."
+    },
+    {
+      "question": "How do you say \"200 ou 210 euros\"?",
+      "options": [
+        "A. Deux cents ou deux-cent-dix euros ?",
+        "B. Deux cent ou deux-cent-dix euros ?",
+        "C. Deux cents ou deux-cents-dix euros ?",
+        "D. Deux cents ou deux-cents-dix euro ?"
+      ],
+      "correctAnswer": "A. Deux cents ou deux-cent-dix euros ?",
+      "explanation": "Cent does not have an 's' if it is followed by another number."
+    },
+    {
+      "question": "How do you say \"les 12 coups de minuit\" ?",
+      "options": [
+        "A. les drouze coups de minuit",
+        "B. Les douze coups de minuit",
+        "C. les douces coups de minuit",
+        "D. les douzze coups de minuit"
+      ],
+      "correctAnswer": "B. Les douze coups de minuit.",
+      "explanation": "The number 12 is invariable (does not have a plural form)."
+    }
+  ]
+}

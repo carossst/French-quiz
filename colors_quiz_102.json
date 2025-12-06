@@ -1,0 +1,109 @@
+{
+  "id": 102,
+  "themeId": 1,
+  "name": "Writing and Reading Conversation Colors â€“ Quiz 2",
+  "description": "Practice Colors vocabulary and grammar in conversation scenarios (reading/writing).",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "Translate into French 'I recently painted my living room light grey.'",
+      "options": [
+        "A. J'ai récemment peint mon salon en jaune clair.",
+        "B. J'ai récemment peint mon salon en gris clair.",
+        "C. J'ai récemment peint mon salon en bleu clair.",
+        "D. J'ai récemment peint mon salon en orange clair."
+      ],
+      "correctAnswer": "B. J'ai récemment peint mon salon en gris clair."
+    },
+    {
+      "question": "Translate into French 'Good idea! Light grey is better than brown; it opens up the room.'",
+      "options": [
+        "A. Bonne idée ! Le gris clair, c'est mieux que le marron ; cela agrandit la pièce.",
+        "B. Bonne idée ! Le gris clair, c'est mieux que le noir ; cela agrandit la pièce.",
+        "C. Bonne idée ! Le gris clair, c'est mieux que le pourpre ; cela agrandit la pièce.",
+        "D. Bonne idée ! Le gris clair, c'est mieux que le mauve ; cela agrandit la pièce."
+      ],
+      "correctAnswer": "A. Bonne idée ! Le gris clair, c'est mieux que le marron ; cela agrandit la pièce."
+    },
+    {
+      "question": "Translate into French 'I can't decide between red and dark green for the curtains.'",
+      "options": [
+        "A. J'hésite entre le bleu marine et le jaune moutarde pour les rideaux.",
+        "B. J'hésite entre le violet et le turquoise pour les rideaux.",
+        "C. J'hésite entre le terracotta et le vert pour les rideaux.",
+        "D. J'hésite entre le rouge et le vert foncé pour les rideaux."
+      ],
+      "correctAnswer": "D. J'hésite entre le rouge et le vert foncé pour les rideaux."
+    },
+    {
+      "question": "Translate into French 'Red would add a touch of warmth'",
+      "options": [
+        "A. Du bleu ajouterait une touche de chaleur.",
+        "B. Du rouge ajouterait une touche de chaleur.",
+        "C. De l'orange ajouterait une touche de chaleur.",
+        "D. Du violet ajouterait une touche de chaleur."
+      ],
+      "correctAnswer": "B. Du rouge ajouterait une touche de chaleur."
+    },
+    {
+      "question": "Translate into French 'I think I'll go with the red curtains.'",
+      "options": [
+        "A. Je crois que je vais choisir les rideaux roses.",
+        "B. Je crois que je vais choisir les rideaux noirs.",
+        "C. Je crois que je vais choisir les rideaux rouges.",
+        "D. Je crois que je vais choisir les rideaux verts."
+      ],
+      "correctAnswer": "C. Je crois que je vais choisir les rideaux rouges."
+    },
+    {
+      "question": "Translate into French 'Yes. That's a good idea! Red is a bold and energetic color.'",
+      "options": [
+        "A. Oui. C'est une bonne idée ! La cerise est une couleur audacieuse et énergisante.",
+        "B. Oui. C'est une bonne idée ! La tomate est une couleur audacieuse et énergisante.",
+        "C. Oui. C'est une bonne idée ! Le rouge est une couleur audacieuse et énergisante.",
+        "D. Oui. C'est une bonne idée ! Le rubis est une couleur audacieuse et énergisante."
+      ],
+      "correctAnswer": "C. Oui. C'est une bonne idée ! Le rouge est une couleur audacieuse et énergisante."
+    },
+    {
+      "question": "Translate into French 'Yes and it will go well with my wooden furniture, won't it?'",
+      "options": [
+        "A. Oui et ça ira bien avec mes meubles en bois, non ?",
+        "B. Oui et ça ira bien avec mes meubles en bois noir, non ?",
+        "C. Oui et ça ira bien avec mes meubles en bois marron, non ?",
+        "D. Oui et ça ira bien avec mes meubles en boisé, non ?"
+      ],
+      "correctAnswer": "A. Oui et ça ira bien avec mes meubles en bois, non ?"
+    },
+    {
+      "question": "Translate into French 'I think so. I always go for red, beige or green for light wood furniture like yours.'",
+      "options": [
+        "A. Je pense. J'opte toujours pour du rouge, du gris ou du lavande pour les meubles en bois clair, comme les tiens.",
+        "B. Je pense. J'opte toujours pour du rouge, du beige ou du vert pour les meubles en bois clair, comme les tiens.",
+        "C. Je pense. J'opte toujours pour du rouge, du beige ou du sauge pour les meubles en bois clair, comme les tiens.",
+        "D. Je pense. J'opte toujours pour du rouge, de beige ou de vert pour les meubles en bois clair, comme les tiens."
+      ],
+      "correctAnswer": "B. Je pense. J'opte toujours pour du rouge, du beige ou du vert pour les meubles en bois clair, comme les tiens."
+    },
+    {
+      "question": "Translate into French 'I can always add a pop of green with some plants.'",
+      "options": [
+        "A. Je peux toujours ajouter une touche de pomme avec des plantes.",
+        "B. Je peux toujours ajouter une touche de bleu avec des plantes.",
+        "C. Je peux toujours ajouter une touche de verdure avec des plantes.",
+        "D. Je peux toujours ajouter une touche de vert avec des plantes."
+      ],
+      "correctAnswer": "D. Je peux toujours ajouter une touche de vert avec des plantes."
+    },
+    {
+      "question": "Translate into French 'Exactly! You could also add terracotta orange chairs.'",
+      "options": [
+        "A. Exactement ! Tu pourrais aussi ajouter des chaises en terracotta orange.",
+        "B. Exactement ! Tu pourrais ajouter des chaises en orange.",
+        "C. Exactement ! Tu pourrais aussi ajouter des chaises en terracotta.",
+        "D. Exactement ! Tu pourras ajouter des chaises en terracotta orange."
+      ],
+      "correctAnswer": "A. Exactement ! Tu pourrais aussi ajouter des chaises en terracotta orange."
+    }
+  ]
+}

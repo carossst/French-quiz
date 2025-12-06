@@ -1,0 +1,119 @@
+{
+  "id": 101,
+  "themeId": 1,
+  "name": "Writing and Reading Colors â€“ Quiz 1",
+  "description": "Practice Colors vocabulary and grammar through writing and reading exercises.",
+  "version": "2.2.3",
+  "questions": [
+    {
+      "question": "How do you say \"Red\"?",
+      "options": [
+        "A. Rose",
+        "B. Rouge",
+        "C. Led",
+        "D. Bordeaux"
+      ],
+      "correctAnswer": "B. Rouge",
+      "explanation": "Red is one of the three colors on the French flag, symbolizing liberty, equality, and fraternity."
+    },
+    {
+      "question": "How do you say \"Yellow\"?",
+      "options": [
+        "A. Noir",
+        "B. Jaune",
+        "C. Maillot",
+        "D. Rose"
+      ],
+      "correctAnswer": "B. Jaune",
+      "explanation": "In the Tour de France, a grueling cycling race that takes place in France over several weeks each summer, the leader of the race wears a yellow jersey (maillot jaune)."
+    },
+    {
+      "question": "How do you say \"Orange\"?",
+      "options": [
+        "A. Outre",
+        "B. Bleu",
+        "C. Orangeu",
+        "D. Orange"
+      ],
+      "correctAnswer": "D. Orange",
+      "explanation": "Orange can be associated with the South of France (le Sud de la France). The vibrant orange clay tiles adorning rooftops in this region are a distinctive feature and a delightful pop of color in the sunny landscape."
+    },
+    {
+      "question": "How do you say \"Purple\"?",
+      "options": [
+        "A. Violet",
+        "B. Marron",
+        "C. Pomme",
+        "D. Violette"
+      ],
+      "correctAnswer": "A. Violet",
+      "explanation": "Violet is linked to the lavender (lavande) fields in Provence. These fragrant purple blooms are a beloved symbol of the region and a beautiful sight."
+    },
+    {
+      "question": "How do you say \"Brown\"?",
+      "options": [
+        "A. Gris",
+        "B. Ronde",
+        "C. Marron",
+        "D. Clair"
+      ],
+      "correctAnswer": "C. Marron",
+      "explanation": "Marron is a color and also means horse chestnuts (marrons). These spiky spheres are roasted and enjoyed as a seasonal treat, particularly during the holidays."
+    },
+    {
+      "question": "How do you say \"Pink\"?",
+      "options": [
+        "A. Rose",
+        "B. Rouge",
+        "C. Rosse",
+        "D. Rouse"
+      ],
+      "correctAnswer": "A. Rose",
+      "explanation": "Beyond its romantic associations, pink holds a special place in French architecture. The rosy hue of many traditional buildings, particularly in the south of France, adds a touch of warmth and character to the landscape. This architectural style is sometimes referred to as rose sandstone (grès rose)."
+    },
+    {
+      "question": "How do you say \"Blue\"? (masculine singular)",
+      "options": [
+        "A. Beau",
+        "B. Blueu",
+        "C. Bleuté",
+        "D. Bleu"
+      ],
+      "correctAnswer": "D. Bleu",
+      "explanation": "Although France is a Republic today, blue still can hold a connection to royalty."
+    },
+    {
+      "question": "How do you say \"Green\"? (feminine singular)",
+      "options": [
+        "A. Grasse",
+        "B. Verte",
+        "C. Vert",
+        "D. Feuille"
+      ],
+      "correctAnswer": "B. Verte",
+      "explanation": "Green has been associated with hope and good luck in French culture. This symbolism can be seen in the phrase \"avoir le feu vert\" (literally \"to have the green light\"), which means to get the go-ahead or permission for something."
+    },
+    {
+      "question": "How do you say \"White\"? (masculine singular)",
+      "options": [
+        "A. Blanche",
+        "B. Blant",
+        "C. Blanct",
+        "D. Blanc"
+      ],
+      "correctAnswer": "D. Blanc",
+      "explanation": "White can be used for grapes (raisins blancs) which are a key ingredient in many French wines, particularly white wines from Burgundy and the Loire Valley."
+    },
+    {
+      "question": "How do you say \"Black\"? (feminine plural)",
+      "options": [
+        "A. Noire",
+        "B. Noires",
+        "C. Noirs",
+        "D. Nuit"
+      ],
+      "correctAnswer": "B. Noires",
+      "explanation": "Black holds a unique place in French fashion that goes beyond just a color choice. The \"little black dress\" (la petite robe noire) originated with Coco Chanel's designs in the 1920s and is still a wardrobe staple in France today."
+    }
+  ]
+}
