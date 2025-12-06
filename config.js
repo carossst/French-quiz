@@ -36,6 +36,6 @@ window.resourceManagerConfig = {
         metadata: 8000,         // 8s timeout pour metadata.json
         quiz: 6000,             // 6s timeout pour quiz JSON  
         audio: 15000,           // 15s timeout pour fichiers MP3
-        audioCheck: 3000        // 3s timeout pour vÃ©rification existence audio
+        audioCheck: 3000        // 3s timeout pour verification existence audio
     }
 };

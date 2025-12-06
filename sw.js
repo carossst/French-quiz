@@ -1,4 +1,4 @@
-/* sw.js â€” Service Worker v3.0 pour Test Your French */
+/* sw.js - Service Worker v3.0 pour Test Your French */
 
 
 const CACHE_NAME = "tyf-cache-v3.0";
@@ -32,7 +32,7 @@ const log = DEBUG ? (...args) => console.log('[SW]', ...args) : () => { };
 const warn = (...args) => console.warn('[SW]', ...args);
 const error = (...args) => console.error('[SW]', ...args);
 
-// Ã‰vÃ©nement 'install' (inchangÃ©)
+// Evenement 'install' (inchange)
 self.addEventListener("install", event => {
   log("Install - Version:", CACHE_NAME);
   self.skipWaiting();
@@ -67,7 +67,7 @@ self.addEventListener("install", event => {
   );
 });
 
-// Ã‰vÃ©nement 'activate' (inchangÃ©)
+// Evenement 'activate' (inchange)
 self.addEventListener("activate", event => {
   log("Activate - Version:", CACHE_NAME);
 
@@ -91,7 +91,7 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Ã‰vÃ©nement 'fetch' (inchangÃ©)
+// Evenement 'fetch' (inchange)
 self.addEventListener("fetch", event => {
   const request = event.request;
   const requestUrl = new URL(request.url);
@@ -121,7 +121,7 @@ self.addEventListener("fetch", event => {
   event.respondWith(handleStaticRequest(request));
 });
 
-// ðŸ”§ CORRECTION 4 : handleAudioRequest - retour audio correct, pas JSON
+// ”§ CORRECTION 4 : handleAudioRequest - retour audio correct, pas JSON
 async function handleAudioRequest(request) {
   log(`Audio request: ${request.url}`);
 
@@ -153,9 +153,9 @@ async function handleAudioRequest(request) {
   } catch (error) {
     warn(`Audio request failed (network error?): ${request.url}`, error.message);
 
-    // ðŸ”§ CORRIGÃ‰ : Laisser passer au rÃ©seau ou retour HTTP propre
+    // ”§ CORRIGE : Laisser passer au reseau ou retour HTTP propre
     try {
-      // Tentative finale sur le rÃ©seau sans cache
+      // Tentative finale sur le reseau sans cache
       return await fetch(request);
     } catch (networkError) {
       // Si vraiment impossible, retour 404 propre sans body null
@@ -170,7 +170,7 @@ async function handleAudioRequest(request) {
 
 }
 
-// handleJsonRequest (inchangÃ©)
+// handleJsonRequest (inchange)
 async function handleJsonRequest(request) {
   log(`JSON request: ${request.url}`);
 
@@ -206,7 +206,7 @@ async function handleJsonRequest(request) {
   }
 }
 
-// handleStaticRequest (inchangÃ©)
+// handleStaticRequest (inchange)
 async function handleStaticRequest(request) {
   const cachedResponse = await caches.match(request, { cacheName: CACHE_NAME });
 
@@ -317,11 +317,11 @@ async function handleStaticRequest(request) {
         </head>
         <body>
           <div class="offline-container">
-            <div class="offline-icon">ðŸŒ</div>
+            <div class="offline-icon">Œ</div>
             <h1>Test Your French</h1>
             <h2>Offline Mode</h2>
             <p>This page is not available offline yet. Please check your internet connection and try again.</p>
-          <a href="/" class="retry-btn">ðŸ”„ Retry</a>
+          <a href="/" class="retry-btn">”„ Retry</a>
 
           </div>
         </body>
@@ -338,7 +338,7 @@ async function handleStaticRequest(request) {
   }
 }
 
-// Gestion messages (inchangÃ©)
+// Gestion messages (inchange)
 self.addEventListener('message', event => {
   log("Message received:", event.data);
 
@@ -425,7 +425,7 @@ self.addEventListener('message', event => {
   }
 });
 
-// cacheAudioFiles (inchangÃ©)
+// cacheAudioFiles (inchange)
 async function cacheAudioFiles(audioUrls) {
   const cache = await caches.open(DYNAMIC_CACHE);
   const results = [];
@@ -457,7 +457,7 @@ async function cacheAudioFiles(audioUrls) {
   return results;
 }
 
-// clearAllCaches (inchangÃ©)
+// clearAllCaches (inchange)
 async function clearAllCaches() {
   const cacheNames = await caches.keys();
   const appCacheNames = cacheNames.filter(name => name.startsWith('tyf-'));
@@ -471,7 +471,7 @@ async function clearAllCaches() {
   log("All application caches cleared.");
 }
 
-// Gestion erreurs globales (inchangÃ©)
+// Gestion erreurs globales (inchange)
 self.addEventListener('error', event => {
   error('Service Worker error:', event.error);
 });
@@ -480,7 +480,7 @@ self.addEventListener('unhandledrejection', event => {
   error('Unhandled promise rejection:', event.reason);
 });
 
-// SystÃ¨me notifications (inchangÃ©)
+// Systeme notifications (inchange)
 async function scheduleNotification(title, body, delay = 86400000) {
   if (Notification.permission === 'default') {
     const permission = await Notification.requestPermission();
@@ -531,4 +531,4 @@ async function cleanOldDynamicCache() {
   }
 }
 // Message de chargement
-log('Service Worker v3.0 loaded successfully - Test Your French ready! ðŸ‡«ðŸ‡·');
+log('Service Worker v3.0 loaded successfully - Test Your French ready! ‡«‡·');

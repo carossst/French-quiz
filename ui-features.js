@@ -16,11 +16,11 @@ function UIFeatures(uiCore, storageManager, resourceManager) {
     this.storageManager = storageManager;
     this.resourceManager = resourceManager;
 
-    // ðŸ§  Init paywall
+    // §  Init paywall
     this.paywallTimer = null;
 
 
-    // Messages rotatifs par catÃ©gorie de performance
+    // Messages rotatifs par categorie de performance
     this.feedbackMessages = {
         lowPerformance: [
             "That's real French - great job testing yourself!",
@@ -45,12 +45,12 @@ function UIFeatures(uiCore, storageManager, resourceManager) {
         ]
     };
 
-    // DÃ©marrage conversion
+    // Demarrage conversion
     this.startConversionTimer();
 }
 
 //================================================================================
-// SYSTÃˆME MESSAGES ROTATIFS
+// SYSTEME MESSAGES ROTATIFS
 //================================================================================
 UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) {
     const pct = Number(percentage) || 0;
@@ -136,7 +136,7 @@ UIFeatures.prototype.updateXPHeader = function () {
 
 UIFeatures.prototype.setupDailyReward = function () {
     if (window.TYF_CONFIG?.debug?.enabled) {
-        console.debug('ðŸŽ Daily reward system updated - using chest icon in header');
+        console.debug('Ž Daily reward system updated - using chest icon in header');
     }
 };
 
@@ -145,7 +145,7 @@ UIFeatures.prototype.collectDailyReward = function () {
     const result = this.storageManager.collectDailyReward();
     if (result.success) {
         this.showDailyRewardAnimation(result.fpEarned || result.pointsEarned);
-        this.updateXPHeader(); // <-- suffit, car updateXPHeader() reconstruit lâ€™icÃ´ne
+        this.updateXPHeader(); // <-- suffit, car updateXPHeader() reconstruit l'icone
     }
 };
 
@@ -199,7 +199,7 @@ UIFeatures.prototype.startConversionTimer = function () {
 
 UIFeatures.prototype.showSophiePaywall = function () {
     if (this.storageManager.isPremiumUser()) return;
-    // ðŸ”’ garde anti-doublon
+    // ”’ garde anti-doublon
     if (document.getElementById('sophie-paywall-modal')) return;
 
     const modal = this.createPaywallModal();
@@ -263,14 +263,14 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
                  âœ•
             </button>
             
-            <div class="text-5xl mb-4">ðŸŽ¯</div>
+            <div class="text-5xl mb-4">Ž¯</div>
             <h2 class="text-xl font-bold text-gray-800 mb-4">Want to assess all French domains?</h2>
             
             <div class="bg-orange-50 rounded-lg p-4 mb-6 text-left">
                 <div class="text-orange-800 text-sm space-y-2">
                     <div>â° <strong>You've already invested ${sessionMinutes} minutes</strong></div>
-                    <div>ðŸ“… At free pace: ${waitDays} days waiting</div>
-                    <div>ðŸ’Ž With Premium: Complete Quiz now</div>
+                    <div>“… At free pace: ${waitDays} days waiting</div>
+                    <div>’Ž With Premium: Complete Quiz now</div>
                 </div>
             </div>
             
@@ -287,7 +287,7 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
             <div class="text-sm text-gray-600 mb-6">Your time is worth more than 40 cents per day</div>
             
             <button id="paywall-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mb-3">
-                ðŸš€ Get Complete Quiz
+                š€ Get Complete Quiz
             </button>
             
             <button data-action="close" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg transition-colors">
@@ -342,13 +342,13 @@ UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
         }
     });
 
-    // 2) Verrouillage dâ€™interaction + accessibilitÃ©
+    // 2) Verrouillage d'interaction + accessibilite
     if (optionsContainer) {
         optionsContainer.classList.add('is-validated');
         optionsContainer.setAttribute('aria-disabled', 'true');
         options.forEach(o => {
             o.setAttribute('tabindex', '-1');           // plus focusable
-            o.setAttribute('aria-checked', 'false');    // on ne laisse pas un Ã©tat radio actif
+            o.setAttribute('aria-checked', 'false');    // on ne laisse pas un etat radio actif
         });
     }
 
@@ -371,7 +371,7 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
         question.correctIndex >= 0 && question.correctIndex < question.options.length;
 
     const strip = (s) => String(s).replace(/^\s*[A-D]\s*[\.)]\s*/i, '').trim();
-    const rawCorrect = validIdx ? String(question.options[question.correctIndex]) : 'â€”';
+    const rawCorrect = validIdx ? String(question.options[question.correctIndex]) : '-';
     const safeCorrect = this.escapeHTML(strip(rawCorrect));
     const safeExplanation = typeof question?.explanation === 'string' ? this.escapeHTML(question.explanation) : '';
 
@@ -383,7 +383,7 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
         ${safeExplanation ? `
           <div class="mt-3 p-3 bg-white/10 rounded-lg border border-white/20">
             <div class="flex items-start gap-2">
-              <span class="text-lg">ðŸ’¡</span>
+              <span class="text-lg">’¡</span>
               <div class="text-left">
                 <div class="text-sm font-semibold text-white mb-1">Did you know?</div>
                 <div class="text-sm text-white opacity-95">${safeExplanation}</div>
@@ -396,12 +396,12 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
     // cas incorrect  
     return `
     <div class="feedback-content incorrect text-center">
-      <div class="text-2xl mb-1">ðŸ’ª</div>
+      <div class="text-2xl mb-1">’ª</div>
       <div class="text-lg font-bold text-white mb-1">Keep learning!</div>
       <div class="text-base text-white opacity-95 mb-1">Correct answer: <strong>${safeCorrect}</strong></div>
       ${safeExplanation ? `
         <div class="mt-2 text-sm text-white opacity-90">
-          <span>ðŸ’¡ </span>${safeExplanation}
+          <span>’¡ </span>${safeExplanation}
         </div>` : ''}
     </div>`;
 };
@@ -449,8 +449,22 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
     }
     if (unlockStatus.reason === "PREVIOUS_LOCKED") {
         // Montrer le modal au lieu de bloquer
-        const modal = this.createThemePreviewModal(theme, unlockStatus);
+        const modal = this.createThemePreviewModal(theme);
         document.body.appendChild(modal);
+        return;
+    }
+    if (unlockStatus.reason === "PREVIOUS_LOCKED") {
+        const themeNames = {
+            1: "Colors", 2: "Numbers", 3: "Gender", 4: "Singular and Plural",
+            5: "Present Tense", 6: "Accents", 7: "Ca Va", 8: "Metro",
+            9: "Boulangerie", 10: "Cafe"
+        };
+        const previousTheme = themeNames[theme.id - 1] || "the previous theme";
+        const cost = this.storageManager.getUnlockCost(this.storageManager.getUnlockedPremiumThemesCount());
+
+        alert(`”’ Sequential unlock: Unlock ${previousTheme} first!\n\n` +
+            `Then you'll need ${cost} French Points to unlock ${theme.name}.\n\n` +
+            `’Ž Or get instant access to all themes ($12) - click header link`);  // <- avec la )
         return;
     }
 
@@ -463,15 +477,15 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
             `Missing: ${needed} French Points\n\n`;
 
         if (needed <= 5) {
-            message += `ðŸ”¥ So close! Take more quizzes or tomorrow's bonus!\n\n`;
-            message += `ðŸ’Ž Or get instant access to all themes ($12) - click header link`;
+            message += `”¥ So close! Take more quizzes or tomorrow's bonus!\n\n`;
+            message += `’Ž Or get instant access to all themes ($12) - click header link`;
         } else if (needed <= 15) {
-            message += `ðŸ’¡ A few more quizzes and daily bonuses!\n\n`;
-            message += `ðŸ’Ž Or get instant access to all themes ($12) - click header link\n\n`;
-            message += `ðŸŽ Don't forget your daily chests!`;
+            message += `’¡ A few more quizzes and daily bonuses!\n\n`;
+            message += `’Ž Or get instant access to all themes ($12) - click header link\n\n`;
+            message += `Ž Don't forget your daily chests!`;
         } else {
-            message += `ðŸ’Ž Or get instant access to all themes ($12) - click header link\n\n`;
-            message += `ðŸ’¡ Free path: Complete quizzes to earn French Points + daily chest bonuses`;
+            message += `’Ž Or get instant access to all themes ($12) - click header link\n\n`;
+            message += `’¡ Free path: Complete quizzes to earn French Points + daily chest bonuses`;
 
         }
 
@@ -483,7 +497,7 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
         const confirmMessage = `âœ¨ Unlock "${theme.name}" for ${unlockStatus.cost} FP?\n\n` +
             `You have ${this.storageManager.getFrenchPoints()} FP\n` +
             `After unlock: ${this.storageManager.getFrenchPoints() - unlockStatus.cost} FP remaining\n\n` +
-            `ðŸ’¡ This unlocks 5 authentic French quizzes`;
+            `’¡ This unlocks 5 authentic French quizzes`;
 
         const confirmUnlock = confirm(confirmMessage);
         if (confirmUnlock) {
@@ -505,108 +519,72 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
             }
 
             if (ok) {
-                alert(`ðŸŽ‰ "${theme.name}" unlocked!\n\n5 new authentic French quizzes available\n${this.storageManager.getFrenchPoints()} French Points remaining`);
+                alert(`Ž‰ "${theme.name}" unlocked!\n\n5 new authentic French quizzes available\n${this.storageManager.getFrenchPoints()} French Points remaining`);
                 this.updateXPHeader();
                 setTimeout(() => {
                     if (this.uiCore?.showWelcomeScreen) this.uiCore.showWelcomeScreen();
                     else window.location.reload();
                 }, 100);
             } else {
-                this.showFeedbackMessage?.('error', 'Unlock failed â€” please try again');
+                this.showFeedbackMessage?.('error', 'Unlock failed - please try again');
             }
         }
 
         return;
     }
 
-    // On passe maintenant unlockStatus au modal
-    this.showThemePreviewModal(theme, unlockStatus);
+    this.showThemePreviewModal(theme);
 
 };
-
 
 UIFeatures.prototype.showThemePreviewModal = function (theme, unlockStatus) {
     const modal = this.createThemePreviewModal(theme, unlockStatus);
-
-    // Tracker l'aperçu premium
-    if (window.trackMicroConversion) {
-        window.trackMicroConversion('premium_preview', {
-            themeId: theme.id,
-            themeName: theme.name,
-            reason: unlockStatus?.reason || null
-        });
-    }
-
     document.body.appendChild(modal);
-
-    // Focus automatique sur le bouton code premium (accessibilité)
-    setTimeout(() => {
-        const codeBtn = modal.querySelector('#premium-code-btn');
-        if (codeBtn) codeBtn.focus();
-    }, 100);
 };
 
 UIFeatures.prototype.createThemePreviewModal = function (theme, unlockStatus) {
+    // Modal avec 3 options : Code premium / Achat / Suggestion alternative
     const modal = document.createElement('div');
-    modal.id = 'theme-preview-modal';
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
 
-    // Sécuriser unlockStatus
-    const safeStatus = unlockStatus || {};
     let statusMessage = '';
-
-    if (safeStatus.reason === "PREVIOUS_LOCKED") {
+    if (unlockStatus.reason === "PREVIOUS_LOCKED") {
         const themeNames = {
             1: "Colors", 2: "Numbers", 3: "Gender", 4: "Singular and Plural",
-            5: "Present Tense", 6: "Accents", 7: "Ça Va", 8: "Metro",
-            9: "Boulangerie", 10: "Café"
+            5: "Present Tense", 6: "Accents", 7: "Ca Va", 8: "Metro",
+            9: "Boulangerie", 10: "Cafe"
         };
         const previousTheme = themeNames[theme.id - 1] || "the previous theme";
-        statusMessage = `🔒 Sequential unlock required: complete "${previousTheme}" first.`;
-    } else if (safeStatus.reason === "INSUFFICIENT_FP") {
-        const needed = safeStatus.cost - (safeStatus.currentFP || 0);
-        statusMessage = `💰 You need ${needed} more French Points (${safeStatus.cost} total).`;
+        statusMessage = `”’ Sequential unlock required: Complete "${previousTheme}" first!`;
+    } else if (unlockStatus.reason === "INSUFFICIENT_FP") {
+        const needed = unlockStatus.cost - unlockStatus.currentFP;
+        statusMessage = `’° Need ${needed} more French Points (${unlockStatus.cost} total)`;
     }
-
-    // Bloc conditionnel : orange si raison, bleu sinon (marketing)
-    const statusHtml = statusMessage
-        ? `
-            <div class="bg-orange-50 rounded-lg p-4 mb-6">
-                <div class="text-orange-800 text-sm">${statusMessage}</div>
-            </div>`
-        : `
-            <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                <div class="text-blue-800 text-sm space-y-2">
-                    <div>🎯 <strong>5 progressive quizzes</strong></div>
-                    <div>🎧 <strong>Authentic French audio</strong></div>
-                    <div>📊 <strong>Real situation testing</strong></div>
-                </div>
-            </div>`;
 
     modal.innerHTML = `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
             <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
-                <span aria-hidden="true" class="text-lg">✕</span>
+                âœ•
             </button>
             
             <div class="text-4xl mb-4">${theme.icon}</div>
             <h2 class="text-xl font-bold text-gray-800 mb-4">${theme.name}</h2>
             
-            ${statusHtml}
+            <div class="bg-orange-50 rounded-lg p-4 mb-6">
+                <div class="text-orange-800 text-sm">${statusMessage}</div>
+            </div>
             
             <div class="space-y-3">
                 <button id="premium-code-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
-                    🔓 I have a premium code
+                    ”“ I have a premium code
                 </button>
                 
                 <button id="premium-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
-                    💳 Get All Themes - $12
+                    ’³ Get All Themes - $12
                 </button>
                 
                 <button id="colors-first-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">
-                    🆓 Try Colors theme first
+                    †“ Try Colors theme first
                 </button>
             </div>
         </div>`;
@@ -630,7 +608,7 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
         ? 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm'
         : 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50';
 
-    toast.textContent = `ðŸŽ +${points} French Points!`;
+    toast.textContent = `Ž +${points} French Points!`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2000);
 };
@@ -652,27 +630,27 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
         message = isMobile ? `Great start! (${score}/20)` : `Great start! Real French progress (${score}/20)`;
     }
 
-    // Points gagnÃ©s
+    // Points gagnes
     message += `\n+${fpEarned} French Points earned`;
 
-    // CONVERSION IMMÃ‰DIATE selon profil
+    // CONVERSION IMMEDIATE selon profil
     const currentFP = this.storageManager.getFrenchPoints();
 
     if (this.storageManager.isPremiumUser()) {
-        message += `\nðŸš€ Premium active - unlimited learning!`;
-        message += `\nðŸ† You're mastering authentic French`;
+        message += `\nš€ Premium active - unlimited learning!`;
+        message += `\n† You're mastering authentic French`;
     } else if (currentFP < 10) {
-        message += `\nðŸŒŸ You're building authentic skills!`;
+        message += `\nŒŸ You're building authentic skills!`;
         message += isMobile ?
             `\nâœ¨ Love this? All themes $12` :
             `\nâœ¨ Love the progress? Get all themes instantly $12`;
     } else if (currentFP < 25) {
-        message += `\nðŸ”¥ Your French breakthrough is happening!`;
+        message += `\n”¥ Your French breakthrough is happening!`;
         message += isMobile ?
             `\nâœ¨ Ready to accelerate? All themes $12` :
             `\nâœ¨ Ready to accelerate your progress? All themes $12`;
     } else {
-        message += `\nðŸ† Your dedication shows in every quiz`;
+        message += `\n† Your dedication shows in every quiz`;
         message += isMobile ?
             `\nâœ¨ Complete your journey - All themes $12` :
             `\nâœ¨ Complete your French journey - All themes $12`;
@@ -682,6 +660,47 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
 };
 
 
+UIFeatures.prototype.createThemePreviewModal = function (theme) {
+    const modal = document.createElement('div');
+    modal.id = 'theme-preview-modal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.setAttribute('role', 'dialog');
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
+                <span aria-hidden="true" class="text-lg">âœ•</span>
+            </button>
+            
+            <div class="text-4xl mb-4">${theme.icon}</div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Unlock ${theme.name}?</h2>
+            
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <div class="text-blue-800 text-sm space-y-2">
+                    <div>Ž¯ <strong>5 progressive quizzes</strong></div>
+                    <div>Ž§ <strong>Authentic French audio</strong></div>
+                    <div>“Š <strong>Real situation testing</strong></div>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button id="premium-code-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
+                    ”“ I have a premium code
+                </button>
+                
+                <button id="premium-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+                    ’³ Get Premium Access (12â‚¬)
+                </button>
+                
+                <button id="colors-first-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">
+                    †“ Try Colors theme first
+                </button>
+            </div>
+        </div>`;
+
+    this.setupThemePreviewEvents(modal, theme);
+    return modal;
+};
 UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme) {
     const cleanup = () => document.removeEventListener('keydown', onEsc);
     const close = () => { cleanup(); modal.remove(); };
@@ -752,8 +771,8 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
             const result = this.storageManager?.unlockPremiumWithCode
                 ? this.storageManager.unlockPremiumWithCode(code)
                 : { success: false };
-            if (result.success) { this.showFeedbackMessage?.('success', 'ðŸŽ‰ Premium unlocked!'); close(); }
-            else { input.classList.add('border-red-400'); input.value = ''; input.placeholder = 'Invalid code â€” try again'; }
+            if (result.success) { this.showFeedbackMessage?.('success', 'Ž‰ Premium unlocked!'); close(); }
+            else { input.classList.add('border-red-400'); input.value = ''; input.placeholder = 'Invalid code - try again'; }
         });
     }
     const buyBtn = modal.querySelector('#buy-premium-btn');
@@ -770,10 +789,10 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
 //================================================================================
 
 UIFeatures.prototype.showUserProfileModal = function () {
-    // Ne pas montrer si dÃ©jÃ  identifiÃ©
+    // Ne pas montrer si deja identifie
     if (this.storageManager.isUserIdentified()) return;
 
-    // Ne pas montrer si pas encore prÃªt
+    // Ne pas montrer si pas encore pret
     if (!this.storageManager.shouldShowProfileModal()) return;
 
     const modal = this.createUserProfileModal();
@@ -804,7 +823,7 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
 
     return `
         <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative animate-fade-in">
-            <div class="text-4xl mb-4">ðŸŽ‰</div>
+            <div class="text-4xl mb-4">Ž‰</div>
             <h2 id="profile-modal-title" class="text-xl font-bold text-gray-800 mb-3">
                 Excellent progress!
             </h2>
@@ -835,7 +854,7 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
             <div class="space-y-3">
                 <button id="save-profile-btn" 
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                     ðŸ’¾ Save my progress
+                     ’¾ Save my progress
                 </button>
                 
                 <button id="skip-profile-btn" 
@@ -845,7 +864,7 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
             </div>
             
           <div class="text-xs text-gray-500 mt-4">
-    <span aria-hidden="true" class="mr-1">ðŸ”’</span>
+    <span aria-hidden="true" class="mr-1">”’</span>
     Your data stays private and local
 </div>
         </div>`;
@@ -857,7 +876,7 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     const saveBtn = modal.querySelector('#save-profile-btn');
     const skipBtn = modal.querySelector('#skip-profile-btn');
 
-    // Validation en temps rÃ©el
+    // Validation en temps reel
     const validateInputs = () => {
         const email = emailInput.value.trim();
         const firstName = firstNameInput.value.trim();
@@ -880,7 +899,7 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
         const firstName = firstNameInput.value.trim();
 
         if (this.storageManager.setUserProfile(email, firstName)) {
-            this.showFeedbackMessage('success', `ðŸ‘‹ Hi ${firstName}! Your progress is saved`);
+            this.showFeedbackMessage('success', `‘‹ Hi ${firstName}! Your progress is saved`);
             this.closeUserProfileModal(modal);
         } else {
             this.showFeedbackMessage('error', 'âŒ Error saving profile');
@@ -893,7 +912,7 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
         this.closeUserProfileModal(modal);
     });
 
-    // Ã‰chapper
+    // Echapper
     const escapeHandler = (e) => {
         if (e.key === 'Escape') {
             this.storageManager.markProfileModalRefused();
@@ -921,7 +940,7 @@ UIFeatures.prototype.closeUserProfileModal = function (modal) {
 
 
 UIFeatures.prototype.updateUserGreeting = function () {
-    // Met Ã  jour l'affichage si il y a un Ã©lÃ©ment de salutation
+    // Met a jour l'affichage si il y a un element de salutation
     const userGreeting = document.getElementById('user-greeting');
     if (userGreeting) {
         const displayName = this.storageManager.getUserDisplayName();
@@ -934,7 +953,7 @@ UIFeatures.prototype.updateUserGreeting = function () {
 //================================================================================
 
 UIFeatures.prototype.initializeNotifications = function () {
-    // VÃ©rifier si les notifications sont activÃ©es dans la config
+    // Verifier si les notifications sont activees dans la config
     if (!window.TYF_CONFIG?.serviceWorker?.notifications?.enabled) return;
 
     // Demander permission au premier lancement
@@ -952,10 +971,10 @@ UIFeatures.prototype.requestNotificationPermission = function () {
     if ('Notification' in window) {
         Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
-                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications activÃ©es âœ…');
+                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications activees âœ…');
                 this.scheduleNextNotification();
             } else {
-                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications refusÃ©es âŒ');
+                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications refusees âŒ');
             }
         });
     }
@@ -963,14 +982,14 @@ UIFeatures.prototype.requestNotificationPermission = function () {
 
 
 UIFeatures.prototype.scheduleNextNotification = function () {
-    // Notifications SW requiÃ¨rent un contexte sÃ©curisÃ© (https) + permission
+    // Notifications SW requierent un contexte securise (https) + permission
     if (!window.isSecureContext) return;
     if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
 
     const message = {
         type: 'SCHEDULE_NOTIFICATION',
-        title: 'ðŸŽ Test Your French',
+        title: 'Ž Test Your French',
         body: 'Your daily chest is waiting! Free French Points!',
         delay: 24 * 60 * 60 * 1000
     };
@@ -1011,7 +1030,7 @@ UIFeatures.prototype.getChestInfo = function () {
         nextReadyTs = lastTs ? (lastTs + cooldown) : Date.now();
     }
 
-    // 3) clamp de lâ€™Ã©tat "available"
+    // 3) clamp de l'etat "available"
     const msLeft = nextReadyTs - Date.now();
     const availableFromStore = this.storageManager?.isDailyRewardAvailable?.() || false;
     const available = availableFromStore || msLeft <= 0;
@@ -1019,7 +1038,7 @@ UIFeatures.prototype.getChestInfo = function () {
     // 4) ETA lisible (vide si dispo)
     const etaText = available ? '' : this.formatDuration(msLeft);
 
-    // 5) points = minimum garanti pour lâ€™UI
+    // 5) points = minimum garanti pour l'UI
     return { available, points: 3, etaText };
 }; UIFeatures.prototype.addChestIconToHeader = function () {
     const fpEl = document.getElementById('user-fp');
@@ -1033,7 +1052,7 @@ UIFeatures.prototype.getChestInfo = function () {
     };
 
     const tooltipText = info.available
-        ? 'Open your daily chest â€” at least +3 French Points (sometimes +4)'
+        ? 'Open your daily chest - at least +3 French Points (sometimes +4)'
         : (info.etaText ? `Next chest in ${info.etaText}` : 'Next chest: ready');
 
     // wrapper unique
@@ -1046,14 +1065,14 @@ UIFeatures.prototype.getChestInfo = function () {
         wrapper.innerHTML = ''; // reset propre
     }
 
-    // icÃ´ne (+ Ã©tat dispo)
+    // icone (+ etat dispo)
     const chestIcon = document.createElement('button');
     chestIcon.id = 'daily-chest-icon';
     chestIcon.className = 'chest-icon ml-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2'
         + (info.available ? ' chest-icon--available' : '');
     chestIcon.type = 'button';
     chestIcon.setAttribute('aria-label', info.available ? 'Open your daily chest' : 'Next chest time');
-    chestIcon.innerHTML = info.available ? ' ðŸŽ<span class="chest-badge">+3</span>' : ' ðŸŽ';
+    chestIcon.innerHTML = info.available ? ' Ž<span class="chest-badge">+3</span>' : ' Ž';
 
     // tooltip ENFANT du bouton (match le CSS : .chest-icon:hover .chest-tooltip)
     const tooltip = document.createElement('span');
@@ -1064,7 +1083,7 @@ UIFeatures.prototype.getChestInfo = function () {
     wrapper.appendChild(chestIcon);
     chestIcon.appendChild(tooltip);
 
-    // interactions (hover/focus/click) â€” no inline styles
+    // interactions (hover/focus/click) - no inline styles
     const showTip = () => tooltip.classList.add('is-visible');
     const hideTip = () => tooltip.classList.remove('is-visible');
 
@@ -1080,11 +1099,11 @@ UIFeatures.prototype.getChestInfo = function () {
         if (!this.storageManager.collectDailyReward) return;
         const result = this.storageManager.collectDailyReward();
 
-        // Mise Ã  jour UI si succÃ¨s
+        // Mise a jour UI si succes
         if (result?.success) {
             this.showDailyRewardAnimation?.(result.fpEarned || result.pointsEarned);
 
-            // Retirer badge +3 et Ã©tat dispo
+            // Retirer badge +3 et etat dispo
             const badge = chestIcon.querySelector('.chest-badge');
             if (badge) badge.remove();
             chestIcon.classList.remove('chest-icon--available');
@@ -1126,7 +1145,7 @@ UIFeatures.prototype.escapeHTML = function (text) {
 };
 
 UIFeatures.prototype.showFeedbackMessage = function (type, message) {
-    // CrÃ©e ou sÃ©lectionne le conteneur
+    // Cree ou selectionne le conteneur
     let container = document.getElementById('feedback-message-container');
     if (!container) {
         container = document.createElement('div');
@@ -1142,7 +1161,7 @@ UIFeatures.prototype.showFeedbackMessage = function (type, message) {
     } else if (type === 'error') {
         icon = 'âŒ'; bg = 'bg-red-50'; color = 'text-red-800'; border = 'border border-red-200';
     } else if (type === 'info') {
-        icon = 'ðŸ’¡'; bg = 'bg-blue-50'; color = 'text-blue-800'; border = 'border border-blue-200';
+        icon = '’¡'; bg = 'bg-blue-50'; color = 'text-blue-800'; border = 'border border-blue-200';
     }
 
     const toast = document.createElement('div');
@@ -1162,7 +1181,7 @@ UIFeatures.prototype.showFeedbackMessage = function (type, message) {
 
 
 UIFeatures.prototype.setupResultsEventListeners = function () {
-    // hook CSS pour lâ€™Ã©cran de rÃ©sultats
+    // hook CSS pour l'ecran de resultats
     document.querySelector('.quiz-wrapper')?.classList.add('results-compact');
 
     const backBtn = document.getElementById('back-to-themes-btn');
@@ -1196,7 +1215,7 @@ UIFeatures.prototype.updateFPProgressIndicator = function () {
 
     const currentFP = this.storageManager.getFrenchPoints();
 
-    // âœ… CoÃ»t fondÃ© sur nb de THÃˆMES premium dÃ©jÃ  dÃ©bloquÃ©s
+    // âœ… Cout fonde sur nb de THEMES premium deja debloques
     const nextCost = this.storageManager.getNextThemeUnlockCost();
     const remaining = nextCost - currentFP;
 
@@ -1205,7 +1224,7 @@ UIFeatures.prototype.updateFPProgressIndicator = function () {
         return;
     }
 
-    fpElement.textContent = `â€¢ ${remaining} French Points to unlock next theme`;
+    fpElement.textContent = `* ${remaining} French Points to unlock next theme`;
     fpElement.classList.remove('hidden');
 };
 

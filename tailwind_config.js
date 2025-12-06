@@ -17,7 +17,7 @@ module.exports = {
 
     plugins: [],
     safelist: [
-        // Classes Tailwind pour les Ã©tats dynamiques
+        // Classes Tailwind pour les etats dynamiques
         'bg-green-50',
         'bg-green-100',
         'bg-orange-50',
@@ -71,7 +71,7 @@ module.exports = {
         'invisible'
 
 
-        // Classes actuellement utilisÃ©es dans le JS
+        // Classes actuellement utilisees dans le JS
         'min-h-screen',
         'flex',
         'items-center',

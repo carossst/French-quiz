@@ -1,4 +1,4 @@
-// quizManager.js â€“ Version 3.0
+// quizManager.js -“ Version 3.0
 
 function QuizManager(resourceManager, storageManager, ui) {
   if (!resourceManager || !storageManager) {
@@ -63,7 +63,7 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
       this.storageManager.isQuizCompleted(this.currentQuizId)) {
       this.ui?.showFeedbackMessage?.(
         'info',
-        'ðŸ” Revision mode: no French Points on replays (first completion only)'
+        '” Revision mode: no French Points on replays (first completion only)'
       );
     }
     this.preprocessQuestions();
@@ -120,7 +120,7 @@ QuizManager.prototype.preprocessQuestions = function () {
 };
 
 QuizManager.prototype.displayQuiz = function (quiz) {
-  // Utiliser le systÃ¨me UI moderne au lieu de l'ancien
+  // Utiliser le systeme UI moderne au lieu de l'ancien
   if (this.ui && this.ui.showQuizScreen) {
     this.ui.showQuizScreen();
   } else {
@@ -134,7 +134,7 @@ QuizManager.prototype.renderCurrentQuestion = function () {
     return;
   }
 
-  // Utiliser le systÃ¨me UI existant - PAS de passage automatique
+  // Utiliser le systeme UI existant - PAS de passage automatique
   if (this.ui && this.ui.renderCurrentQuestion) {
     this.ui.renderCurrentQuestion();
   } else {
@@ -152,12 +152,12 @@ QuizManager.prototype.selectAnswer = function (answerIndex) {
     return;
   }
 
-  // SEULEMENT stocker la rÃ©ponse
+  // SEULEMENT stocker la reponse
   this.userAnswers[this.currentIndex] = answerIndex;
 
   console.log(`QuizManager: Answer selected: ${answerIndex} for question ${this.currentIndex + 1}`);
 
-  // Mettre Ã  jour l'UI pour montrer la sÃ©lection
+  // Mettre a jour l'UI pour montrer la selection
   if (this.ui && this.ui.updateSelectedOption) {
     this.ui.updateSelectedOption(answerIndex);
   }
@@ -173,7 +173,7 @@ QuizManager.prototype.validateCurrentAnswer = function () {
   const question = this.getCurrentQuestion();
   const isCorrect = question.correctIndex === answerIndex;
 
-  // Maintenant on met Ã  jour le score
+  // Maintenant on met a jour le score
   if (isCorrect) this.score++;
   this.questionStatus[this.currentIndex] = isCorrect ? "correct" : "incorrect";
 

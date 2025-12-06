@@ -25,7 +25,7 @@ function initializeUXTracking() {
   try {
     if (window.TYF_CONFIG?.debug?.enabled) {
       const sessionTime = window.storageManager?.getSessionDuration?.();
-      console.log('ðŸ“Š UX Session started -', sessionTime || 0, 'minutes');
+      console.log('“Š UX Session started -', sessionTime || 0, 'minutes');
     }
   } catch (error) {
     console.warn('UX tracking failed:', error);
@@ -40,7 +40,7 @@ function track(event, data) {
     sessionId: sessionStorage.getItem('sessionId') || Date.now().toString()
   });
   localStorage.setItem('tyf_events', JSON.stringify(events));
-  console.log('ðŸ“Š Tracked:', event, data);
+  console.log('“Š Tracked:', event, data);
 }
 
 window.addEventListener('error', (event) => {
@@ -107,14 +107,14 @@ function validateJavaScriptModules() {
  */
 window.trackMicroConversion = function (action, details = {}) {
   const events = {
-    'quiz_completed': 'Quiz terminÃ©',
-    'premium_preview': 'AperÃ§u premium vu',
-    'fp_earned': 'Points gagnÃ©s',
+    'quiz_completed': 'Quiz termine',
+    'premium_preview': 'Apercu premium vu',
+    'fp_earned': 'Points gagnes',
     'return_visit': 'Retour utilisateur',
-    'theme_clicked': 'ThÃ¨me explorÃ©'
+    'theme_clicked': 'Theme explore'
   };
 
-  // Envoi Ã  GA4 (si premium user et GA4 activÃ©)
+  // Envoi a GA4 (si premium user et GA4 active)
   if (window.gtag && window.ga4Initialized) {
     gtag('event', action, {
       'event_category': 'Engagement',
@@ -144,7 +144,7 @@ async function startApplication() {
   let storageManager, resourceManager, quizManager, uiCore;
 
   try {
-    // Initialiser tout en mÃªme temps
+    // Initialiser tout en meme temps
     storageManager = new window.StorageManager();
     initializeUXTracking();
     resourceManager = new window.ResourceManager();
@@ -157,7 +157,7 @@ async function startApplication() {
 
     Logger.debug("Managers initialized");
 
-    // Charger mÃ©tadonnÃ©es ET dÃ©marrer UI en mÃªme temps
+    // Charger metadonnees ET demarrer UI en meme temps
     const [metadata] = await Promise.all([
       resourceManager.loadMetadata(),
       uiCore.start()
@@ -204,13 +204,13 @@ function setupGamificationEvents() {
     ['premium-unlocked', handlePremiumUnlocked]
   ];
 
-  // Initialiser le tableau si nÃ©cessaire
+  // Initialiser le tableau si necessaire
   if (!window.TYF_EVENT_HANDLERS) window.TYF_EVENT_HANDLERS = [];
 
   // UNE SEULE FOIS le forEach
   events.forEach(([eventName, handler]) => {
     document.addEventListener(eventName, handler);
-    // Garder la rÃ©fÃ©rence pour cleanup
+    // Garder la reference pour cleanup
     window.TYF_EVENT_HANDLERS.push({ eventName, handler });
   });
 
@@ -229,7 +229,7 @@ function cleanupGamificationEvents() {
 function handleBadgeEarned(event) {
   const badges = event.detail?.badges;
   if (badges?.length) {
-    showNotification('badges', badges.length === 1 ? `ðŸ… Badge earned: ${badges[0]}` : `ðŸ… ${badges.length} badges earned!`);
+    showNotification('badges', badges.length === 1 ? `… Badge earned: ${badges[0]}` : `… ${badges.length} badges earned!`);
   }
 }
 
@@ -241,12 +241,12 @@ function handleFPGained(event) {
 
 function handleLevelUp(event) {
   if (event.detail?.newLevel) {
-    showNotification('level-up', `ðŸŽ‰ Level Up! You reached level ${event.detail.newLevel}!`);
+    showNotification('level-up', `Ž‰ Level Up! You reached level ${event.detail.newLevel}!`);
   }
 }
 
 function handlePremiumUnlocked(event) {
-  showNotification('premium', 'ðŸ”“ Premium unlocked! All themes available!');
+  showNotification('premium', '”“ Premium unlocked! All themes available!');
 }
 
 function initializeAnalyticsIfPremium(storageManager) {
@@ -366,9 +366,9 @@ if (window.TYF_CONFIG?.debug?.enabled) {
     Logger,
     showErrorMessage,
     config: window.TYF_CONFIG,
-    // NOUVEAU v2.6.0: IntÃ©gration ResourceManager debug tools
+    // NOUVEAU v2.6.0: Integration ResourceManager debug tools
     get ResourceManager() {
-      // Lazy getter pour Ã©viter problÃ¨me d'ordre de chargement
+      // Lazy getter pour eviter probleme d'ordre de chargement
       return window.RM_DEBUG || {
         status: 'ResourceManager debug tools not loaded yet',
         note: 'RM_DEBUG will be available after ResourceManager initialization'
@@ -381,12 +381,12 @@ window.showErrorMessage = showErrorMessage;
 
 
 
-// Afficher l'Ã©cran de chargement
+// Afficher l'ecran de chargement
 function showLoadingScreen(container) {
   container.innerHTML = `
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
       <div class="text-center">
-        <div class="text-6xl mb-6 animate-bounce">ðŸ‡«ðŸ‡·</div>
+        <div class="text-6xl mb-6 animate-bounce">‡«‡·</div>
         <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div>
         <h2 class="text-xl font-bold text-gray-800 mb-2">Loading Test Your French...</h2>
         <p class="text-gray-600">Preparing your authentic French assessment</p>

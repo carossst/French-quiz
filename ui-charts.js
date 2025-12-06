@@ -1,5 +1,5 @@
 /*
- * ui-charts.js â€“ Version v3.0
+ * ui-charts.js -“ Version v3.0
  */
 
 window.UICharts = function (uiCore, storageManager, resourceManager) {
@@ -16,7 +16,7 @@ UICharts.prototype.getStatsLayoutMode = function () {
         isDesktop,
         // sur desktop: 3 items si assez de hauteur, sinon 2 ; sur mobile: 3
         historyCap: isDesktop ? (H >= 880 ? 3 : 2) : 3,
-        // sur desktop: cacher Achievements si lâ€™Ã©cran est â€œcourtâ€
+        // sur desktop: cacher Achievements si l'ecran est "court"
         showBadges: isDesktop ? (H >= 880) : true,
     };
 };
@@ -25,7 +25,7 @@ UICharts.prototype.getStatsLayoutMode = function () {
 // CHARGEMENT SIMPLE
 //================================================================================
 UICharts.prototype.loadDetailedStats = function () {
-    console.log("ðŸ“Š Loading detailed stats data...");
+    console.log("“Š Loading detailed stats data...");
     const data = this.storageManager.getVisualizationData();
 
     let valid = true;
@@ -44,10 +44,10 @@ UICharts.prototype.loadDetailedStats = function () {
         this.showStatsError();
     }
 
-    // Toujours binder les boutons aprÃ¨s injection du HTML
+    // Toujours binder les boutons apres injection du HTML
     this.setupAllStatsEvents();
 
-    // Ajuste la hauteur visible (retire la hauteur du header) pour Ã©viter le scroll page
+    // Ajuste la hauteur visible (retire la hauteur du header) pour eviter le scroll page
     // on le fait sur le prochain frame pour mesurer les tailles correctes.
     requestAnimationFrame(() => this.adjustViewportHeight());
 };
@@ -107,10 +107,10 @@ UICharts.prototype.updateSimpleStats = function (data) {
     const level = Math.floor(frenchPoints / 50) + 1;
 
     this.updateStat('stats-quizzes-completed',
-        `ðŸŽ¯ ${completedQuizzes} â†’ ${this.getProgressMessage(completedQuizzes, globalAccuracy)}`
+        `Ž¯ ${completedQuizzes} â†’ ${this.getProgressMessage(completedQuizzes, globalAccuracy)}`
     );
     this.updateStat('stats-average-score',
-        `ðŸ“ˆ ${globalAccuracy}% â†’ ${this.getAccuracyMessage(globalAccuracy, completedQuizzes)}`
+        `“ˆ ${globalAccuracy}% â†’ ${this.getAccuracyMessage(globalAccuracy, completedQuizzes)}`
     );
     this.updateStat('stats-current-level', `Level ${level}`);
 };
@@ -132,7 +132,7 @@ UICharts.prototype.normalizeHistory = function (history) {
         })
         .sort((a, b) => b._ts - a._ts);
 
-    // 1 ligne par (themeId, jour) â†’ on garde la plus rÃ©cente du jour
+    // 1 ligne par (themeId, jour) â†’ on garde la plus recente du jour
     const byKey = new Map();
     for (const r of rows) {
         const key = `${r.themeId}|${r._day}`;
@@ -161,7 +161,7 @@ UICharts.prototype.renderQuickHistory = function (history) {
     if (!history || history.length === 0) {
         container.innerHTML = `
       <div class="text-center py-4 text-gray-500">
-        <div class="text-2xl mb-2">ðŸ“</div>
+        <div class="text-2xl mb-2">“</div>
         <div class="text-sm">No quiz history yet</div>
         <div class="text-xs text-gray-400 mt-1">Complete a quiz to see your activity</div>
       </div>`;
@@ -177,7 +177,7 @@ UICharts.prototype.renderQuickHistory = function (history) {
             ? Math.round((item.score / item.total) * 100)
             : (typeof item.accuracy === 'number' ? Math.round(item.accuracy) : 0);
 
-        const sentiment = accuracy >= 70 ? 'ðŸŒŸ' : accuracy >= 50 ? 'ðŸ’ª' : 'ðŸŽ¯';
+        const sentiment = accuracy >= 70 ? 'ŒŸ' : accuracy >= 50 ? '’ª' : 'Ž¯';
 
         let timeAgo = 'Recently';
         if (item.date) {
@@ -193,7 +193,7 @@ UICharts.prototype.renderQuickHistory = function (history) {
         <span class="text-lg">${sentiment}</span>
         <div class="flex-1 min-w-0">
           <div class="text-xs font-medium text-gray-800 truncate">${themeName}</div>
-          <div class="text-xs text-gray-600">${accuracy}% â€¢ ${timeAgo}</div>
+          <div class="text-xs text-gray-600">${accuracy}% * ${timeAgo}</div>
         </div>
       </div>`;
     }).join('');
@@ -204,7 +204,7 @@ UICharts.prototype.renderQuickHistory = function (history) {
 UICharts.prototype.getThemeName = function (themeId) {
     const themeNames = {
         1: 'Colors', 2: 'Numbers', 3: 'Gender', 4: 'Singular/Plural', 5: 'Present Tense',
-        6: 'Accents', 7: 'Ã‡a va', 8: 'Metro', 9: 'Boulangerie', 10: 'CafÃ©'
+        6: 'Accents', 7: 'Ã‡a va', 8: 'Metro', 9: 'Boulangerie', 10: 'Cafe'
     };
     return themeNames[themeId] || `Theme ${themeId}`;
 };
@@ -243,7 +243,7 @@ UICharts.prototype.renderSimpleBadges = function (badges) {
     if (!container) return;
 
     if (!badges || badges.length === 0) {
-        // Supprime toute la carte â€œAchievementsâ€ si vide
+        // Supprime toute la carte "Achievements" si vide
         const card = container.closest('.theme-card');
         if (card && card.parentElement) {
             card.parentElement.removeChild(card);
@@ -255,7 +255,7 @@ UICharts.prototype.renderSimpleBadges = function (badges) {
 
     container.innerHTML = badges.slice(0, 6).map(badge => `
     <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-2 rounded-lg text-center border border-blue-100">
-      <div class="text-lg mb-1">${(badge && badge.icon) ? badge.icon : 'ðŸ†'}</div>
+      <div class="text-lg mb-1">${(badge && badge.icon) ? badge.icon : '†'}</div>
       <div class="text-xs font-medium text-gray-700">${(badge && badge.name) ? badge.name : 'Achievement'}</div>
     </div>
   `).join('');
@@ -266,7 +266,7 @@ UICharts.prototype.getAchievementPreview = function (quizzes, accuracy) {
     if (quizzes <= 3) {
         return `
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-2">
-                <div class="text-2xl mb-1">ðŸŽ¯</div>
+                <div class="text-2xl mb-1">Ž¯</div>
                 <div class="text-sm font-bold">Perfect Quiz Badge</div>
                 <div class="text-xs text-gray-600">Get 100% on any quiz</div>
             </div>
@@ -277,11 +277,11 @@ UICharts.prototype.getAchievementPreview = function (quizzes, accuracy) {
         return `
             <div class="grid grid-cols-2 gap-2 mb-2">
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 text-center">
-                    <div class="text-lg">ðŸ’Ž</div>
+                    <div class="text-lg">’Ž</div>
                     <div class="text-xs font-bold">100 FP</div>
                 </div>
                 <div class="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
-                    <div class="text-lg">ðŸ”¥</div>
+                    <div class="text-lg">”¥</div>
                     <div class="text-xs font-bold">Streak</div>
                 </div>
             </div>
@@ -290,7 +290,7 @@ UICharts.prototype.getAchievementPreview = function (quizzes, accuracy) {
 
     return `
         <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-2">
-            <div class="text-2xl mb-1">ðŸ‘‘</div>
+            <div class="text-2xl mb-1">‘‘</div>
             <div class="text-sm font-bold">French Master</div>
             <div class="text-xs text-gray-600">Complete all themes with 80%+ average</div>
         </div>
@@ -330,7 +330,7 @@ UICharts.prototype.generateHistoryItem = function (item) {
     const theme = this.uiCore?.themeIndexCache?.find(t => t.id === item.themeId);
     const themeName = theme?.name || 'French Practice';
     const accuracy = item.accuracy || 0;
-    const sentiment = accuracy >= 70 ? 'ðŸŒŸ' : 'ðŸ’ª';
+    const sentiment = accuracy >= 70 ? 'ŒŸ' : '’ª';
     const message = accuracy >= 70 ? 'Great!' : 'Keep going!';
 
     let timeAgo = 'Recently';
@@ -347,14 +347,14 @@ UICharts.prototype.generateHistoryItem = function (item) {
             <span class="text-lg">${sentiment}</span>
             <div class="flex-1 min-w-0">
                 <div class="text-xs font-medium text-gray-800 truncate">${themeName}</div>
-                <div class="text-xs text-gray-600">${message} â€¢ ${timeAgo}</div>
+                <div class="text-xs text-gray-600">${message} * ${timeAgo}</div>
             </div>
         </div>`;
 };
 
 
 //================================================================================
-// NOUVELLES FONCTIONS POUR PAGE STATS COMPLÃˆTE
+// NOUVELLES FONCTIONS POUR PAGE STATS COMPLETE
 //================================================================================
 UICharts.prototype.generateFullStatsPage = function () {
     const data = this.storageManager.getVisualizationData();
@@ -376,7 +376,7 @@ UICharts.prototype.generateFullStatsPage = function () {
           ${this.generateCompactHowItWorks()}
         </div>
 
-        <!-- Sidebar : scroll interne si contenu dÃ©passe -->
+        <!-- Sidebar : scroll interne si contenu depasse -->
         <aside class="flex flex-col gap-4 min-h-0 lg:overflow-auto">
           ${showBadges ? this.generateCompactBadgesContainer() : ''}
           ${this.generateCompactHistoryContainer()}
@@ -406,7 +406,7 @@ UICharts.prototype.generateLevelCard = function (data, uiState) {
     return `
     <div class="theme-card bg-white mb-4 text-center">
       <div class="flex items-center justify-center gap-4 mb-2">
-        <div class="text-3xl">ðŸ‡«ðŸ‡·</div>
+        <div class="text-3xl">‡«‡·</div>
         <div class="text-center">
           <div class="text-sm text-gray-600">You're at</div>
           <div id="stats-current-level" class="text-2xl font-bold text-blue-700">Level ${level}</div>
@@ -443,12 +443,12 @@ UICharts.prototype.generateStatsCards = function (data) {
     return `
     <div class="grid grid-cols-2 gap-4 mb-4">
         <div class="theme-card text-center">
-            <div class="text-2xl mb-2">ðŸ†</div>
+            <div class="text-2xl mb-2">†</div>
             <div id="stats-quizzes-completed" class="text-2xl font-bold text-blue-600">${completedQuizzes}</div>
             <div class="text-sm text-gray-600">Tests Completed</div>
         </div>
         <div class="theme-card text-center">
-            <div class="text-2xl mb-2">ðŸŽ¯</div>
+            <div class="text-2xl mb-2">Ž¯</div>
             <div id="stats-average-score" class="text-2xl font-bold ${accuracyColor}">${globalAccuracy}%</div>
             <div class="text-xs text-gray-600">${accuracyMessage}</div>
         </div>
@@ -471,13 +471,13 @@ UICharts.prototype.generateMainCTA = function (uiState) {
     return `
     <div class="theme-card bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center mb-4">
       <div class="text-xl mb-2">Continue Your French Journey</div>
-      <p class="mb-4 opacity-90">9 more themes waiting â€¢ Authentic situations â€¢ Only $12</p>
+      <p class="mb-4 opacity-90">9 more themes waiting * Authentic situations * Only $12</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <button id="next-quiz-action-btn" class="quiz-button bg-white text-purple-600 hover:bg-purple-50">
           Take Next Quiz
         </button>
         <button id="get-premium-btn" class="quiz-button bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-bold">
-          Get All Themes â€” $12
+          Get All Themes - $12
         </button>
       </div>
     </div>`;
@@ -492,15 +492,15 @@ UICharts.prototype.generateHowItWorksSimple = function () {
         <div class="space-y-2">
           <div class="text-2xl">âœ…</div>
           <div class="font-medium">Take Quizzes</div>
-          <div class="text-gray-600">1â€“10 FP based on score</div>
+          <div class="text-gray-600">1-“10 FP based on score</div>
         </div>
         <div class="space-y-2">
-          <div class="text-2xl">ðŸ“…</div>
+          <div class="text-2xl">“…</div>
           <div class="font-medium">Daily Reward</div>
-          <div class="text-gray-600">+3â€“4 FP (70%:3 â€¢ 30%:4)</div>
+          <div class="text-gray-600">+3-“4 FP (70%:3 * 30%:4)</div>
         </div>
         <div class="space-y-2">
-          <div class="text-2xl">ðŸ”“</div>
+          <div class="text-2xl">”“</div>
           <div class="font-medium">Unlock Themes</div>
           <div class="text-gray-600">25 / 50 / 75 / 100 FP</div>
         </div>
@@ -513,21 +513,21 @@ UICharts.prototype.generateCompactHowItWorks = function () {
     <h3 class="text-sm font-bold text-gray-900 mb-2">How it works</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-700">
       <div class="flex items-start gap-2">
-        <span>ðŸŽ¯</span>
+        <span>Ž¯</span>
         <div>
           <div class="font-medium">Quizzes</div>
           <div class="text-xs text-gray-600">Earn 1 French Point per correct answer. Points only count the first time you take a quiz.</div>
         </div>
       </div>
       <div class="flex items-start gap-2">
-        <span>ðŸŽ</span>
+        <span>Ž</span>
         <div>
           <div class="font-medium">Daily chest</div>
           <div class="text-xs text-gray-600">+3 or +4 French Points once a day.</div>
         </div>
       </div>
       <div class="flex items-start gap-2">
-        <span>ðŸ”“</span>
+        <span>”“</span>
         <div>
           <div class="font-medium">Unlock themes</div>
           <div class="text-xs text-gray-600">25 / 50 / 75 / 100 French Points per theme.</div>
@@ -545,12 +545,12 @@ UICharts.prototype.generateCompactStatsGrid = function (data) {
     return `
   <div class="grid grid-cols-2 gap-3">
     <div class="theme-card p-3 text-center">
-      <div class="text-lg mb-1">ðŸ†</div>
+      <div class="text-lg mb-1">†</div>
       <div id="stats-quizzes-completed" class="text-xl font-bold text-blue-600">${completedQuizzes}</div>
       <div class="text-xs text-gray-600">Quizzes Completed</div>
     </div>
     <div class="theme-card p-3 text-center">
-      <div class="text-lg mb-1">ðŸŽ¯</div>
+      <div class="text-lg mb-1">Ž¯</div>
       <div id="stats-average-score" class="text-xl font-bold ${globalAccuracy >= 70 ? 'text-green-600' : globalAccuracy >= 50 ? 'text-blue-600' : 'text-orange-600'}">${globalAccuracy}%</div>
       <div class="text-xs text-gray-600">${globalAccuracy >= 70 ? 'Excellent!' : globalAccuracy >= 50 ? 'Good!' : 'Keep going!'}</div>
     </div>
@@ -562,12 +562,12 @@ UICharts.prototype.generateCompactMainCTA = function () {
     return `
   <div class="theme-card">
     <div class="text-lg font-bold text-gray-900">Continue your French</div>
-    <p class="text-sm text-gray-700 mt-1">9 more themes â€¢ Authentic situations â€¢ Only $12</p>
+    <p class="text-sm text-gray-700 mt-1">9 more themes * Authentic situations * Only $12</p>
 
     <div class="mt-3">
       <button id="get-premium-btn"
               class="quiz-button bg-indigo-600 hover:bg-indigo-700 text-white text-sm">
-        Unlock all â€” $12
+        Unlock all - $12
       </button>
     </div>
   </div>`;
@@ -579,10 +579,10 @@ UICharts.prototype.generateCompactMainCTA = function () {
 UICharts.prototype.generateCompactBadgesContainer = function () {
     return `
     <div class="theme-card">
-      <h3 class="text-base font-semibold mb-3 text-gray-800">ðŸ† Achievements</h3>
+      <h3 class="text-base font-semibold mb-3 text-gray-800">† Achievements</h3>
       <div id="badges-display-container" class="grid grid-cols-2 gap-2">
         <div class="col-span-2 text-center py-3">
-          <div class="text-lg mb-1">ðŸ†</div>
+          <div class="text-lg mb-1">†</div>
           <p class="text-xs text-gray-600">Loading achievements...</p>
         </div>
       </div>
@@ -592,10 +592,10 @@ UICharts.prototype.generateCompactBadgesContainer = function () {
 UICharts.prototype.generateCompactHistoryContainer = function () {
     return `
   <div class="theme-card">
-    <h3 class="text-base font-semibold mb-3 text-gray-800">ðŸ“š Recent Activity</h3>
+    <h3 class="text-base font-semibold mb-3 text-gray-800">“š Recent Activity</h3>
     <div id="quiz-history-list">
       <div class="text-center py-4 text-gray-500">
-        <div class="text-2xl mb-2">ðŸ“š</div>
+        <div class="text-2xl mb-2">“š</div>
         <p class="text-sm">Loading recent activity...</p>
       </div>
     </div>
@@ -604,7 +604,7 @@ UICharts.prototype.generateCompactHistoryContainer = function () {
 
 
 UICharts.prototype.setupAllStatsEvents = function () {
-    console.log("ðŸŽ¯ Setting up all stats event listeners");
+    console.log("Ž¯ Setting up all stats event listeners");
 
     const addButtonWithFeedback = (buttonId, handler) => {
         const btn = document.getElementById(buttonId);
@@ -640,7 +640,7 @@ UICharts.prototype.setupAllStatsEvents = function () {
 
 
 UICharts.prototype.handlePremiumClick = function () {
-    // 1) Flux achat fourni par l'app (prÃ©fÃ©rÃ©)
+    // 1) Flux achat fourni par l'app (prefere)
     if (this.uiCore?.features?.handlePurchase) {
         this.uiCore.features.handlePurchase();
         return;
@@ -656,7 +656,7 @@ UICharts.prototype.handlePremiumClick = function () {
         return;
     }
 
-    // 3) Config (si rÃ©ellement renseignÃ©e)
+    // 3) Config (si reellement renseignee)
     const url = (window.TYF_CONFIG && typeof TYF_CONFIG.stripePaymentUrl === 'string')
         ? TYF_CONFIG.stripePaymentUrl
         : '';
@@ -665,7 +665,7 @@ UICharts.prototype.handlePremiumClick = function () {
         return;
     }
 
-    // 4) Sinon on laisse lâ€™utilisateur utiliser le bouton du header
+    // 4) Sinon on laisse l'utilisateur utiliser le bouton du header
     alert('Purchase link is in the header. Please use the Buy button at the top.');
 };
 

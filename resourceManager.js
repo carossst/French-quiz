@@ -79,7 +79,7 @@ window.ResourceManager = (function () {
   ResourceManagerClass.prototype.accessQuizCache = function (cacheKey) {
     if (this.cache.quizzes.has(cacheKey)) {
       const quiz = this.cache.quizzes.get(cacheKey);
-      // LRU : Supprimer + RÃ©insÃ©rer = bouge en fin
+      // LRU : Supprimer + Reinserer = bouge en fin
       this.cache.quizzes.delete(cacheKey);
       this.cache.quizzes.set(cacheKey, quiz);
       return quiz;
@@ -88,11 +88,11 @@ window.ResourceManager = (function () {
   };
 
   ResourceManagerClass.prototype.setQuizCache = function (cacheKey, quiz) {
-    // Si cache plein, supprimer le moins rÃ©cent (premier)
+    // Si cache plein, supprimer le moins recent (premier)
     if (this.cache.quizzes.size >= this.cache.maxQuizzes) {
       const oldestKey = this.cache.quizzes.keys().next().value;
       this.cache.quizzes.delete(oldestKey);
-      this.logger.log(`LRU: Ã‰viction de ${oldestKey}`);
+      this.logger.log(`LRU: Eviction de ${oldestKey}`);
     }
     this.cache.quizzes.set(cacheKey, quiz);
   };
@@ -148,7 +148,7 @@ window.ResourceManager = (function () {
     } catch (error) {
       this.logger.error('Metadata load failed:', error.message);
 
-      // Fallback: utiliser cache mÃªme expirÃ©
+      // Fallback: utiliser cache meme expire
       if (this.cache.metadata) {
         this.logger.warn("Using expired cached metadata as fallback");
         return this.cache.metadata;
@@ -212,7 +212,7 @@ window.ResourceManager = (function () {
     } catch (error) {
       this.logger.error(`Quiz load failed (theme ${themeId}, quiz ${quizId}):`, error.message);
 
-      // Fallback: chercher dans le cache mÃªme expirÃ©
+      // Fallback: chercher dans le cache meme expire
       const cachedQuiz = this.accessQuizCache(cacheKey);
       if (cachedQuiz) {
         this.logger.warn("Using cached quiz as fallback");

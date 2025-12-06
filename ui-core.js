@@ -77,7 +77,7 @@
             case 'welcome':
                 this.setupWelcomeEvents();
                 if (this.features) {
-                    this.features.showXPHeader(); // affichage immÃ©diat
+                    this.features.showXPHeader(); // affichage immediat
                     this.features.updateXPHeader(); // synchronisation
                 }
                 break;
@@ -117,18 +117,18 @@
     <section class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
       <div class="max-w-2xl text-center px-6 py-12">
         <h1 class="text-3xl md:text-4xl font-bold text-blue-700 mb-4">
-         ðŸ‡«ðŸ‡· Test Your French
+         ‡«‡· Test Your French
         </h1>
         <!-- DISCOVER YOUR LEVEL -->
 <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg">
   <p class="text-blue-800 font-medium">
-   ðŸ‡«ðŸ‡· Authentic French from Paris - discover your real level!
+   ‡«‡· Authentic French from Paris - discover your real level!
    Test yourself with genuine daily situations that French natives encounter.
   </p>
 </div>
         
         <p class="text-lg text-gray-600 mb-6">
-          Authentic French tests â€“ try the free <strong>Colors</strong> quiz ðŸŽ¯
+          Authentic French tests -“ try the free <strong>Colors</strong> quiz Ž¯
         </p>       
         <button id="start-first-quiz-btn" class="cta-primary w-full sm:w-auto">
           â–¶ï¸ Start the Colors Quiz
@@ -136,15 +136,15 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 text-center">
           <div>
-            <div class="text-2xl mb-2">ðŸŽ§</div>
+            <div class="text-2xl mb-2">Ž§</div>
             <p class="text-gray-700 text-sm">Authentic audio</p>
           </div>
           <div>
-            <div class="text-2xl mb-2">ðŸ†</div>
+            <div class="text-2xl mb-2">†</div>
             <p class="text-gray-700 text-sm">Real assessment</p>
           </div>
           <div>
-            <div class="text-2xl mb-2">ðŸ“ˆ</div>
+            <div class="text-2xl mb-2">“ˆ</div>
             <p class="text-gray-700 text-sm">Track progress</p>
           </div>
         </div>
@@ -156,7 +156,7 @@
 
 
 
-    // GÃ©nÃ¨re automatiquement le message d'urgence selon le mois
+    // Genere automatiquement le message d'urgence selon le mois
     UICore.prototype.getUrgencyMessage = function () {
         const now = new Date();
         const currentMonth = now.toLocaleDateString('en-US', { month: 'long' }).toLowerCase();
@@ -230,10 +230,10 @@
         const isGood = resultsData.percentage >= 60;
         const isFail = resultsData.percentage < 40;
 
-        // RÃ©cupÃ¨re le message personnalisÃ© (rotatif ou spÃ©cial Ã©chec)
+        // Recupere le message personnalise (rotatif ou special echec)
         let feedbackMsg = '';
         if (resultsData.score === 0) {
-            feedbackMsg = "You gave it a try â€“ thatâ€™s what counts! â­ Try the Colors theme again to improve ðŸŽ¨";
+            feedbackMsg = "You gave it a try -“ that's what counts! * Try the Colors theme again to improve Ž¨";
         } else if (this.features?.getRotatedFeedbackMessage) {
             feedbackMsg = this.features.getRotatedFeedbackMessage(resultsData.percentage, resultsData.themeId);
         }
@@ -244,7 +244,7 @@
         
         <div class="mb-8">
             <div class="text-5xl mb-4 animate-bounce">
-                ${isExcellent ? 'ðŸŽ‰' : isGood ? 'ðŸ†' : 'â­'}
+                ${isExcellent ? 'Ž‰' : isGood ? '†' : '*'}
             </div>
             <h1 class="text-4xl font-bold mb-4 ${isExcellent ? 'text-green-600' : isGood ? 'text-blue-600' : 'text-orange-600'}">
                 ${isExcellent ? 'Excellent!' : isGood ? 'Well Done!' : 'Keep Going!'}
@@ -256,7 +256,7 @@
         </div>
 
     <div class="fp-display mb-6">
-    <div class="text-3xl mb-2">ðŸ’Ž</div>
+    <div class="text-3xl mb-2">’Ž</div>
     <div class="text-lg font-bold text-purple-800 mb-1 whitespace-pre-line">
         ${this.features?.getCompletionMessage ? this.features.getCompletionMessage(resultsData.percentage, resultsData.score) : `+${resultsData.score} French Points earned!`}
     </div>
@@ -273,16 +273,16 @@
         </div>
 
         <div id="detailed-stats" class="hidden">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">ðŸ“Š Performance Analysis</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4">“Š Performance Analysis</h3>
             
             <div class="mb-4 p-4 rounded-lg ${this.getCECRColorClass(resultsData.percentage)}">
-                <div class="font-bold mb-2">ðŸŽ¯ Level </div>
+                <div class="font-bold mb-2">Ž¯ Level </div>
                 <div class="text-lg font-bold">${this.getCECRLevel(resultsData.percentage)}</div>
                 <div class="text-sm">${this.getCECRMessage(resultsData.percentage)}</div>
             </div>
 
             <div id="questions-review">
-                <h4 class="font-bold text-gray-800 mb-3">ðŸ” Question Review</h4>
+                <h4 class="font-bold text-gray-800 mb-3">” Question Review</h4>
                 <div class="text-sm text-gray-600">Loading detailed review...</div>
             </div>
         </div>
@@ -292,7 +292,7 @@
                 â† Back to Theme
             </button>
             <button id="back-to-themes-btn" class="quiz-button">
-                ðŸ  Home
+                  Home
             </button>
         </div>
     </div>
@@ -325,13 +325,13 @@
             feedbackContainer.innerHTML = '';
         }
 
-        // GÃ©nÃ©rer et afficher la question
+        // Generer et afficher la question
         questionContainer.innerHTML = this.generateQuestionHTML(question);
 
-        // Configurer les Ã©vÃ©nements pour cette question
+        // Configurer les evenements pour cette question
         this.setupQuestionEvents(question);
 
-        // Mettre Ã  jour la progression
+        // Mettre a jour la progression
         this.updateQuizProgress();
     };
 
@@ -340,14 +340,14 @@
 
         return `
   <div class="quiz-wrapper" role="main" aria-label="Quiz screen">
-    <!-- Barre dâ€™en-tÃªte compacte -->
+    <!-- Barre d'en-tete compacte -->
     <div class="flex items-center justify-between mb-4">
       <div class="text-sm text-gray-600">
         <span id="quiz-progress-count">${progress.current}/${progress.total}</span>
       </div>
       <div class="flex items-center gap-2">
         <button id="go-themes-btn" class="quiz-button">â† Back</button>
-        <button id="home-quiz-btn" class="quiz-button">ðŸ  Home</button>
+        <button id="home-quiz-btn" class="quiz-button">  Home</button>
       </div>
     </div>
 
@@ -357,10 +357,10 @@
 
     </div>
 
-    <!-- Contenu question / rÃ©ponses -->
+    <!-- Contenu question / reponses -->
     <div id="question-container" class="space-y-4"></div>
 
-    <!-- Feedback (bonne/mauvaise rÃ©ponse, â€œDid you know?â€) -->
+    <!-- Feedback (bonne/mauvaise reponse, "Did you know?") -->
     <div id="feedback-container" class="mt-6" role="status" aria-live="polite"></div>
 
 
@@ -391,7 +391,7 @@
         <div class="max-w-4xl mx-auto px-4">
       <div class="flex gap-4 mb-6">
     <button id="back-to-themes-btn" class="text-blue-600 hover:text-blue-800 font-medium py-2 px-6 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-        ðŸ  Home
+          Home
     </button>   
 </div>
             
@@ -430,7 +430,7 @@
     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
         <div class="max-w-2xl mx-auto">
             <div class="theme-card text-center">
-                <h2 class="text-xl font-bold mb-4">ðŸ“Š Your Progress</h2>
+                <h2 class="text-xl font-bold mb-4">“Š Your Progress</h2>
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <p class="text-blue-700">Statistics are being prepared...</p>
                 </div>
@@ -446,7 +446,7 @@
         // Bouton retour vers accueil
         this.addClickHandler('back-to-welcome-btn', () => this.showWelcomeScreen());
 
-        // Charger les donnÃ©es stats aprÃ¨s rendu HTML
+        // Charger les donnees stats apres rendu HTML
         if (this.charts && this.charts.loadDetailedStats) {
             setTimeout(() => this.charts.loadDetailedStats(), 100);
         }
@@ -479,7 +479,7 @@
         ${question.hint ? `
             <div class="question-hint mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
                 <div class="flex items-start">
-                    ðŸ’¡
+                    ’¡
                     <div>
                         <div class="font-medium text-blue-800 mb-1">Hint:</div>
                         <div class="text-blue-700 text-sm">${question.hint}</div>
@@ -491,20 +491,20 @@
     };
 
     UICore.prototype.generateAudioHTML = function (audioFilename) {
-        console.log('ðŸŽµ generateAudioHTML called with:', audioFilename);
+        console.log('Žµ generateAudioHTML called with:', audioFilename);
 
         const themeId = this.quizManager.currentThemeId;
-        console.log('ðŸŽµ Current themeId:', themeId);
+        console.log('Žµ Current themeId:', themeId);
 
         const audioPath = this.resourceManager.getAudioPath(themeId, audioFilename);
-        console.log('ðŸŽµ Generated audioPath:', audioPath);
+        console.log('Žµ Generated audioPath:', audioPath);
 
         if (!audioPath) {
             console.error('âŒ No audioPath generated!');
             return '';
         }
 
-        // ðŸ”§ CORRECTION PRINCIPALE - Ajouter src directement sur audio ET source
+        // ”§ CORRECTION PRINCIPALE - Ajouter src directement sur audio ET source
         return `
 <div class="question-audio-container mb-6 text-center">
   <div class="bg-blue-50 rounded-lg p-4 inline-block">
@@ -558,11 +558,11 @@
             const btn = container.querySelector('.audio-play-btn');
 
             if (audio && btn) {
-                // ðŸ”§ FONCTION CORRIGÃ‰E - Gestion d'erreur propre
+                // ”§ FONCTION CORRIGEE - Gestion d'erreur propre
                 const playNow = () => {
                     audio.currentTime = 0;
 
-                    // Promesse de lecture avec gestion d'erreur dÃ©taillÃ©e
+                    // Promesse de lecture avec gestion d'erreur detaillee
                     audio.play()
                         .then(() => {
                             console.log('âœ… Audio playback started successfully');
@@ -572,9 +572,9 @@
                         .catch((error) => {
                             console.error('âŒ Audio playback failed:', error);
 
-                            // Messages d'erreur spÃ©cifiques selon le type d'erreur
+                            // Messages d'erreur specifiques selon le type d'erreur
                             if (error.name === 'NotAllowedError') {
-                                btn.textContent = 'ðŸ”‡ Click to allow audio';
+                                btn.textContent = '”‡ Click to allow audio';
                                 btn.disabled = false;
                             } else if (error.name === 'NotSupportedError') {
                                 btn.textContent = 'âŒ Format not supported';
@@ -592,15 +592,15 @@
                 // Event listener pour le bouton
                 btn.addEventListener('click', () => {
                     btn.disabled = true;
-                    btn.textContent = 'Loadingâ€¦';
+                    btn.textContent = 'Loading...';
 
-                    console.log('ðŸŽµ Audio button clicked, src:', audio.src);
+                    console.log('Žµ Audio button clicked, src:', audio.src);
 
                     if (audio.readyState >= 1) {
-                        // Audio dÃ©jÃ  prÃªt
+                        // Audio deja pret
                         playNow();
                     } else {
-                        // Attendre que l'audio soit prÃªt
+                        // Attendre que l'audio soit pret
                         let timeoutId = setTimeout(() => {
                             console.error('â° Audio loading timeout');
                             btn.textContent = 'âŒ Loading timeout';
@@ -626,7 +626,7 @@
                     }
                 });
 
-                // ðŸ”§ GESTION D'ERREUR AMÃ‰LIORÃ‰E
+                // ”§ GESTION D'ERREUR AMELIOREE
                 audio.addEventListener('error', (e) => {
                     console.error('âŒ Audio error event:', {
                         error: audio.error,
@@ -658,15 +658,15 @@
                     btn.disabled = true;
                 });
 
-                // Audio terminÃ© normalement
+                // Audio termine normalement
                 audio.addEventListener('ended', () => {
                     console.log('âœ… Audio playback ended');
                     btn.textContent = 'Replay';
                     btn.disabled = false;
                 });
 
-                // ðŸ”§ VÃ‰RIFICATION INITIALE DU FICHIER AUDIO
-                // VÃ©rifier si le fichier existe vraiment
+                // ”§ VERIFICATION INITIALE DU FICHIER AUDIO
+                // Verifier si le fichier existe vraiment
                 if (audio.src) {
                     fetch(audio.src, { method: 'HEAD' })
                         .then(response => {
@@ -726,7 +726,7 @@
             this.features.showQuestionFeedback(question, selectedIndex);
             return;
         }
-        console.warn('UIFeatures.showQuestionFeedback missing â€” no feedback rendered.');
+        console.warn('UIFeatures.showQuestionFeedback missing - no feedback rendered.');
     };
 
 
@@ -735,7 +735,7 @@
         if (theme.id === 1) return 'section-theme-free';
         if (this.storageManager.isPremiumUser()) return 'section-theme-premium';
 
-        // VÃ©rifier si dÃ©bloquÃ© avec FP
+        // Verifier si debloque avec FP
         const isUnlocked = this.storageManager.isQuizUnlocked(theme.id * 100 + 1);
         if (isUnlocked && !this.storageManager.isPremiumUser()) {
             return 'section-theme-unlocked';
@@ -749,7 +749,7 @@
             return '<div class="text-center text-gray-500">Loading themes...</div>';
         }
 
-        // AFFICHER TOUS LES THÃˆMES
+        // AFFICHER TOUS LES THEMES
         return this.themeIndexCache.map(theme => {
             return `
 <div class="theme-item ${this.getThemeStateClass(theme)}" 
@@ -765,11 +765,11 @@
     };
 
     UICore.prototype.getThemeProgressDisplay = function (themeId) {
-        // ThÃ¨me dÃ©bloquÃ© - montrer progression
+        // Theme debloque - montrer progression
         if (this.storageManager.isThemeUnlocked(themeId)) {
             const progress = this.storageManager.getThemeProgress(themeId);
             const color = progress.completedCount > 0 ? 'green' : 'blue';
-            return `<div class="text-xs text-${color}-600 mt-2">ðŸ“š ${progress.completedCount}/${progress.total} completed</div>`;
+            return `<div class="text-xs text-${color}-600 mt-2">“š ${progress.completedCount}/${progress.total} completed</div>`;
         }
 
         const unlockStatus = this.storageManager.canUnlockTheme(themeId);
@@ -778,7 +778,7 @@
             const themeNames = {
                 1: "Colors", 2: "Numbers", 3: "Gender", 4: "Singular and Plural",
                 5: "Present Tense", 6: "Accents", 7: "Ca Va", 8: "Metro",
-                9: "Boulangerie", 10: "CafÃ©"
+                9: "Boulangerie", 10: "Cafe"
             };
             const previousTheme = themeNames[themeId - 1] || `theme ${themeId - 1}`;
 
@@ -788,22 +788,22 @@
             const isMobile = window.innerWidth < 640;
 
             if (isMobile) {
-                return `<div class="text-xs text-gray-400 mt-2">ðŸ”’ ${previousTheme} needed + ${realCost} FP â€¢ <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">ðŸ’Ž or $12</span></div>`;
+                return `<div class="text-xs text-gray-400 mt-2">”’ ${previousTheme} needed + ${realCost} FP * <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">’Ž or $12</span></div>`;
             } else {
-                return `<div class="text-xs text-gray-400 mt-2">ðŸ”’ Unlock ${previousTheme} first + ${realCost} FP needed â€¢ <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">ðŸ’Ž or $12</span></div>`;
+                return `<div class="text-xs text-gray-400 mt-2">”’ Unlock ${previousTheme} first + ${realCost} FP needed * <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">’Ž or $12</span></div>`;
             }
         }
 
-        // FP insuffisants pour dÃ©bloquer
+        // FP insuffisants pour debloquer
         if (!unlockStatus.canUnlock) {
             const needed = unlockStatus.cost - this.storageManager.getFrenchPoints();
-            let message = `ðŸ”’ ${needed} more FP needed â€¢ <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">ðŸ’Ž or $12</span>`;
+            let message = `”’ ${needed} more FP needed * <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">’Ž or $12</span>`;
 
             return `<div class="text-xs text-gray-500 mt-2">${message}</div>`;
         }
 
-        // Peut dÃ©bloquer avec FP
-        return `<div class="text-xs text-blue-600 mt-2">ðŸ”“ ${unlockStatus.cost} FP to unlock â€¢ <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">ðŸ’Ž or $12</span></div>`;
+        // Peut debloquer avec FP
+        return `<div class="text-xs text-blue-600 mt-2">”“ ${unlockStatus.cost} FP to unlock * <span class="text-purple-600 cursor-pointer" data-action="show-premium-modal">’Ž or $12</span></div>`;
     };
     UICore.prototype.generateQuizCards = function (quizzes) {
         return quizzes.map(quiz => {
@@ -818,7 +818,7 @@
                     ${quiz.id % 10}
                 </span>
                 ${isCompleted ? 'âœ…' : ''}
-                ${!isUnlocked ? 'ðŸ”’' : ''}
+                ${!isUnlocked ? '”’' : ''}
             </div>
             <h3 class="font-bold text-lg mb-2">${quiz.name}</h3>
             <p class="text-gray-600 text-sm">${quiz.description}</p>
@@ -852,7 +852,7 @@
                     // Mapping simple et direct
                     const realThemeId = Math.floor(quizId / 100);
 
-                    console.log(`ðŸŽ¯ Loading quiz ${quizId} from theme ${realThemeId}`);
+                    console.log(`Ž¯ Loading quiz ${quizId} from theme ${realThemeId}`);
                     this.quizManager.loadQuiz(realThemeId, quizId);
                 } else if (this.features?.showPaywallModal) {
                     this.features.showPaywallModal(`unlock-quiz-${quizId}`);
@@ -887,12 +887,12 @@
         };
         addClick('quit-quiz-btn', goBack);
         addClick('back-to-themes-btn', goBack);
-        addClick('go-themes-btn', goBack);                 // âœ… NOUVEAU (ton bouton Back rÃ©el)
+        addClick('go-themes-btn', goBack);                 // âœ… NOUVEAU (ton bouton Back reel)
 
         addClick('home-quiz-btn', async () => this.showWelcomeScreen());
 
         // Navigation questions
-        addClick('prev-question-btn', async () => this.quizManager?.previousQuestion()); // âœ… CORRIGÃ‰
+        addClick('prev-question-btn', async () => this.quizManager?.previousQuestion()); // âœ… CORRIGE
         addClick('next-question-btn', async () => this.quizManager?.nextQuestion());
     };
 
@@ -908,7 +908,7 @@
             }
         });
 
-        // âœ… Retry (couvre primary + secondaire si prÃ©sent)
+        // âœ… Retry (couvre primary + secondaire si present)
         ['retry-quiz-primary-btn', 'retry-quiz-btn'].forEach(id => {
             this.addClickHandler(id, () => {
                 const { currentThemeId, currentQuizId } = this.quizManager;
@@ -920,7 +920,7 @@
 
         // âœ… Back to theme & Home (selon tes deux boutons bas de page)
         this.addClickHandler('quit-quiz-btn', () => this.showQuizSelection()); // â† Back to Theme
-        this.addClickHandler('back-to-themes-btn', () => this.showWelcomeScreen()); // ðŸ  Home
+        this.addClickHandler('back-to-themes-btn', () => this.showWelcomeScreen()); //   Home
 
         this.addClickHandler('toggle-details-btn', () => {
             const detailsDiv = document.getElementById('detailed-stats');
@@ -948,7 +948,7 @@
             tile.addEventListener('click', () => {
                 const id = Number(tile.dataset.themeId || '0');
 
-                // RÃ©cupÃ¨re le thÃ¨me via ResourceManager si possible, sinon via le cache index
+                // Recupere le theme via ResourceManager si possible, sinon via le cache index
                 const theme = (this.resourceManager && typeof this.resourceManager.getThemeById === 'function')
                     ? this.resourceManager.getThemeById(id)
                     : (this.themeIndexCache || []).find(t => Number(t.id) === id);
@@ -958,13 +958,13 @@
                     return;
                 }
 
-                // ðŸ‘‰ Laisse ui-features dÃ©cider (paywall, code promo, Colors gratuit, etc.)
+                // ‘‰ Laisse ui-features decider (paywall, code promo, Colors gratuit, etc.)
                 if (this.features && typeof this.features.handleThemeClick === 'function') {
                     this.features.handleThemeClick(theme);
                     return;
                 }
 
-                // Fallback simple : Colors accessible, autres thÃ¨mes bloquÃ©s
+                // Fallback simple : Colors accessible, autres themes bloques
                 if (id === 1) {
                     this.quizManager.currentThemeId = 1;
                     this.showQuizSelection();
@@ -1104,7 +1104,7 @@
             return `
         <button id="retry-quiz-primary-btn" 
                 class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold text-xl py-4 px-12 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200">
-            ðŸ”„ Retry Quiz
+            ”„ Retry Quiz
         </button>`;
         }
     };
