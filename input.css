@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 /* ====================================
- VARIABLES OPTIMISÃ‰ES
+   VARIABLES OPTIMISÉES
    ==================================== */
 
 :root {
-    /* Couleurs RGB pour opacitÃ© dynamique */
+    /* Couleurs RGB pour opacité dynamique */
     --color-primary: 56 189 248;
     --color-success: 34 197 94;
     --color-premium: 168 85 247;
@@ -14,13 +14,13 @@
     --color-danger-bright: 185 28 28;
     --color-free: 22 163 74;
 
-    /* Composants UI centralisÃ©s */
+    /* Composants UI centralisés */
     --badge-height: 22px;
     --badge-height-mobile: 18px;
     --badge-padding: 0.75rem;
     --badge-padding-mobile: 0.5rem;
 
-    /* SystÃ¨me d'espacement unifiÃ© */
+    /* Système d'espacement unifié */
     --spacing-xs: 0.5rem;
     --spacing-sm: 0.75rem;
     --spacing-md: 1.25rem;
@@ -41,10 +41,8 @@
     --header-mobile: 35px;
 }
 
-
-
 /* ====================================
-   BASE & RESET OPTIMISÃ‰
+   BASE & RESET OPTIMISÉ
    ==================================== */
 * {
     -webkit-font-smoothing: antialiased;
@@ -77,7 +75,7 @@ body {
 }
 
 /* ====================================
-   HEADER XP OPTIMISÃ‰ GAMIFICATION
+   HEADER XP OPTIMISÉ GAMIFICATION
    ==================================== */
 #xp-header {
     position: static;
@@ -101,7 +99,7 @@ body {
     font-weight: 700;
 }
 
-/* XP SYSTEM Ã‰LÃ‰MENTS - AFFICHAGE */
+/* XP SYSTEM ÉLÉMENTS - AFFICHAGE */
 #user-level {
     color: inherit;
     font-size: 1.125rem;
@@ -167,7 +165,7 @@ body {
 }
 
 /* ====================================
-   CHEST HOVER SYSTÃˆME RESTAURÃ‰
+   CHEST HOVER SYSTÈME RESTAURÉ
    ==================================== */
 #daily-chest-wrapper {
     position: relative;
@@ -237,29 +235,26 @@ body {
 }
 
 /* ====================================
-   SECTIONS THÃˆMES - BADGES UNIFORMES
+   SECTIONS THÈMES - BADGES UNIFORMES
    ==================================== */
 #themes-section {
     background: rgba(255, 255, 255, 0.85);
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    /* AjoutÃ© */
     padding: 0.75rem var(--spacing-section) 2rem;
     margin: 0.25rem auto 0.5rem;
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-    /* AmÃ©liorÃ© */
     overflow: visible;
 }
 
-/* Espace supplÃ©mentaire mobile pour badges plus visibles */
+/* Espace supplémentaire mobile pour badges plus visibles */
 @media (max-width: 640px) {
     #themes-section {
         padding-bottom: 2.5rem;
-        /* Plus d'espace sur mobile */
     }
 }
 
-/* Active le blur uniquement quand c'est supportÃ©, et plutÃ´t sur desktop */
+/* Active le blur uniquement quand c'est supporté, et plutôt sur desktop */
 @supports ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
     @media (min-width: 1024px) {
         #themes-section {
@@ -279,7 +274,7 @@ body {
     text-align: center;
 }
 
-/* Responsive : plus grand sur desktop - GROUPÃ‰ */
+/* Responsive : plus grand sur desktop */
 @media (min-width: 640px) {
     #themes-section h2 {
         font-size: 2rem;
@@ -294,7 +289,7 @@ body {
     }
 }
 
-/* Scrollbar personnalisÃ©e - GROUPÃ‰ */
+/* Scrollbar personnalisée */
 #themes-section::-webkit-scrollbar {
     width: 6px;
 }
@@ -313,7 +308,7 @@ body {
 }
 
 /* ====================================
-   GRILLE THÃˆMES RESPONSIVE
+   GRILLE THÈMES RESPONSIVE
    ==================================== */
 #themes-grid {
     display: grid;
@@ -343,13 +338,11 @@ body {
 
     #themes-grid>*:nth-child(n+11) {
         display: none;
-        /* Remettre DANS le media query */
     }
 }
 
-
 /* ====================================
-   CARTES THÃˆMES - PERFORMANCE GPU
+   CARTES THÈMES - PERFORMANCE GPU
    ==================================== */
 .theme-item {
     position: relative;
@@ -402,7 +395,7 @@ body {
     margin-top: 0.5rem;
 }
 
-/* Ã‰tats des thÃ¨mes avec badges - GROUPÃ‰ */
+/* États des thèmes avec badges */
 :is(.section-theme-free, .section-theme-premium, .section-theme-unlocked, .section-theme-locked) {
     position: relative;
 }
@@ -462,7 +455,6 @@ body {
     }
 }
 
-
 .section-theme-free::before {
     content: "FREE";
     background: linear-gradient(135deg, rgb(var(--color-success)), #16a34a);
@@ -493,7 +485,7 @@ body {
 }
 
 /* ====================================
-   OPTIONS QUIZ - FEEDBACK OPTIMISÃ‰
+   OPTIONS QUIZ - FEEDBACK OPTIMISÉ
    ==================================== */
 .option {
     position: relative;
@@ -521,7 +513,6 @@ body {
     background: rgba(22, 163, 74, 0.3) !important;
     border: 2px solid rgb(22, 163, 74) !important;
     color: rgb(0, 0, 0) !important;
-    /* Noir au lieu de vert foncÃ© */
     font-weight: 700 !important;
 }
 
@@ -533,7 +524,7 @@ body {
 }
 
 /* ====================================
-   BOUTONS - DESIGN MODERNE GROUPÃ‰
+   BOUTONS - DESIGN MODERNE
    ==================================== */
 :is(.quiz-button, #start-first-quiz-btn, #retry-quiz-primary-btn, #next-quiz-btn,
     #back-to-themes-btn, #premium-code-btn, #premium-buy-btn, #paywall-buy-btn,
@@ -562,7 +553,7 @@ body {
     cursor: not-allowed;
 }
 
-/* Boutons secondaires - GROUPÃ‰ */
+/* Boutons secondaires */
 :is(#view-stats-btn, #skip-profile-btn, #colors-first-btn, #toggle-details-btn,
     #close-modal-btn, .close-modal-btn) {
     background: rgb(243 244 246);
@@ -577,7 +568,7 @@ body {
         transform var(--transition-fast);
 }
 
-/* Boutons compacts - GROUPÃ‰ */
+/* Boutons compacts */
 :is(button[id$="-btn"], .copy-code-btn) {
     padding: 0.5rem 0.9rem;
     font-size: 0.9rem;
@@ -598,7 +589,7 @@ body {
 }
 
 /* ====================================
-   QUIZ INTERFACE - Ã‰LÃ‰MENTS
+   QUIZ INTERFACE - ÉLÉMENTS
    ==================================== */
 #question-container {
     background: white;
@@ -631,7 +622,6 @@ body {
     pointer-events: auto;
 }
 
-
 .options-container.is-validated .option {
     pointer-events: none;
 }
@@ -657,7 +647,7 @@ body {
     color: rgb(var(--color-primary));
 }
 
-/* === FEEDBACK  === */
+/* === FEEDBACK === */
 .feedback-content {
     border-radius: var(--radius-card);
     padding: 1rem 1.25rem;
@@ -732,7 +722,7 @@ body {
 }
 
 /* ====================================
-   STATS & RÃ‰SULTATS - SECTIONS
+   STATS & RÉSULTATS - SECTIONS
    ==================================== */
 #detailed-stats {
     background: #f8fafc;
@@ -794,7 +784,7 @@ body {
 }
 
 /* ====================================
-   ACCESSIBILITÃ‰ PRÃ‰SERVÃ‰E
+   ACCESSIBILITÉ PRÉSERVÉE
    ==================================== */
 .skip-link {
     position: absolute;
@@ -866,7 +856,7 @@ body {
 }
 
 /* ====================================
-   HOVER STATES - OPTIMISÃ‰S
+   HOVER STATES - OPTIMISÉS
    ==================================== */
 @media (hover: hover) {
     .option:hover {
@@ -924,7 +914,7 @@ body {
 }
 
 /* ====================================
-   TRANSITIONS CIBLÃ‰ES - PERFORMANCE
+   TRANSITIONS CIBLÉES - PERFORMANCE
    ==================================== */
 :is(.option, .quiz-item, .assessment-domain, .theme-item) {
     transition: transform var(--transition-fast),
@@ -950,7 +940,7 @@ body {
         transform var(--transition-fast);
 }
 
-/* Performance GPU - PAS de forcing permanent */
+/* Performance GPU - pas de forcing permanent */
 :is(.quiz-wrapper, .theme-item, .quiz-item, .assessment-domain, .interactive-element,
     .quiz-button, button[id$="-btn"], .copy-code-btn, #daily-reward-btn, #reload-btn, .cta-primary) {
     transform: none;
@@ -958,7 +948,7 @@ body {
     backface-visibility: visible;
 }
 
-/* Supprime les derniers 'transition: all' spÃ©cifiques */
+/* Supprime les derniers 'transition: all' spécifiques */
 :is(.option.correct-validated, .option.incorrect-validated) {
     transition: background-color var(--transition-fast),
         border-color var(--transition-fast),
@@ -1000,40 +990,80 @@ body {
     width: 0%;
 }
 
+.w-pct-5 {
+    width: 5%;
+}
+
 .w-pct-10 {
     width: 10%;
+}
+
+.w-pct-15 {
+    width: 15%;
 }
 
 .w-pct-20 {
     width: 20%;
 }
 
+.w-pct-25 {
+    width: 25%;
+}
+
 .w-pct-30 {
     width: 30%;
+}
+
+.w-pct-35 {
+    width: 35%;
 }
 
 .w-pct-40 {
     width: 40%;
 }
 
+.w-pct-45 {
+    width: 45%;
+}
+
 .w-pct-50 {
     width: 50%;
+}
+
+.w-pct-55 {
+    width: 55%;
 }
 
 .w-pct-60 {
     width: 60%;
 }
 
+.w-pct-65 {
+    width: 65%;
+}
+
 .w-pct-70 {
     width: 70%;
+}
+
+.w-pct-75 {
+    width: 75%;
 }
 
 .w-pct-80 {
     width: 80%;
 }
 
+.w-pct-85 {
+    width: 85%;
+}
+
 .w-pct-90 {
     width: 90%;
+}
+
+.w-pct-95 {
+    width: 95%;
 }
 
 .w-pct-100 {
@@ -1041,7 +1071,7 @@ body {
 }
 
 /* ====================================
-   ANIMATIONS PRÃ‰SERVÃ‰ES
+   ANIMATIONS PRÉSERVÉES
    ==================================== */
 @media (prefers-reduced-motion: reduce) {
 

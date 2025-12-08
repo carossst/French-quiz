@@ -1,3 +1,4 @@
--e User-agent: *
+User-agent: *
 Allow: /
+
 Sitemap: https://carossst.github.io/French-quiz/sitemap.xml

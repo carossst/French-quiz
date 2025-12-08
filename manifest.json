@@ -3,7 +3,8 @@
   "short_name": "TYF",
   "description": "Progressive Web App to learn French through interactive quizzes.",
   "version": "3.0",
-  "start_url": "./",
+  "id": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -74,7 +75,8 @@
       "icons": [
         {
           "src": "./icons/shortcut-quiz.png",
-          "sizes": "96x96"
+          "sizes": "96x96",
+          "type": "image/png"
         }
       ]
     },
@@ -86,7 +88,8 @@
       "icons": [
         {
           "src": "./icons/shortcut-stats.png",
-          "sizes": "96x96"
+          "sizes": "96x96",
+          "type": "image/png"
         }
       ]
     }

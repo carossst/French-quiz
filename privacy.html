@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Privacy Policy -“ Test Your French</title>
+    <title>Privacy Policy - Test Your French</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,follow">
     <style>
@@ -32,6 +32,7 @@
             color: #3b82f6;
         }
 
+        /* Anti-scraping */
         .obfuscated-email {
             unicode-bidi: bidi-override;
             direction: rtl;
@@ -41,11 +42,13 @@
 
 <body>
     <h1>Privacy Policy</h1>
+
     <section>
         <p><strong>Test Your French</strong> is a privacy-first language assessment app. We do <strong>not</strong>
             collect, sell or share your personal data. Your progress and results are stored only in your browser
             (localStorage) and are never sent to our servers.</p>
     </section>
+
     <section>
         <h2>What we store</h2>
         <ul>
@@ -55,19 +58,24 @@
                 only)</li>
         </ul>
     </section>
+
     <section>
         <h2>Contact</h2>
         <p>
             For any questions about privacy, contact us at
-            bonjour [at] testyourfrench [dot] com
-            or <a href="mailto:bonjour@testyourfrench.com" rel="noopener">send an email</a>.
+            <span class="obfuscated-email" data-user="ruojnob" data-domain="moc.hcnerfyuotset"></span>
+            or <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com">send an email</a>.
         </p>
     </section>
+
     <section>
         <h2>Third-party services</h2>
-        <p>Payments are processed securely by <a href="https://stripe.com/" rel="noopener" target="_blank">Stripe</a>.
-            We never store payment information.</p>
+        <p>Payments are processed securely by
+            <a href="https://stripe.com/" rel="noopener" target="_blank">Stripe</a>.
+            We never store payment information.
+        </p>
     </section>
+
     <section>
         <p>Last updated: August 2025</p>
     </section>
@@ -75,12 +83,11 @@
     <footer class="text-xs text-gray-500 text-center py-6 mt-10">
         <a href="./index.html">Home</a> |
         <a href="./terms.html">Terms</a> |
-        <a href="mailto:bonjour&#64;testyourfrench&#46;com">Contact</a> |
+        <a id="contact-mail-footer" data-user="bonjour" data-domain="testyourfrench.com">Contact</a> |
         v3.0
     </footer>
 
-
-
+    <script src="./email.js"></script>
 </body>
 
 </html>

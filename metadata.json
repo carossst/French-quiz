@@ -7,33 +7,33 @@
             "id": 1,
             "name": "I Speak Colors",
             "description": "Practice French color vocabulary and usage.",
-            "icon": "â—ˆ",
+            "icon": "🎨",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 101,
                     "name": "Writing and Reading Colors Test 1",
-                    "description": "Read and write key phrases related to i speak colors."
+                    "description": "Read and write key phrases related to I Speak Colors."
                 },
                 {
                     "id": 102,
                     "name": "Writing and Reading Conversation Colors Test 2",
-                    "description": "Use i speak colors vocabulary in everyday conversation contexts."
+                    "description": "Use I Speak Colors vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 103,
                     "name": "Listening Colors Test 3",
-                    "description": "Improve your listening skills with i speak colors phrases and expressions."
+                    "description": "Improve your listening skills with I Speak Colors phrases and expressions."
                 },
                 {
                     "id": 104,
                     "name": "Listening Conversation Colors Test 4",
-                    "description": "Practice listening in realistic i speak colors dialogues."
+                    "description": "Practice listening in realistic I Speak Colors dialogues."
                 },
                 {
                     "id": 105,
                     "name": "Writing and Reading & Listening Colors Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak colors situations."
+                    "description": "Mix of writing, reading and listening skills for I Speak Colors situations."
                 }
             ]
         },
@@ -41,33 +41,33 @@
             "id": 2,
             "name": "I Speak Numbers",
             "description": "Practice French numbers and numerical expressions.",
-            "icon": "â‘ ",
+            "icon": "🔢",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 201,
                     "name": "Writing and Reading Numbers Test 1",
-                    "description": "Read and write key phrases related to i speak numbers."
+                    "description": "Read and write key phrases related to I Speak Numbers."
                 },
                 {
                     "id": 202,
                     "name": "Writing and Reading Conversation Numbers Test 2",
-                    "description": "Use i speak numbers vocabulary in everyday conversation contexts."
+                    "description": "Use I Speak Numbers vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 203,
                     "name": "Listening Numbers Test 3",
-                    "description": "Improve your listening skills with i speak numbers phrases and expressions."
+                    "description": "Improve your listening skills with I Speak Numbers phrases and expressions."
                 },
                 {
                     "id": 204,
                     "name": "Listening Conversation Numbers Test 4",
-                    "description": "Practice listening in realistic i speak numbers dialogues."
+                    "description": "Practice listening in realistic I Speak Numbers dialogues."
                 },
                 {
                     "id": 205,
                     "name": "Writing and Reading & Listening Numbers Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak numbers situations."
+                    "description": "Mix of writing, reading and listening skills for I Speak Numbers situations."
                 }
             ]
         },
@@ -75,33 +75,33 @@
             "id": 3,
             "name": "I Speak Gender",
             "description": "Master grammatical gender in French.",
-            "icon": "âš§",
+            "icon": "⚧",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 301,
                     "name": "Writing and Reading Gender Test 1",
-                    "description": "Read and write key phrases related to i speak gender."
+                    "description": "Read and write key phrases related to I Speak Gender."
                 },
                 {
                     "id": 302,
                     "name": "Writing and Reading Conversation Gender Test 2",
-                    "description": "Use i speak gender vocabulary in everyday conversation contexts."
+                    "description": "Use I Speak Gender vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 303,
                     "name": "Listening Gender Test 3",
-                    "description": "Improve your listening skills with i speak gender phrases and expressions."
+                    "description": "Improve your listening skills with I Speak Gender phrases and expressions."
                 },
                 {
                     "id": 304,
                     "name": "Listening Conversation Gender Test 4",
-                    "description": "Practice listening in realistic i speak gender dialogues."
+                    "description": "Practice listening in realistic I Speak Gender dialogues."
                 },
                 {
                     "id": 305,
                     "name": "Writing and Reading & Listening Gender Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak gender situations."
+                    "description": "Mix of writing, reading and listening skills for I Speak Gender situations."
                 }
             ]
         },
@@ -109,33 +109,33 @@
             "id": 4,
             "name": "I Speak Singular and Plural",
             "description": "Practice French singular and plural forms.",
-            "icon": "â‡„",
+            "icon": "⇆",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 401,
-                    "name": "Writing and Reading Plural Test 1",
-                    "description": "Read and write key phrases related to i speak singular and plural."
+                    "name": "Writing and Reading Singular and Plural Test 1",
+                    "description": "Read and write key phrases related to I Speak Singular and Plural."
                 },
                 {
                     "id": 402,
-                    "name": "Writing and Reading Conversation Plural Test 2",
-                    "description": "Use i speak singular and plural vocabulary in everyday conversation contexts."
+                    "name": "Writing and Reading Conversation Singular and Plural Test 2",
+                    "description": "Use I Speak Singular and Plural vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 403,
-                    "name": "Listening Plural Test 3",
-                    "description": "Improve your listening skills with i speak singular and plural phrases and expressions."
+                    "name": "Listening Singular and Plural Test 3",
+                    "description": "Improve your listening skills with I Speak Singular and Plural phrases and expressions."
                 },
                 {
                     "id": 404,
-                    "name": "Listening Conversation Plural Test 4",
-                    "description": "Practice listening in realistic i speak singular and plural dialogues."
+                    "name": "Listening Conversation Singular and Plural Test 4",
+                    "description": "Practice listening in realistic I Speak Singular and Plural dialogues."
                 },
                 {
                     "id": 405,
-                    "name": "Writing and Reading & Listening Plural Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak singular and plural situations."
+                    "name": "Writing and Reading & Listening Singular and Plural Test 5",
+                    "description": "Mix of writing, reading and listening skills for I Speak Singular and Plural situations."
                 }
             ]
         },
@@ -143,33 +143,33 @@
             "id": 5,
             "name": "I Speak Present Tense",
             "description": "Conjugate and use the French present tense.",
-            "icon": "â±ï¸",
+            "icon": "⏱️",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 501,
-                    "name": "Writing and Reading Tense Test 1",
-                    "description": "Read and write key phrases related to i speak present tense."
+                    "name": "Writing and Reading Present Tense Test 1",
+                    "description": "Read and write key phrases related to I Speak Present Tense."
                 },
                 {
                     "id": 502,
-                    "name": "Writing and Reading Conversation Tense Test 2",
-                    "description": "Use i speak present tense vocabulary in everyday conversation contexts."
+                    "name": "Writing and Reading Conversation Present Tense Test 2",
+                    "description": "Use I Speak Present Tense vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 503,
-                    "name": "Listening Tense Test 3",
-                    "description": "Improve your listening skills with i speak present tense phrases and expressions."
+                    "name": "Listening Present Tense Test 3",
+                    "description": "Improve your listening skills with I Speak Present Tense phrases and expressions."
                 },
                 {
                     "id": 504,
-                    "name": "Listening Conversation Tense Test 4",
-                    "description": "Practice listening in realistic i speak present tense dialogues."
+                    "name": "Listening Conversation Present Tense Test 4",
+                    "description": "Practice listening in realistic I Speak Present Tense dialogues."
                 },
                 {
                     "id": 505,
-                    "name": "Writing and Reading & Listening Tense Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak present tense situations."
+                    "name": "Writing and Reading & Listening Present Tense Test 5",
+                    "description": "Mix of writing, reading and listening skills for I Speak Present Tense situations."
                 }
             ]
         },
@@ -183,95 +183,95 @@
                 {
                     "id": 601,
                     "name": "Writing and Reading Accents Test 1",
-                    "description": "Read and write key phrases related to i speak accents."
+                    "description": "Read and write key phrases related to I Speak Accents."
                 },
                 {
                     "id": 602,
                     "name": "Writing and Reading Conversation Accents Test 2",
-                    "description": "Use i speak accents vocabulary in everyday conversation contexts."
+                    "description": "Use I Speak Accents vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 603,
                     "name": "Listening Accents Test 3",
-                    "description": "Improve your listening skills with i speak accents phrases and expressions."
+                    "description": "Improve your listening skills with I Speak Accents phrases and expressions."
                 },
                 {
                     "id": 604,
                     "name": "Listening Conversation Accents Test 4",
-                    "description": "Practice listening in realistic i speak accents dialogues."
+                    "description": "Practice listening in realistic I Speak Accents dialogues."
                 },
                 {
                     "id": 605,
                     "name": "Writing and Reading & Listening Accents Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak accents situations."
+                    "description": "Mix of writing, reading and listening skills for I Speak Accents situations."
                 }
             ]
         },
         {
             "id": 7,
-            "name": "I Speak Ã‡a Va",
+            "name": "I Speak Ça Va",
             "description": "Learn essential greetings and ice-breaking phrases.",
-            "icon": "âœŒ",
+            "icon": "✌",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 701,
-                    "name": "Writing and Reading Va Test 1",
-                    "description": "Read and write key phrases related to i speak Ã§a va."
+                    "name": "Writing and Reading Ça Va Test 1",
+                    "description": "Read and write key phrases related to I Speak Ça Va."
                 },
                 {
                     "id": 702,
-                    "name": "Writing and Reading Conversation Va Test 2",
-                    "description": "Use i speak Ã§a va vocabulary in everyday conversation contexts."
+                    "name": "Writing and Reading Conversation Ça Va Test 2",
+                    "description": "Use I Speak Ça Va vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 703,
-                    "name": "Listening Va Test 3",
-                    "description": "Improve your listening skills with i speak Ã§a va phrases and expressions."
+                    "name": "Listening Ça Va Test 3",
+                    "description": "Improve your listening skills with I Speak Ça Va phrases and expressions."
                 },
                 {
                     "id": 704,
-                    "name": "Listening Conversation Va Test 4",
-                    "description": "Practice listening in realistic i speak Ã§a va dialogues."
+                    "name": "Listening Conversation Ça Va Test 4",
+                    "description": "Practice listening in realistic I Speak Ça Va dialogues."
                 },
                 {
                     "id": 705,
-                    "name": "Writing and Reading & Listening Va Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak Ã§a va situations."
+                    "name": "Writing and Reading & Listening Ça Va Test 5",
+                    "description": "Mix of writing, reading and listening skills for I Speak Ça Va situations."
                 }
             ]
         },
         {
             "id": 8,
-            "name": "I Speak MÃ©tro",
+            "name": "I Speak Métro",
             "description": "Navigate public transport and use related vocabulary.",
-            "icon": "â“‚",
+            "icon": "🚇",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 801,
-                    "name": "Writing and Reading MÃ©tro Test 1",
-                    "description": "Read and write key phrases related to i speak mÃ©tro."
+                    "name": "Writing and Reading Métro Test 1",
+                    "description": "Read and write key phrases related to I Speak Métro."
                 },
                 {
                     "id": 802,
-                    "name": "Writing and Reading Conversation MÃ©tro Test 2",
-                    "description": "Use i speak mÃ©tro vocabulary in everyday conversation contexts."
+                    "name": "Writing and Reading Conversation Métro Test 2",
+                    "description": "Use I Speak Métro vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 803,
-                    "name": "Listening MÃ©tro Test 3",
-                    "description": "Improve your listening skills with i speak mÃ©tro phrases and expressions."
+                    "name": "Listening Métro Test 3",
+                    "description": "Improve your listening skills with I Speak Métro phrases and expressions."
                 },
                 {
                     "id": 804,
-                    "name": "Listening Conversation MÃ©tro Test 4",
-                    "description": "Practice listening in realistic i speak mÃ©tro dialogues."
+                    "name": "Listening Conversation Métro Test 4",
+                    "description": "Practice listening in realistic I Speak Métro dialogues."
                 },
                 {
                     "id": 805,
-                    "name": "Writing and Reading & Listening MÃ©tro Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak mÃ©tro situations."
+                    "name": "Writing and Reading & Listening Métro Test 5",
+                    "description": "Mix of writing, reading and listening skills for I Speak Métro situations."
                 }
             ]
         },
@@ -279,67 +279,67 @@
             "id": 9,
             "name": "I Speak Boulangerie",
             "description": "Order bread and pastries like a local.",
-            "icon": "âŠŸ",
+            "icon": "🥐",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 901,
                     "name": "Writing and Reading Boulangerie Test 1",
-                    "description": "Read and write key phrases related to i speak boulangerie."
+                    "description": "Read and write key phrases related to I Speak Boulangerie."
                 },
                 {
                     "id": 902,
                     "name": "Writing and Reading Conversation Boulangerie Test 2",
-                    "description": "Use i speak boulangerie vocabulary in everyday conversation contexts."
+                    "description": "Use I Speak Boulangerie vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 903,
                     "name": "Listening Boulangerie Test 3",
-                    "description": "Improve your listening skills with i speak boulangerie phrases and expressions."
+                    "description": "Improve your listening skills with I Speak Boulangerie phrases and expressions."
                 },
                 {
                     "id": 904,
                     "name": "Listening Conversation Boulangerie Test 4",
-                    "description": "Practice listening in realistic i speak boulangerie dialogues."
+                    "description": "Practice listening in realistic I Speak Boulangerie dialogues."
                 },
                 {
                     "id": 905,
                     "name": "Writing and Reading & Listening Boulangerie Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak boulangerie situations."
+                    "description": "Mix of writing, reading and listening skills for I Speak Boulangerie situations."
                 }
             ]
         },
         {
             "id": 10,
-            "name": "I Speak CafÃ©",
-            "description": "Order drinks and food in a French cafÃ©.",
-            "icon": "â˜•",
+            "name": "I Speak Café",
+            "description": "Order drinks and food in a French café.",
+            "icon": "☕",
             "estimatedQuestionsPerQuiz": 10,
             "quizzes": [
                 {
                     "id": 1001,
-                    "name": "Writing and Reading CafÃ© Test 1",
-                    "description": "Read and write key phrases related to i speak cafÃ©."
+                    "name": "Writing and Reading Café Test 1",
+                    "description": "Read and write key phrases related to I Speak Café."
                 },
                 {
                     "id": 1002,
-                    "name": "Writing and Reading Conversation CafÃ© Test 2",
-                    "description": "Use i speak cafÃ© vocabulary in everyday conversation contexts."
+                    "name": "Writing and Reading Conversation Café Test 2",
+                    "description": "Use I Speak Café vocabulary in everyday conversation contexts."
                 },
                 {
                     "id": 1003,
-                    "name": "Listening CafÃ© Test 3",
-                    "description": "Improve your listening skills with i speak cafÃ© phrases and expressions."
+                    "name": "Listening Café Test 3",
+                    "description": "Improve your listening skills with I Speak Café phrases and expressions."
                 },
                 {
                     "id": 1004,
-                    "name": "Listening Conversation CafÃ© Test 4",
-                    "description": "Practice listening in realistic i speak cafÃ© dialogues."
+                    "name": "Listening Conversation Café Test 4",
+                    "description": "Practice listening in realistic I Speak Café dialogues."
                 },
                 {
                     "id": 1005,
-                    "name": "Writing and Reading & Listening CafÃ© Test 5",
-                    "description": "Mix of writing, reading and listening skills for i speak cafÃ© situations."
+                    "name": "Writing and Reading & Listening Café Test 5",
+                    "description": "Mix of writing, reading and listening skills for I Speak Café situations."
                 }
             ]
         }
