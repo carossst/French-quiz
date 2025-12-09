@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test Your French - Authentic Daily French Quizzes</title>
 
+  <!-- App name -->
+  <meta name="application-name" content="Test Your French">
+
   <!-- SEO -->
   <meta name="description"
     content="Test Your French with interactive quizzes! Free Colors theme plus premium content. Privacy-first learning with gamification.">
@@ -30,7 +33,7 @@
   <meta property="og:image" content="https://carossst.github.io/French-quiz/icons/icon-192x192.png">
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Test Your French - Authentic Daily French Quizzes">
   <meta name="twitter:description" content="Discover your real French level with authentic daily French quizzes.">
   <meta name="twitter:image" content="https://carossst.github.io/French-quiz/icons/icon-192x192.png">
@@ -54,6 +57,9 @@
   }
   </script>
 
+  <!-- Preconnects -->
+  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
+
   <!-- Icons & manifest -->
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192x192.png">
   <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
@@ -73,7 +79,6 @@
   <a href="#app-container" class="skip-link">
     Skip to main content
   </a>
-
 
   <!-- Header global : XP + daily chest + CTA Stripe -->
   <header id="app-header" class="py-1">
@@ -111,7 +116,6 @@
       Start with the free <em>Colors</em> theme to discover your real French level.
     </p>
   </section>
-
 
   <!-- Conteneur principal de l’app (rendu par UICore) -->
   <div id="app-container" role="main" aria-live="polite" aria-label="Test Your French application content"></div>
