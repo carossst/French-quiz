@@ -1,4 +1,4 @@
-// ui-core.js v3.1 - Refined UX flow (new user → quiz → results → stats)
+// ui-core.js v3.1 - TESTf-Refined UX flow (new user → quiz → results → stats)
 (function (global) {
     function UICore(quizManager, appContainer, resourceManager, storageManager) {
         if (!quizManager || !appContainer || !resourceManager || !storageManager) {
@@ -45,17 +45,38 @@
             throw error;
         }
     };
-
     UICore.prototype.initializeDependencies = function () {
-        this.features = new UIFeatures(this, this.storageManager, this.resourceManager);
+        const FeaturesCtor = window.UIFeatures;
 
-        // XP system + header
-        this.features.initializeXPSystem();
-        if (this.features.updateXPHeader) {
-            this.features.updateXPHeader();
-        }
-        if (this.features.addChestIconToHeader) {
-            this.features.addChestIconToHeader();
+        // Sécurité : si UIFeatures n'est pas dispo, on ne bloque pas l'app
+        if (typeof FeaturesCtor === "function") {
+            this.features = new FeaturesCtor(this, this.storageManager, this.resourceManager);
+
+            this.features.initializeXPSystem?.();
+            this.features.updateXPHeader?.();
+            this.features.addChestIconToHeader?.();
+
+            if (this.features.setupGlobalEventListeners) {
+                this.features.setupGlobalEventListeners();
+            }
+        } else {
+            console.warn("UIFeatures not available – XP header disabled.");
+            // Stub minimal pour éviter les erreurs plus loin dans le code
+            this.features = {
+                initializeXPSystem() { },
+                updateXPHeader() { },
+                addChestIconToHeader() { },
+                setupGlobalEventListeners() { },
+                showQuestionFeedback() { },
+                handleResultsFP() { },
+                getCompletionMessage() {
+                    return "Quiz completed – French Points earned.";
+                },
+                getNextQuizInTheme() {
+                    return null;
+                },
+                handleThemeClick: null
+            };
         }
 
         // Charts module (stats)
@@ -70,11 +91,8 @@
                         return Promise.resolve();
                     }
                 };
-
-        if (this.features.setupGlobalEventListeners) {
-            this.features.setupGlobalEventListeners();
-        }
     };
+
 
     UICore.prototype.loadThemeIndex = async function () {
         const metadata = await this.resourceManager.loadMetadata();
@@ -708,21 +726,38 @@
     };
 
     UICore.prototype.getThemeProgressDisplay = function (themeId) {
-        if (this.storageManager.isThemeUnlocked(themeId)) {
-            const progress = this.storageManager.getThemeProgress(themeId);
-            const color = progress.completedCount > 0 ? "green" : "blue";
-            return (
-                '<div class="text-xs text-' +
-                color +
-                '-600 mt-2">Completed ' +
-                progress.completedCount +
-                "/" +
-                progress.total +
-                "</div>"
-            );
+        // Cas 1 : thème déjà débloqué → on affiche juste la progression
+        if (this.storageManager.isThemeUnlocked &&
+            this.storageManager.isThemeUnlocked(themeId)) {
+
+            if (typeof this.storageManager.getThemeProgress === "function") {
+                const progress = this.storageManager.getThemeProgress(themeId) || {
+                    completedCount: 0,
+                    total: 0
+                };
+                const color = progress.completedCount > 0 ? "green" : "blue";
+
+                return (
+                    '<div class="text-xs text-' +
+                    color +
+                    '-600 mt-2">Completed ' +
+                    progress.completedCount +
+                    "/" +
+                    progress.total +
+                    "</div>"
+                );
+            }
+
+            return '<div class="text-xs text-green-600 mt-2">Theme unlocked.</div>';
         }
 
-        const unlockStatus = this.storageManager.canUnlockTheme(themeId);
+        // Cas 2 : pas de logique de déverrouillage par points → fallback premium
+        if (typeof this.storageManager.canUnlockTheme !== "function") {
+            return '<div class="text-xs text-gray-500 mt-2">Premium theme – unlock via purchase.</div>';
+        }
+
+        // Cas 3 : logique French Points disponible
+        const unlockStatus = this.storageManager.canUnlockTheme(themeId) || {};
 
         if (unlockStatus.reason === "PREVIOUS_LOCKED") {
             const themeNames = {
@@ -749,8 +784,12 @@
             );
         }
 
-        if (!unlockStatus.canUnlock) {
-            const needed = unlockStatus.cost - this.storageManager.getFrenchPoints();
+        if (unlockStatus.canUnlock === false && typeof unlockStatus.cost === "number") {
+            const fp = typeof this.storageManager.getFrenchPoints === "function"
+                ? this.storageManager.getFrenchPoints()
+                : 0;
+            const needed = unlockStatus.cost - fp;
+
             return (
                 '<div class="text-xs text-gray-500 mt-2">' +
                 needed +
@@ -758,12 +797,18 @@
             );
         }
 
-        return (
-            '<div class="text-xs text-blue-600 mt-2">Unlock with ' +
-            unlockStatus.cost +
-            " French Points or purchase premium access.</div>"
-        );
+        if (unlockStatus.canUnlock && typeof unlockStatus.cost === "number") {
+            return (
+                '<div class="text-xs text-blue-600 mt-2">Unlock with ' +
+                unlockStatus.cost +
+                " French Points or purchase premium access.</div>"
+            );
+        }
+
+        // Fallback ultra-safe
+        return '<div class="text-xs text-gray-500 mt-2">Premium theme.</div>';
     };
+
 
     /* ----------------------------------------
        QUIZ SELECTION (INSIDE A THEME)
