@@ -1,4 +1,4 @@
-// ui-core.js v3.1 - TESTf-Refined UX flow (new user → quiz → results → stats)
+// ui-core.js v3.1 - TEST-Refined UX flow (new user → quiz → results → stats)
 (function (global) {
     function UICore(quizManager, appContainer, resourceManager, storageManager) {
         if (!quizManager || !appContainer || !resourceManager || !storageManager) {
@@ -207,22 +207,22 @@
         const progressText = this.getProgressText(uiState);
 
         return (
-            '\n<div class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen" role="main" aria-label="Themes screen">' +
-            '\n  <div class="max-w-6xl mx-auto px-4 pt-6 pb-10">' +
-            '\n    <div class="text-center mb-6">' +
-            '\n      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>' +
-            '\n      <p class="text-sm md:text-base text-gray-700">' +
+            '\n<div class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen lg:h-screen lg:flex lg:flex-col" role="main" aria-label="Themes screen">' +
+            '\n  <div class="max-w-6xl mx-auto px-4 pt-4 pb-6 lg:pt-2 lg:pb-4 lg:flex-1 lg:flex lg:flex-col">' +
+            '\n    <div class="text-center mb-4 lg:mb-2">' +
+            '\n      <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>' +
+            '\n      <p class="text-sm text-gray-700">' +
             progressText +
             "</p>" +
             "\n    </div>" +
-            '\n    <section id="themes-section" aria-label="Available themes">' +
-            '\n      <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Choose your next theme</h2>' +
-            '\n      <div id="themes-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">' +
+            '\n    <section id="themes-section" aria-label="Available themes" class="lg:flex-1">' +
+            '\n      <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-2 text-center">Choose your next theme</h2>' +
+            '\n      <div id="themes-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-2">' +
             this.generateSimpleThemesGrid() +
             "\n      </div>" +
             "\n    </section>" +
-            '\n    <div class="text-center mt-6">' +
-            '\n      <button id="view-stats-btn" class="text-gray-600 hover:text-gray-900 underline text-sm md:text-base">' +
+            '\n    <div class="text-center mt-4 lg:mt-2 shrink-0">' +
+            '\n      <button id="view-stats-btn" class="text-gray-600 hover:text-gray-900 underline text-sm">' +
             "\n        View your statistics and history" +
             "\n      </button>" +
             "\n    </div>" +
@@ -697,14 +697,18 @@
             return '<div class="text-center text-gray-500 col-span-full">Loading themes...</div>';
         }
 
-        const self = this;
+        var self = this;
         return this.themeIndexCache
             .map(function (theme) {
+                var isLocked = self.getThemeStateClass(theme) === 'section-theme-locked';
+                var ariaLabel = theme.name + (isLocked ? ' (locked)' : '');
                 return (
                     '\n<div class="theme-item ' +
                     self.getThemeStateClass(theme) +
                     '" data-theme-id="' +
                     theme.id +
+                    '" role="button" tabindex="0" aria-label="' +
+                    ariaLabel +
                     '">' +
                     '\n  <div class="text-center">' +
                     '\n    <div class="text-2xl mb-2">' +
