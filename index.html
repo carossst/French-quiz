@@ -6,14 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test Your French - Authentic Daily French Quizzes</title>
 
-  <!-- App name -->
-  <meta name="application-name" content="Test Your French">
-
-  <!-- SEO -->
+  <!-- SEO de base -->
   <meta name="description"
-    content="Test Your French with interactive quizzes! Free Colors theme plus premium content. Privacy-first learning with gamification.">
-  <meta name="keywords"
-    content="test french, french quiz, french lessons, interactive learning, gamification, language learning, CECR evaluation">
+    content="Test Your French with interactive quizzes! Free Colors theme + premium content. Privacy-first learning with gamification.">
   <meta name="author" content="Test Your French Team">
 
   <!-- PWA & UI -->
@@ -27,18 +22,18 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Test Your French - Interactive French Learning">
   <meta property="og:description"
-    content="Test Your French with interactive quizzes! Free Colors theme plus premium content. Privacy-first learning with gamification.">
+    content="Test Your French with interactive quizzes! Free Colors theme + premium content. Privacy-first learning with gamification.">
   <meta property="og:url" content="https://carossst.github.io/French-quiz/">
   <meta property="og:site_name" content="Test Your French">
   <meta property="og:image" content="https://carossst.github.io/French-quiz/icons/icon-192x192.png">
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Test Your French - Authentic Daily French Quizzes">
   <meta name="twitter:description" content="Discover your real French level with authentic daily French quizzes.">
   <meta name="twitter:image" content="https://carossst.github.io/French-quiz/icons/icon-192x192.png">
 
-  <!-- JSON-LD (sans rating fictif) -->
+  <!-- JSON-LD -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -57,9 +52,6 @@
   }
   </script>
 
-  <!-- Preconnects -->
-  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
-
   <!-- Icons & manifest -->
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192x192.png">
   <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
@@ -75,49 +67,21 @@
 </head>
 
 <body class="bg-gray-50">
-  <!-- Skip link a11y -->
-  <a href="#app-container" class="skip-link">
-    Skip to main content
-  </a>
+  <!-- Skip link pour accessibilité -->
+  <a href="#app-container" class="skip-link">Skip to main content</a>
 
-  <!-- Header global : XP + daily chest + CTA Stripe -->
-  <header id="app-header" class="py-1">
-    <div id="xp-header" class="max-w-3xl mx-auto px-4">
-      <div class="flex flex-col gap-1 md:flex-row md:items-center md:justify-between text-xs md:text-sm text-gray-700">
-
-        <!-- Statut niveau + points + coffre -->
-        <div class="flex flex-col md:flex-row md:items-center gap-1">
-          <div class="text-sm font-bold text-blue-700">
-            ⭐ Level <span id="user-level">1</span>
-          </div>
-
-          <div class="flex items-center flex-wrap gap-2">
-            <div id="user-fp" class="font-semibold text-gray-800">
-              0 French Points
-            </div>
-            <div id="daily-chest-wrapper"></div>
-          </div>
-        </div>
-
-        <!-- CTA Stripe compact -->
-        <a href="https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02" id="premium-unlock-btn"
-          class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-1.5 px-3 md:py-2 md:px-4 rounded-lg text-xs md:text-sm"
-          aria-label="Unlock all French quiz themes for twelve dollars">
-          Unlock all themes - $12
-        </a>
-      </div>
+  <!-- Header XP compact -->
+  <div id="xp-header" class="py-2 text-center">
+    <div class="inline-flex items-center gap-3 flex-wrap justify-center">
+      <span class="text-blue-700 font-bold">⭐ Level <span id="user-level">1</span></span>
+      <span class="text-lg">🇫🇷</span>
+      <span id="user-fp" class="font-semibold text-gray-700">0 FP</span>
+      <div id="daily-chest-wrapper">🎁</div>
+      <a href="https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02" id="premium-unlock-btn">💎 $12</a>
     </div>
-  </header>
+  </div>
 
-  <!-- Onboarding texte avant l’app -->
-  <section class="max-w-3xl mx-auto text-center my-1 px-4">
-    <p class="text-xs md:text-sm text-gray-700">
-      <strong>New here?</strong>
-      Start with the free <em>Colors</em> theme to discover your real French level.
-    </p>
-  </section>
-
-  <!-- Conteneur principal de l’app (rendu par UICore) -->
+  <!-- Conteneur principal rendu par JS -->
   <div id="app-container" role="main" aria-live="polite" aria-label="Test Your French application content"></div>
 
   <!-- Notifications -->
@@ -127,7 +91,7 @@
     class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
     aria-live="polite"></div>
 
-  <!-- Scripts principaux -->
+  <!-- Scripts -->
   <script src="./config.js" defer></script>
   <script src="./resourceManager.js" defer></script>
   <script src="./storage.js" defer></script>
@@ -135,16 +99,17 @@
   <script src="./ui-features.js" defer></script>
   <script src="./ui-charts.js" defer></script>
   <script src="./ui-core.js" defer></script>
+  <script src="./referral.js" defer></script>
   <script src="./main.js" defer></script>
   <script src="./email.js" defer></script>
   <script src="./noscript.js" defer></script>
   <script src="./fallback.js" defer></script>
 
-  <!-- Fallback JS désactivé -->
+  <!-- Fallback sans JavaScript -->
   <noscript>
     <div class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
       <div class="text-center max-w-md mx-auto px-4">
-        <div class="text-6xl mb-4">!</div>
+        <div class="text-6xl mb-4">⚠️</div>
         <h2 class="text-2xl font-bold text-gray-800 mb-4">JavaScript Required</h2>
         <p class="text-gray-600 mb-6">
           Test Your French requires JavaScript to function.
@@ -154,10 +119,10 @@
     </div>
   </noscript>
 
-  <!-- Fallback JS bloqué / erreur de chargement -->
+  <!-- Fallback JS bloqué / erreur -->
   <div id="js-failed" class="hidden fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
     <div class="text-center max-w-md mx-auto px-4">
-      <div class="text-6xl mb-4">!</div>
+      <div class="text-6xl mb-4">⚠️</div>
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Something went wrong</h2>
       <p class="text-gray-600 mb-6">
         JavaScript seems to be blocked or failed to load.<br>
@@ -171,13 +136,11 @@
   </div>
 
   <!-- Footer -->
-  <footer id="app-footer" class="text-xs text-gray-500 text-center py-6 mt-10">
-    <a href="./privacy.html" aria-label="Read privacy policy">Privacy</a> |
-    <a href="./terms.html" aria-label="Read terms of service">Terms</a> |
-    <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com" href="#" class="underline">
-      Contact
-    </a>
-    | v3.0
+  <footer class="text-xs text-gray-500 text-center py-6 mt-10">
+    <a href="./privacy.html" aria-label="Read privacy policy">Privacy</a> ·
+    <a href="./terms.html" aria-label="Read terms of service">Terms</a> ·
+    <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com" href="#" class="underline">Contact</a>
+    · v3.0
   </footer>
 </body>
 
