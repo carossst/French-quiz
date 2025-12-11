@@ -852,5 +852,4 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     firstNameInput.addEventListener('input', validateInputs);
 
     validateInputs();
-
-
+};
