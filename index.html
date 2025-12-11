@@ -53,33 +53,57 @@
   </script>
 
   <!-- Icons & manifest -->
-  <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="./icons/icon-48x48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="./icons/icon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192x192.png">
   <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
   <link rel="manifest" href="./manifest.json">
 
   <!-- Styles -->
-  <link rel="preload" href="style.css" as="style">
-  <link rel="stylesheet" href="style.css">
+  <link rel="preload" href="style.css" as="style" fetchpriority="high">
+  <link rel="stylesheet" href="style.css" media="all">
 
-  <!-- CSP -->
+  <!-- CSP - Amélioré pour meilleure sécurité -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://buy.stripe.com; font-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self' https://buy.stripe.com; frame-ancestors 'none'; frame-src https://js.stripe.com https://buy.stripe.com;">
+    content="default-src 'self'; script-src 'self' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://carossst.github.io; connect-src 'self' https://api.stripe.com https://buy.stripe.com; font-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self' https://buy.stripe.com; frame-ancestors 'none'; frame-src https://js.stripe.com https://buy.stripe.com; upgrade-insecure-requests;">
 </head>
 
-<body class="bg-gray-50">
+<body>
   <!-- Skip link pour accessibilité -->
   <a href="#app-container" class="skip-link">Skip to main content</a>
 
-  <!-- Header XP compact -->
-  <div id="xp-header" class="py-2 text-center">
-    <div class="inline-flex items-center gap-3 flex-wrap justify-center">
-      <span class="text-blue-700 font-bold">⭐ Level <span id="user-level">1</span></span>
-      <span class="text-lg">🇫🇷</span>
-      <span id="user-fp" class="font-semibold text-gray-700">0 FP</span>
-      <div id="daily-chest-wrapper">🎁</div>
-      <a href="https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02" id="premium-unlock-btn">💎 $12</a>
+  <!-- Header XP compact avec meilleur espacement et hiérarchie -->
+  <div id="xp-header" class="py-3 text-center bg-gray-50 border-b border-gray-200">
+    <div class="flex flex-col sm:flex-row sm:inline-flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
+      <!-- Niveau avec plus d'emphase -->
+      <span class="text-blue-700 font-bold text-lg">
+        ⭐ Level <span id="user-level">1</span>
+      </span>
+
+      <!-- Séparateur visuel -->
+      <span class="text-2xl">🇫🇷</span>
+
+      <!-- Points avec couleur distincte -->
+      <span id="user-fp" class="font-semibold text-blue-600 text-base">0 FP</span>
+
+      <!-- Récompense quotidienne -->
+      <div id="daily-chest-wrapper" class="text-xl">🎁</div>
+
+      <!-- Bouton premium bien visible et accessible -->
+      <a href="https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02" id="premium-unlock-btn"
+        class="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-full font-semibold text-sm hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
+        aria-label="Unlock all premium themes for $12 one-time payment">
+        <span class="text-base">💎</span>
+        <span>Unlock All</span>
+        <span class="opacity-90">$12</span>
+      </a>
     </div>
   </div>
+
+  <!-- H1 pour SEO et accessibilité (invisible visuellement) -->
+  <h1 class="sr-only">Test Your French - Interactive French Learning</h1>
 
   <!-- Conteneur principal rendu par JS -->
   <div id="app-container" role="main" aria-live="polite" aria-label="Test Your French application content"></div>
@@ -91,7 +115,7 @@
     class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
     aria-live="polite"></div>
 
-  <!-- Scripts -->
+  <!-- Scripts - CORRIGÉ: chemins sans ./js/ -->
   <script src="./config.js" defer></script>
   <script src="./resourceManager.js" defer></script>
   <script src="./storage.js" defer></script>
@@ -129,18 +153,25 @@
         Please try refreshing the page.
       </p>
       <button id="reload-btn" aria-label="Refresh the page to reload Test Your French"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
         Refresh Page
       </button>
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- Footer - Amélioré pour mobile et accessibilité -->
   <footer class="text-xs text-gray-500 text-center py-6 mt-10">
-    <a href="./privacy.html" aria-label="Read privacy policy">Privacy</a> ·
-    <a href="./terms.html" aria-label="Read terms of service">Terms</a> ·
-    <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com" href="#" class="underline">Contact</a>
-    · v3.0
+    <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
+      <a href="./privacy.html" aria-label="Read privacy policy"
+        class="hover:text-blue-600 transition-colors">Privacy</a>
+      <span class="text-gray-400" aria-hidden="true">·</span>
+      <a href="./terms.html" aria-label="Read terms of service" class="hover:text-blue-600 transition-colors">Terms</a>
+      <span class="text-gray-400" aria-hidden="true">·</span>
+      <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com" href="mailto:bonjour@testyourfrench.com"
+        class="hover:text-blue-600 transition-colors" aria-label="Send email to Test Your French support">Contact</a>
+      <span class="text-gray-400" aria-hidden="true">·</span>
+      <span class="text-gray-400">v3.0</span>
+    </div>
   </footer>
 </body>
 
