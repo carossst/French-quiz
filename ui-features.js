@@ -1,24 +1,16 @@
-// ui-features.js v3.1 - UX-refined features (XP, paywall, chest, feedback)
+// ui-features.js v3.2 - UX refined features (XP, paywall, chest, feedback)
 
 function UIFeatures(uiCore, storageManager, resourceManager) {
-    if (!uiCore) {
-        throw new Error("UIFeatures: uiCore parameter is required");
-    }
-    if (!storageManager) {
-        throw new Error("UIFeatures: storageManager parameter is required");
-    }
-    if (!resourceManager) {
-        throw new Error("UIFeatures: resourceManager parameter is required");
-    }
+    if (!uiCore) throw new Error("UIFeatures: uiCore parameter is required");
+    if (!storageManager) throw new Error("UIFeatures: storageManager parameter is required");
+    if (!resourceManager) throw new Error("UIFeatures: resourceManager parameter is required");
 
     this.uiCore = uiCore;
     this.storageManager = storageManager;
     this.resourceManager = resourceManager;
 
-    // Paywall timer
     this.paywallTimer = null;
 
-    // Rotating feedback messages by performance category
     this.feedbackMessages = {
         lowPerformance: [
             "That's real French - great job testing yourself!",
@@ -48,21 +40,78 @@ function UIFeatures(uiCore, storageManager, resourceManager) {
 }
 
 //================================================================================
+// SMALL SAFE HELPERS (avoid "is not a function" crashes)
+//================================================================================
+
+// DOM helper: set text/value safely
+UIFeatures.prototype.setText = function (id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        el.value = value;
+    } else {
+        el.textContent = value;
+    }
+};
+
+// Escape HTML (required by generateSimpleFeedback)
+UIFeatures.prototype.escapeHTML = function (str) {
+    return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+// Feedback toast fallback (delegates to uiCore if available)
+UIFeatures.prototype.showFeedbackMessage = function (type, message) {
+    if (this.uiCore && typeof this.uiCore.showFeedbackMessage === "function") {
+        return this.uiCore.showFeedbackMessage(type, message);
+    }
+    // Minimal fallback: console + optional alert for errors
+    try {
+        const fn = type === "error" ? "error" : (type === "warn" ? "warn" : "log");
+        console[fn]("[TYF]", message);
+    } catch { }
+};
+
+// Optional: XP progress indicator (no-op unless uiCore provides one)
+UIFeatures.prototype.updateFPProgressIndicator = function () {
+    // If you later implement a dedicated indicator, do it here.
+};
+
+// Optional: notifications (no-op unless implemented)
+UIFeatures.prototype.initializeNotifications = function () {
+    // Intentionally empty. Avoid crashes on prod.
+};
+
+// Storage events binding (safe)
+UIFeatures.prototype.setupStorageEvents = function () {
+    if (this._onStorageUpdated) return;
+    this._onStorageUpdated = () => {
+        try { this.updateXPHeader(); } catch { }
+    };
+    window.addEventListener("storage-updated", this._onStorageUpdated);
+};
+
+//================================================================================
 // ROTATING FEEDBACK SYSTEM
 //================================================================================
 UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) {
     const pct = Number(percentage) || 0;
-    const category = pct >= 60 ? 'strongPerformance' : (pct >= 40 ? 'goodPerformance' : 'lowPerformance');
+    const category = pct >= 60 ? "strongPerformance" : (pct >= 40 ? "goodPerformance" : "lowPerformance");
     const messages = this.feedbackMessages?.[category] || [];
-    if (!messages.length) return 'Keep going!';
+    if (!messages.length) return "Keep going!";
 
-    const key = 'tyf-feedback-index';
-    const safeThemeId = themeId ?? 'global';
+    const key = "tyf-feedback-index";
+    const safeThemeId = themeId ?? "global";
     const themeKey = `${safeThemeId}_${category}`;
     this._feedbackIndexMap = this._feedbackIndexMap || {};
 
     let indexMap;
-    try { indexMap = JSON.parse(localStorage.getItem(key) || '{}') || {}; }
+    try { indexMap = JSON.parse(localStorage.getItem(key) || "{}") || {}; }
     catch { indexMap = this._feedbackIndexMap; }
 
     const currentIndex = Number(indexMap[themeKey]) || 0;
@@ -78,106 +127,86 @@ UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) 
 //================================================================================
 // XP SYSTEM
 //================================================================================
-
 UIFeatures.prototype.initializeXPSystem = function () {
     this.showXPHeader();
     this.updateXPHeader();
-    this.setupDailyReward();
     this.setupStorageEvents();
     this.initializeNotifications();
-    this.updateFPProgressIndicator?.();
+    this.updateFPProgressIndicator();
 };
 
 UIFeatures.prototype.showXPHeader = function () {
-    const xpHeader = document.getElementById('xp-header');
-    if (xpHeader) xpHeader.classList.remove('hidden');
+    const xpHeader = document.getElementById("xp-header");
+    if (xpHeader) xpHeader.classList.remove("hidden");
 };
 
-// Helper DOM pour mettre à jour du texte
-UIFeatures.prototype.setText = function (id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-        el.value = value;
-    } else {
-        el.textContent = value;
-    }
-};
-
-// Gestion de l’icône de coffre (récompense quotidienne) dans le header
+// Daily chest in header
 UIFeatures.prototype.addChestIconToHeader = function () {
-    const wrapper = document.getElementById('daily-chest-wrapper');
+    const wrapper = document.getElementById("daily-chest-wrapper");
     if (!wrapper) return;
-
-    // éviter d’empiler les listeners à chaque updateXPHeader
-    if (wrapper.dataset.chestBound === '1') {
-        const available = this.storageManager.isDailyRewardAvailable
-            ? this.storageManager.isDailyRewardAvailable()
-            : true;
-        wrapper.style.opacity = available ? '1' : '0.5';
-        wrapper.style.cursor = available ? 'pointer' : 'default';
-        return;
-    }
-    wrapper.dataset.chestBound = '1';
 
     const updateState = () => {
         const available = this.storageManager.isDailyRewardAvailable
-            ? this.storageManager.isDailyRewardAvailable()
+            ? !!this.storageManager.isDailyRewardAvailable()
             : true;
-        wrapper.style.opacity = available ? '1' : '0.5';
-        wrapper.style.cursor = available ? 'pointer' : 'default';
+
+        wrapper.style.opacity = available ? "1" : "0.5";
+        wrapper.style.cursor = available ? "pointer" : "default";
+        wrapper.setAttribute("aria-disabled", available ? "false" : "true");
     };
 
+    // Prevent stacking listeners
+    if (wrapper.dataset.chestBound === "1") {
+        updateState();
+        return;
+    }
+    wrapper.dataset.chestBound = "1";
+
     const activate = (event) => {
-        if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
+        if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") return;
+
+        if (this.storageManager.isDailyRewardAvailable && !this.storageManager.isDailyRewardAvailable()) {
+            updateState();
             return;
         }
 
-        if (!this.storageManager.collectDailyReward) return;
+        if (typeof this.storageManager.collectDailyReward !== "function") return;
+
         const result = this.storageManager.collectDailyReward();
         if (result && result.success) {
-            const amount =
-                result.fpEarned ?? result.pointsEarned ?? result.earned ?? 0;
-            if (amount > 0 && typeof this.showDailyRewardAnimation === 'function') {
-                this.showDailyRewardAnimation(amount);
-            }
+            const amount = Number(result.fpEarned ?? result.pointsEarned ?? result.earned ?? 0);
+            if (amount > 0) this.showDailyRewardAnimation(amount);
             this.updateXPHeader();
         }
         updateState();
     };
 
-    wrapper.setAttribute('role', 'button');
-    wrapper.setAttribute('tabindex', '0');
-    wrapper.setAttribute('aria-label', 'Collect your daily French Points');
+    wrapper.setAttribute("role", "button");
+    wrapper.setAttribute("tabindex", "0");
+    wrapper.setAttribute("aria-label", "Collect your daily French Points");
 
-    wrapper.addEventListener('click', activate);
-    wrapper.addEventListener('keydown', activate);
+    wrapper.addEventListener("click", activate);
+    wrapper.addEventListener("keydown", activate);
 
     updateState();
 };
 
 UIFeatures.prototype.updateXPHeader = function () {
-    const fp = this.storageManager.getFrenchPoints();
-    const level = this.storageManager.getUserLevel();
-    const progress = this.storageManager.getLevelProgress() || { percentage: 0, remaining: null };
+    const fp = Number(this.storageManager.getFrenchPoints?.() ?? 0);
+    const level = Number(this.storageManager.getUserLevel?.() ?? 1);
+    const progress = this.storageManager.getLevelProgress?.() || { percentage: 0, remaining: null };
 
-    // Level
-    this.setText('user-level', level);
+    this.setText("user-level", level);
 
-    // FP text
-    const fpEl = document.getElementById('user-fp');
-    if (fpEl) {
-        fpEl.textContent = `${fp} French Points`;
-    }
+    const fpEl = document.getElementById("user-fp");
+    if (fpEl) fpEl.textContent = `${fp} French Points`;
 
-    this.updateFPProgressIndicator?.();
+    this.updateFPProgressIndicator();
 
-    // Progress bar via classes (no inline style)
-    const progressBar = document.getElementById('xp-progress-bar');
+    const progressBar = document.getElementById("xp-progress-bar");
     if (progressBar) {
         for (const c of [...progressBar.classList]) {
-            if (c.startsWith('w-pct-')) progressBar.classList.remove(c);
+            if (c.startsWith("w-pct-")) progressBar.classList.remove(c);
         }
         const pct = Number.isFinite(progress.percentage) ? progress.percentage : 0;
         const pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
@@ -188,14 +217,38 @@ UIFeatures.prototype.updateXPHeader = function () {
 };
 
 //================================================================================
+// DAILY REWARD TOAST
+//================================================================================
+UIFeatures.prototype.showDailyRewardAnimation = function (points) {
+    const id = "daily-reward-toast";
+    const existing = document.getElementById(id);
+    if (existing) existing.remove();
+
+    const toast = document.createElement("div");
+    toast.id = id;
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+
+    const isMobile = window.innerWidth < 640;
+    toast.className = isMobile
+        ? "fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm z-50"
+        : "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50";
+
+    toast.textContent = `+${points} French Points!`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+};
+
+//================================================================================
 // CONVERSION SYSTEM (PAYWALL)
 //================================================================================
 UIFeatures.prototype.startConversionTimer = function () {
     const start = () => {
         if (this.paywallTimer || document.hidden) return;
+
         this.paywallTimer = setInterval(() => {
             if (document.hidden) return;
-            if (document.getElementById('sophie-paywall-modal')) return;
+            if (document.getElementById("sophie-paywall-modal")) return;
 
             const shouldTrigger = this.storageManager.shouldTriggerPaywall?.();
 
@@ -204,7 +257,7 @@ UIFeatures.prototype.startConversionTimer = function () {
                 : true;
 
             const hasUnplayedFreeQuizzes =
-                (typeof this.storageManager.hasUnplayedFreeQuizzes === 'function')
+                (typeof this.storageManager.hasUnplayedFreeQuizzes === "function")
                     ? this.storageManager.hasUnplayedFreeQuizzes()
                     : freeLeft;
 
@@ -223,28 +276,28 @@ UIFeatures.prototype.startConversionTimer = function () {
         }
     };
 
-    document.addEventListener('visibilitychange', () => { document.hidden ? stop() : start(); });
+    document.addEventListener("visibilitychange", () => { document.hidden ? stop() : start(); });
     start();
 };
 
 UIFeatures.prototype.showSophiePaywall = function () {
-    if (this.storageManager.isPremiumUser()) return;
-    if (document.getElementById('sophie-paywall-modal')) return;
+    if (this.storageManager.isPremiumUser?.()) return;
+    if (document.getElementById("sophie-paywall-modal")) return;
 
     const modal = this.createPaywallModal();
     document.body.appendChild(modal);
 
     setTimeout(() => {
-        const buyBtn = modal.querySelector('#paywall-buy-btn');
+        const buyBtn = modal.querySelector("#paywall-buy-btn");
         if (buyBtn) buyBtn.focus();
     }, 100);
 };
 
 UIFeatures.prototype.createPaywallModal = function () {
-    const modal = document.createElement('div');
-    modal.id = 'sophie-paywall-modal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.setAttribute('role', 'dialog');
+    const modal = document.createElement("div");
+    modal.id = "sophie-paywall-modal";
+    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+    modal.setAttribute("role", "dialog");
 
     const sessionMinutes = Math.max(0, Math.round(Number(this.storageManager.getSessionDuration?.()) || 0));
     const currentFP = Number(this.storageManager.getFrenchPoints?.()) || 0;
@@ -263,20 +316,18 @@ UIFeatures.prototype.createPaywallModal = function () {
 };
 
 UIFeatures.prototype.setupPaywallEvents = function (modal) {
-    const cleanup = () => document.removeEventListener('keydown', onEsc);
+    const cleanup = () => document.removeEventListener("keydown", onEsc);
     const close = () => { cleanup(); modal.remove(); };
 
-    modal.querySelectorAll('[data-action="close"]').forEach(btn => {
-        btn.addEventListener('click', close);
-    });
-    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener("click", close));
+    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 
-    const onEsc = (e) => { if (e.key === 'Escape') close(); };
-    document.addEventListener('keydown', onEsc);
+    const onEsc = (e) => { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", onEsc);
 
-    const buyBtn = modal.querySelector('#paywall-buy-btn');
+    const buyBtn = modal.querySelector("#paywall-buy-btn");
     if (buyBtn) {
-        buyBtn.addEventListener('click', () => {
+        buyBtn.addEventListener("click", () => {
             const url = window?.TYF_CONFIG?.stripePaymentUrl;
             if (url) window.location.href = url;
         });
@@ -286,13 +337,11 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
 UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitDays) {
     return `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
-                 ×
-            </button>
-            
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">×</button>
+
             <div class="text-5xl mb-4">📊</div>
             <h2 class="text-xl font-bold text-gray-800 mb-4">Want to assess all French domains?</h2>
-            
+
             <div class="bg-orange-50 rounded-lg p-4 mb-6 text-left">
                 <div class="text-orange-800 text-sm space-y-2">
                     <div>⏱ <strong>You've already invested ${sessionMinutes} minutes</strong></div>
@@ -300,7 +349,7 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
                     <div>★ With Premium: Complete Quiz now</div>
                 </div>
             </div>
-            
+
             <div class="bg-blue-50 rounded-lg p-4 mb-6">
                 <div class="text-blue-800 text-sm">
                     ✓ 9 additional quiz themes<br>
@@ -309,93 +358,78 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
                     ✓ Realistic feedback
                 </div>
             </div>
-            
+
             <div class="text-2xl font-bold text-blue-600 mb-2">$12</div>
             <div class="text-sm text-gray-600 mb-6">Your time is worth more than 40 cents per day</div>
-            
+
             <button id="paywall-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mb-3">
                 Unlock all themes - $12
             </button>
-            
+
             <button data-action="close" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg transition-colors">
                 Continue free (${waitDays} days)
             </button>
         </div>`;
 };
 
-UIFeatures.prototype.handlePurchase = function () {
-    const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "https://buy.stripe.com/your-payment-link";
-    window.open(stripeUrl, '_blank');
-    try {
-        if (window.gtag) {
-            gtag('event', 'stripe_clicked', {
-                session_duration: this.storageManager.getSessionDuration?.(),
-                premium_assessments_completed: this.storageManager.getPremiumQuizCompleted?.()
-            });
-        }
-    } catch { /* no-op */ }
-};
-
-UIFeatures.prototype.closePaywall = function (modal) {
-    modal.remove();
-};
-
 //================================================================================
 // RESULTS-LEVEL FP HANDLING
 //================================================================================
-
 UIFeatures.prototype.handleResultsFP = function (resultsData) {
-    // Use quiz "score" as French Points earned (as in getCompletionMessage)
     const points = Number(resultsData && resultsData.score);
     if (!Number.isFinite(points) || points <= 0) return;
-    if (typeof this.showFPGain === 'function') {
-        this.showFPGain(points);
-    }
+    this.showFPGain(points);
+};
+
+UIFeatures.prototype.showFPGain = function (amount) {
+    const elem = document.createElement("div");
+    elem.className = "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-blue-600 z-50 pointer-events-none";
+
+    const label = amount === 1 ? "French Point" : "French Points";
+    elem.textContent = `+${amount} ${label}`;
+    elem.classList.add("fp-gain-anim");
+    document.body.appendChild(elem);
+
+    try { if (window.trackMicroConversion) window.trackMicroConversion("fp_earned", { amount }); } catch { }
+    setTimeout(() => elem.remove(), 1500);
 };
 
 //================================================================================
 // ASSESSMENT FEEDBACK (PER QUESTION)
 //================================================================================
 UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
-    const container = document.getElementById('feedback-container');
+    const container = document.getElementById("feedback-container");
     if (!container) return;
 
-    const scope = container.closest('.quiz-wrapper') || document;
-    const optionsContainer = scope.querySelector('.options-container');
-    const options = scope.querySelectorAll('.option');
+    const scope = container.closest(".quiz-wrapper") || document;
+    const optionsContainer = scope.querySelector(".options-container");
+    const options = scope.querySelectorAll(".option");
 
     const correctIndex = Number(question?.correctIndex);
     const isValid = Number.isInteger(correctIndex) && options[correctIndex];
     const isCorrect = isValid && correctIndex === Number(selectedIndex);
 
-    // Colors on options
     options.forEach((opt, i) => {
-        opt.classList.remove('correct-validated', 'incorrect-validated', 'selected');
+        opt.classList.remove("correct-validated", "incorrect-validated", "selected");
         if (!isValid) return;
-
-        if (i === correctIndex) {
-            opt.classList.add('correct-validated');
-        } else if (i === Number(selectedIndex)) {
-            opt.classList.add('incorrect-validated');
-        }
+        if (i === correctIndex) opt.classList.add("correct-validated");
+        else if (i === Number(selectedIndex)) opt.classList.add("incorrect-validated");
     });
 
-    // Lock interaction + a11y
     if (optionsContainer) {
-        optionsContainer.classList.add('is-validated');
-        optionsContainer.setAttribute('aria-disabled', 'true');
+        optionsContainer.classList.add("is-validated");
+        optionsContainer.setAttribute("aria-disabled", "true");
         options.forEach(o => {
-            o.setAttribute('tabindex', '-1');
-            o.setAttribute('aria-checked', 'false');
+            o.setAttribute("tabindex", "-1");
+            o.setAttribute("aria-checked", "false");
         });
     }
 
-    // Non-blocking compact feedback
     container.innerHTML = this.generateSimpleFeedback(isCorrect, question);
-    container.classList.remove('hidden');
-    container.classList.add('as-toast');
-    container.setAttribute('role', 'status');
-    container.setAttribute('aria-live', 'polite');
+    container.classList.remove("hidden");
+    container.classList.add("as-toast");
+    container.setAttribute("role", "status");
+    container.setAttribute("aria-live", "polite");
     container.tabIndex = -1;
     requestAnimationFrame(() => container.focus({ preventScroll: true }));
 };
@@ -405,10 +439,10 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
     const validIdx = Number.isInteger(question?.correctIndex) && hasOptions &&
         question.correctIndex >= 0 && question.correctIndex < question.options.length;
 
-    const strip = (s) => String(s).replace(/^\s*[A-D]\s*[\.)]\s*/i, '').trim();
-    const rawCorrect = validIdx ? String(question.options[question.correctIndex]) : '-';
+    const strip = (s) => String(s).replace(/^\s*[A-D]\s*[\.)]\s*/i, "").trim();
+    const rawCorrect = validIdx ? String(question.options[question.correctIndex]) : "-";
     const safeCorrect = this.escapeHTML(strip(rawCorrect));
-    const safeExplanation = typeof question?.explanation === 'string' ? this.escapeHTML(question.explanation) : '';
+    const safeExplanation = typeof question?.explanation === "string" ? this.escapeHTML(question.explanation) : "";
 
     if (isCorrect) {
         return `
@@ -424,7 +458,7 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
                 <div class="text-sm text-white opacity-95">${safeExplanation}</div>
               </div>
             </div>
-          </div>` : ''}
+          </div>` : ""}
       </div>`;
     }
 
@@ -436,58 +470,34 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
       ${safeExplanation ? `
         <div class="mt-2 text-sm text-white opacity-90">
           <span>💡 </span>${safeExplanation}
-        </div>` : ''}
+        </div>` : ""}
     </div>`;
-};
-
-UIFeatures.prototype.showFPGain = function (amount) {
-    const elem = document.createElement('div');
-    elem.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-blue-600 z-50 pointer-events-none';
-
-    const label = amount === 1 ? 'French Point' : 'French Points';
-    elem.textContent = `+${amount} ${label}`;
-    elem.classList.add('fp-gain-anim');
-    document.body.appendChild(elem);
-    if (window.trackMicroConversion) window.trackMicroConversion('fp_earned', { amount });
-    setTimeout(() => elem.remove(), 1500);
 };
 
 //================================================================================
 // THEME HANDLING
 //================================================================================
-
 UIFeatures.prototype.handleThemeClick = function (theme) {
-    const unlockStatus = this.storageManager.canUnlockTheme(theme.id);
+    const unlockStatus = this.storageManager.canUnlockTheme?.(theme.id) || { canUnlock: false, reason: "UNKNOWN" };
 
-    if (this.storageManager.isThemeUnlocked(theme.id)) {
-        if (this.uiCore?.quizManager) {
-            this.uiCore.quizManager.currentThemeId = theme.id;
-        }
-        if (this.uiCore?.showQuizSelection) {
-            this.uiCore.showQuizSelection();
-        }
-        return;
-    }
+    const goTheme = () => {
+        if (this.uiCore?.quizManager) this.uiCore.quizManager.currentThemeId = theme.id;
+        if (this.uiCore?.showQuizSelection) this.uiCore.showQuizSelection();
+    };
 
-    if (this.storageManager.isPremiumUser()) {
-        if (this.uiCore?.quizManager) {
-            this.uiCore.quizManager.currentThemeId = theme.id;
-        }
-        if (this.uiCore?.showQuizSelection) {
-            this.uiCore.showQuizSelection();
-        }
+    if (this.storageManager.isThemeUnlocked?.(theme.id) || this.storageManager.isPremiumUser?.()) {
+        goTheme();
         return;
     }
 
     if (unlockStatus.reason === "PREVIOUS_LOCKED") {
-        const modal = this.createThemePreviewModal(theme);
-        document.body.appendChild(modal);
+        this.showThemePreviewModal(theme);
         return;
     }
 
     if (unlockStatus.reason === "INSUFFICIENT_FP") {
-        const currentFP = this.storageManager.getFrenchPoints();
-        const needed = unlockStatus.cost - currentFP;
+        const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
+        const needed = Number(unlockStatus.cost ?? 0) - currentFP;
 
         let message = `${theme.name} needs ${unlockStatus.cost} French Points\n\n` +
             `You have: ${currentFP} French Points\n` +
@@ -511,19 +521,19 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
 
     if (unlockStatus.canUnlock) {
         const confirmMessage = `Unlock "${theme.name}" for ${unlockStatus.cost} FP?\n\n` +
-            `You have ${this.storageManager.getFrenchPoints()} FP\n` +
-            `After unlock: ${this.storageManager.getFrenchPoints() - unlockStatus.cost} FP remaining\n\n` +
+            `You have ${this.storageManager.getFrenchPoints?.() ?? 0} FP\n` +
+            `After unlock: ${(this.storageManager.getFrenchPoints?.() ?? 0) - unlockStatus.cost} FP remaining\n\n` +
             `This unlocks 5 authentic French quizzes`;
 
-        const confirmUnlock = confirm(confirmMessage);
-        if (confirmUnlock) {
+        if (confirm(confirmMessage)) {
             let ok = false;
 
-            if (typeof this.storageManager.unlockTheme === 'function') {
+            if (typeof this.storageManager.unlockTheme === "function") {
                 ok = !!this.storageManager.unlockTheme(theme.id, unlockStatus.cost);
-            } else {
+            } else if (this.storageManager.data && typeof this.storageManager.save === "function") {
                 this.storageManager.data.frenchPoints -= unlockStatus.cost;
                 const baseQuizId = theme.id * 100;
+                this.storageManager.data.unlockedQuizzes = this.storageManager.data.unlockedQuizzes || [];
                 for (let i = 1; i <= 5; i++) {
                     const qid = baseQuizId + i;
                     if (!this.storageManager.data.unlockedQuizzes.includes(qid)) {
@@ -535,24 +545,22 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
             }
 
             if (ok) {
-                alert(`Unlocked "${theme.name}"!\n\n5 new authentic French quizzes available\n${this.storageManager.getFrenchPoints()} French Points remaining`);
+                alert(`Unlocked "${theme.name}"!\n\n5 new authentic French quizzes available\n${this.storageManager.getFrenchPoints?.() ?? 0} French Points remaining`);
                 this.updateXPHeader();
                 setTimeout(() => {
                     if (this.uiCore?.showWelcomeScreen) this.uiCore.showWelcomeScreen();
                     else window.location.reload();
                 }, 100);
             } else {
-                this.showFeedbackMessage?.('error', 'Unlock failed - please try again');
+                this.showFeedbackMessage("error", "Unlock failed - please try again");
             }
         }
-
         return;
     }
 
     this.showThemePreviewModal(theme);
 };
 
-// Next quiz suggestion used on results screen
 UIFeatures.prototype.getNextQuizInTheme = function () {
     if (!this.uiCore || !this.uiCore.quizManager || !this.resourceManager) return null;
 
@@ -560,70 +568,88 @@ UIFeatures.prototype.getNextQuizInTheme = function () {
     const currentQuizId = this.uiCore.quizManager.currentQuizId;
     if (!themeId) return null;
 
-    const theme = (typeof this.resourceManager.getThemeById === 'function')
+    const theme = (typeof this.resourceManager.getThemeById === "function")
         ? this.resourceManager.getThemeById(themeId)
         : null;
 
     if (!theme || !Array.isArray(theme.quizzes)) return null;
 
     const quizzes = theme.quizzes;
+
     const isUnlocked = (id) =>
-        typeof this.storageManager.isQuizUnlocked === 'function'
+        typeof this.storageManager.isQuizUnlocked === "function"
             ? this.storageManager.isQuizUnlocked(id)
             : true;
 
     const isCompleted = (id) =>
-        typeof this.storageManager.isQuizCompleted === 'function'
+        typeof this.storageManager.isQuizCompleted === "function"
             ? this.storageManager.isQuizCompleted(id)
             : false;
 
-    let startIndex = quizzes.findIndex(q => q.id === currentQuizId);
+    const startIndex = quizzes.findIndex(q => q.id === currentQuizId);
 
-    // Try next unlocked quiz in order
     if (startIndex >= 0 && startIndex < quizzes.length - 1) {
         for (let i = startIndex + 1; i < quizzes.length; i++) {
             const q = quizzes[i];
-            if (isUnlocked(q.id)) {
-                return { themeId, quizId: q.id };
-            }
+            if (isUnlocked(q.id)) return { themeId, quizId: q.id };
         }
     }
 
-    // Fallback: first unlocked and not completed quiz
     for (let i = 0; i < quizzes.length; i++) {
         const q = quizzes[i];
-        if (isUnlocked(q.id) && !isCompleted(q.id)) {
-            return { themeId, quizId: q.id };
-        }
+        if (isUnlocked(q.id) && !isCompleted(q.id)) return { themeId, quizId: q.id };
     }
 
     return null;
 };
 
 UIFeatures.prototype.showThemePreviewModal = function (theme) {
-    const modal = this.createThemePreviewModal(theme);
-    document.body.appendChild(modal);
+    const modal = this.createThemePreviewModal?.(theme);
+    if (modal) document.body.appendChild(modal);
 };
 
-UIFeatures.prototype.showDailyRewardAnimation = function (points) {
-    const id = 'daily-reward-toast';
-    const existing = document.getElementById(id);
-    if (existing) existing.remove();
+//================================================================================
+// DAILY REWARD
+//================================================================================
 
-    const toast = document.createElement('div');
-    toast.id = id;
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
-
-    const isMobile = window.innerWidth < 640;
-    toast.className = isMobile
-        ? 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm'
-        : 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50';
-
-    toast.textContent = `+${points} French Points!`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
+UIFeatures.prototype.setupDailyReward = function () {
+    if (window.TYF_CONFIG?.debug?.enabled) {
+        console.debug('🎁 Daily reward system updated - using chest icon in header');
+    }
 };
+
+UIFeatures.prototype.collectDailyReward = function () {
+    const result = this.storageManager.collectDailyReward();
+    if (result.success) {
+        this.showDailyRewardAnimation(result.fpEarned || result.pointsEarned);
+        this.updateXPHeader();
+    }
+};
+
+//================================================================================
+// PAYWALL HELPERS
+//================================================================================
+
+UIFeatures.prototype.handlePurchase = function () {
+    const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "https://buy.stripe.com/your-payment-link";
+    window.open(stripeUrl, '_blank');
+    try {
+        if (window.gtag) {
+            gtag('event', 'stripe_clicked', {
+                session_duration: this.storageManager.getSessionDuration?.(),
+                premium_assessments_completed: this.storageManager.getPremiumQuizCompleted?.()
+            });
+        }
+    } catch { /* no-op */ }
+};
+
+UIFeatures.prototype.closePaywall = function (modal) {
+    modal.remove();
+};
+
+//================================================================================
+// COMPLETION MESSAGES
+//================================================================================
 
 UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
     let message = "";
@@ -645,27 +671,31 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
     const currentFP = this.storageManager.getFrenchPoints();
 
     if (this.storageManager.isPremiumUser()) {
-        message += `\nPremium active - unlimited learning!`;
-        message += `\nYou're mastering authentic French`;
+        message += `\n🚀 Premium active - unlimited learning!`;
+        message += `\n🏆 You're mastering authentic French`;
     } else if (currentFP < 10) {
-        message += `\nYou're building authentic skills!`;
+        message += `\n🌟 You're building authentic skills!`;
         message += isMobile ?
-            `\nLove this? All themes $12` :
-            `\nLove the progress? Get all themes instantly $12`;
+            `\n✨ Love this? All themes $12` :
+            `\n✨ Love the progress? Get all themes instantly $12`;
     } else if (currentFP < 25) {
-        message += `\nYour French breakthrough is happening!`;
+        message += `\n🔥 Your French breakthrough is happening!`;
         message += isMobile ?
-            `\nReady to accelerate? All themes $12` :
-            `\nReady to accelerate your progress? All themes $12`;
+            `\n✨ Ready to accelerate? All themes $12` :
+            `\n✨ Ready to accelerate your progress? All themes $12`;
     } else {
-        message += `\nYour dedication shows in every quiz`;
+        message += `\n🏆 Your dedication shows in every quiz`;
         message += isMobile ?
-            `\nComplete your journey - All themes $12` :
-            `\nComplete your French journey - All themes $12`;
+            `\n✨ Complete your journey - All themes $12` :
+            `\n✨ Complete your French journey - All themes $12`;
     }
 
     return message;
 };
+
+//================================================================================
+// THEME PREVIEW MODAL
+//================================================================================
 
 UIFeatures.prototype.createThemePreviewModal = function (theme) {
     const modal = document.createElement('div');
@@ -676,7 +706,7 @@ UIFeatures.prototype.createThemePreviewModal = function (theme) {
     modal.innerHTML = `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
             <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
-                <span aria-hidden="true" class="text-lg">×</span>
+                <span aria-hidden="true" class="text-lg">✕</span>
             </button>
             
             <div class="text-4xl mb-4">${theme.icon}</div>
@@ -684,7 +714,7 @@ UIFeatures.prototype.createThemePreviewModal = function (theme) {
             
             <div class="bg-blue-50 rounded-lg p-4 mb-6">
                 <div class="text-blue-800 text-sm space-y-2">
-                    <div>★ <strong>5 progressive quizzes</strong></div>
+                    <div>🎯 <strong>5 progressive quizzes</strong></div>
                     <div>🎧 <strong>Authentic French audio</strong></div>
                     <div>📊 <strong>Real situation testing</strong></div>
                 </div>
@@ -692,15 +722,15 @@ UIFeatures.prototype.createThemePreviewModal = function (theme) {
             
             <div class="space-y-3">
                 <button id="premium-code-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
-                    I have a premium code
+                    🔓 I have a premium code
                 </button>
                 
                 <button id="premium-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
-                    Get Premium Access ($12)
+                    💳 Get Premium Access ($12)
                 </button>
                 
                 <button id="colors-first-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">
-                    Try Colors theme first
+                    🆓 Try Colors theme first
                 </button>
             </div>
         </div>`;
@@ -715,7 +745,6 @@ UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme) {
 
     modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener('click', close));
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-
     const onEsc = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onEsc);
 
@@ -736,6 +765,10 @@ UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme) {
     });
 };
 
+//================================================================================
+// PREMIUM CODE MODAL
+//================================================================================
+
 UIFeatures.prototype.showPremiumCodeModal = function () {
     const existing = document.querySelector('#premium-code-input');
     if (existing) { existing.focus(); return; }
@@ -745,7 +778,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     modal.innerHTML = `
     <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative" role="dialog" aria-modal="true">
       <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close" data-action="close">
-        <span aria-hidden="true" class="text-lg">×</span>
+        <span aria-hidden="true" class="text-lg">✕</span>
       </button>
       <h2 class="text-xl font-bold text-gray-800 mb-4">Enter Premium Code</h2>
       <div class="mb-4">
@@ -767,7 +800,6 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     document.body.appendChild(modal);
     modal.querySelectorAll('[data-action="close"], [data-action="cancel"]').forEach(btn => btn.addEventListener('click', close));
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-
     const onEsc = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onEsc);
 
@@ -779,14 +811,8 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
             const result = this.storageManager?.unlockPremiumWithCode
                 ? this.storageManager.unlockPremiumWithCode(code)
                 : { success: false };
-            if (result.success) {
-                this.showFeedbackMessage?.('success', 'Premium unlocked!');
-                close();
-            } else {
-                input.classList.add('border-red-400');
-                input.value = '';
-                input.placeholder = 'Invalid code - try again';
-            }
+            if (result.success) { this.showFeedbackMessage?.('success', '🎉 Premium unlocked!'); close(); }
+            else { input.classList.add('border-red-400'); input.value = ''; input.placeholder = 'Invalid code - try again'; }
         });
     }
     const buyBtn = modal.querySelector('#buy-premium-btn');
@@ -797,7 +823,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
 };
 
 //================================================================================
-// USER PROFILE COLLECTION
+// USER PROFILE MODAL
 //================================================================================
 
 UIFeatures.prototype.showUserProfileModal = function () {
@@ -862,7 +888,7 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
             <div class="space-y-3">
                 <button id="save-profile-btn" 
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                     Save my progress
+                    💾 Save my progress
                 </button>
                 
                 <button id="skip-profile-btn" 
@@ -871,9 +897,10 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
                 </button>
             </div>
             
-          <div class="text-xs text-gray-500 mt-4">
-            Your data stays private and local
-          </div>
+            <div class="text-xs text-gray-500 mt-4">
+                <span aria-hidden="true" class="mr-1">🔒</span>
+                Your data stays private and local
+            </div>
         </div>`;
 };
 
@@ -895,6 +922,156 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
 
     emailInput.addEventListener('input', validateInputs);
     firstNameInput.addEventListener('input', validateInputs);
-
     validateInputs();
+
+    saveBtn.addEventListener('click', () => {
+        const email = emailInput.value.trim();
+        const firstName = firstNameInput.value.trim();
+
+        if (this.storageManager.setUserProfile(email, firstName)) {
+            this.showFeedbackMessage('success', `👋 Hi ${firstName}! Your progress is saved`);
+            this.closeUserProfileModal(modal);
+        } else {
+            this.showFeedbackMessage('error', '❌ Error saving profile');
+        }
+    });
+
+    skipBtn.addEventListener('click', () => {
+        this.storageManager.markProfileModalRefused();
+        this.closeUserProfileModal(modal);
+    });
+
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            this.storageManager.markProfileModalRefused();
+            this.closeUserProfileModal(modal);
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+
+    modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !saveBtn.disabled) {
+            saveBtn.click();
+        }
+    });
 };
+
+UIFeatures.prototype.closeUserProfileModal = function (modal) {
+    modal.classList.add('animate-fade-out');
+    setTimeout(() => {
+        modal.remove();
+    }, 300);
+};
+
+UIFeatures.prototype.updateUserGreeting = function () {
+    const userGreeting = document.getElementById('user-greeting');
+    if (userGreeting) {
+        const displayName = this.storageManager.getUserDisplayName();
+        userGreeting.textContent = `Hi ${displayName}!`;
+    }
+};
+
+//================================================================================
+// NOTIFICATIONS
+//================================================================================
+
+UIFeatures.prototype.requestNotificationPermission = function () {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications enabled ✅');
+                this.scheduleNextNotification();
+            } else {
+                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications denied ❌');
+            }
+        });
+    }
+};
+
+UIFeatures.prototype.scheduleNextNotification = function () {
+    if (!window.isSecureContext) return;
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    const message = {
+        type: 'SCHEDULE_NOTIFICATION',
+        title: '🎁 Test Your French',
+        body: 'Your daily chest is waiting! Free French Points!',
+        delay: 24 * 60 * 60 * 1000
+    };
+
+    navigator.serviceWorker.ready.then(registration => {
+        if (!registration?.active) return;
+        try {
+            const channel = new MessageChannel();
+            registration.active.postMessage(message, [channel.port2]);
+        } catch {
+            registration.active.postMessage(message);
+        }
+    }).catch(() => {/* no-op */ });
+};
+
+//================================================================================
+// UTILITIES
+//================================================================================
+
+UIFeatures.prototype.formatDuration = function (ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return 'now';
+    const h = Math.floor(ms / 3600000);
+    const m = Math.ceil((ms % 3600000) / 60000);
+    if (h <= 0) return `${m} min`;
+    if (m === 60) return `${h + 1} h`;
+    return `${h} h ${m} min`;
+};
+
+UIFeatures.prototype.getChestInfo = function () {
+    let nextReadyTs = this.storageManager?.getNextDailyRewardTime?.() ?? null;
+
+    if (!nextReadyTs) {
+        const lastTs =
+            this.storageManager?.getLastDailyRewardTimestamp?.()
+            ?? Number(localStorage.getItem('tyf:lastDailyRewardAt') || 0);
+        const cooldown = this.storageManager?.getDailyRewardCooldownMs?.() ?? 24 * 60 * 60 * 1000;
+        nextReadyTs = lastTs ? (lastTs + cooldown) : Date.now();
+    }
+
+    const msLeft = nextReadyTs - Date.now();
+    const availableFromStore = this.storageManager?.isDailyRewardAvailable?.() || false;
+    const available = availableFromStore || msLeft <= 0;
+    const etaText = available ? '' : this.formatDuration(msLeft);
+
+    return { available, points: 3, etaText };
+};
+
+UIFeatures.prototype.setupResultsEventListeners = function () {
+    document.querySelector('.quiz-wrapper')?.classList.add('results-compact');
+
+    const backBtn = document.getElementById('back-to-themes-btn');
+    if (backBtn) backBtn.addEventListener('click', () => {
+        if (this.uiCore?.showThemeSelection) this.uiCore.showThemeSelection();
+    });
+
+    const toggleBtn = document.getElementById('toggle-details-btn');
+    const details = document.getElementById('detailed-stats');
+    if (toggleBtn && details) {
+        toggleBtn.addEventListener('click', () => details.classList.toggle('hidden'));
+    }
+};
+
+//================================================================================
+// CLEANUP
+//================================================================================
+
+UIFeatures.prototype.destroy = function () {
+    if (this.paywallTimer) {
+        clearInterval(this.paywallTimer);
+        this.paywallTimer = null;
+    }
+    if (this._onStorageUpdated) {
+        window.removeEventListener('storage-updated', this._onStorageUpdated);
+        this._onStorageUpdated = null;
+    }
+};
+
+window.UIFeatures = UIFeatures;
