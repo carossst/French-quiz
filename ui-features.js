@@ -79,6 +79,9 @@ UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) 
 // XP SYSTEM
 //================================================================================
 
+// XP SYSTEM
+//================================================================================
+
 UIFeatures.prototype.initializeXPSystem = function () {
     this.showXPHeader();
     this.updateXPHeader();
@@ -91,6 +94,18 @@ UIFeatures.prototype.initializeXPSystem = function () {
 UIFeatures.prototype.showXPHeader = function () {
     const xpHeader = document.getElementById('xp-header');
     if (xpHeader) xpHeader.classList.remove('hidden');
+};
+
+// Helper DOM pour mettre à jour du texte
+UIFeatures.prototype.setText = function (id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        el.value = value;
+    } else {
+        el.textContent = value;
+    }
 };
 
 UIFeatures.prototype.updateXPHeader = function () {
