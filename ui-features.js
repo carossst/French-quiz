@@ -79,9 +79,6 @@ UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) 
 // XP SYSTEM
 //================================================================================
 
-// XP SYSTEM
-//================================================================================
-
 UIFeatures.prototype.initializeXPSystem = function () {
     this.showXPHeader();
     this.updateXPHeader();
@@ -106,6 +103,58 @@ UIFeatures.prototype.setText = function (id, value) {
     } else {
         el.textContent = value;
     }
+};
+
+// Gestion de l’icône de coffre (récompense quotidienne) dans le header
+UIFeatures.prototype.addChestIconToHeader = function () {
+    const wrapper = document.getElementById('daily-chest-wrapper');
+    if (!wrapper) return;
+
+    // éviter d’empiler les listeners à chaque updateXPHeader
+    if (wrapper.dataset.chestBound === '1') {
+        const available = this.storageManager.isDailyRewardAvailable
+            ? this.storageManager.isDailyRewardAvailable()
+            : true;
+        wrapper.style.opacity = available ? '1' : '0.5';
+        wrapper.style.cursor = available ? 'pointer' : 'default';
+        return;
+    }
+    wrapper.dataset.chestBound = '1';
+
+    const updateState = () => {
+        const available = this.storageManager.isDailyRewardAvailable
+            ? this.storageManager.isDailyRewardAvailable()
+            : true;
+        wrapper.style.opacity = available ? '1' : '0.5';
+        wrapper.style.cursor = available ? 'pointer' : 'default';
+    };
+
+    const activate = (event) => {
+        if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
+            return;
+        }
+
+        if (!this.storageManager.collectDailyReward) return;
+        const result = this.storageManager.collectDailyReward();
+        if (result && result.success) {
+            const amount =
+                result.fpEarned ?? result.pointsEarned ?? result.earned ?? 0;
+            if (amount > 0 && typeof this.showDailyRewardAnimation === 'function') {
+                this.showDailyRewardAnimation(amount);
+            }
+            this.updateXPHeader();
+        }
+        updateState();
+    };
+
+    wrapper.setAttribute('role', 'button');
+    wrapper.setAttribute('tabindex', '0');
+    wrapper.setAttribute('aria-label', 'Collect your daily French Points');
+
+    wrapper.addEventListener('click', activate);
+    wrapper.addEventListener('keydown', activate);
+
+    updateState();
 };
 
 UIFeatures.prototype.updateXPHeader = function () {
@@ -136,25 +185,6 @@ UIFeatures.prototype.updateXPHeader = function () {
     }
 
     this.addChestIconToHeader();
-};
-
-UIFeatures.prototype.setupDailyReward = function () {
-    if (window.TYF_CONFIG?.debug?.enabled) {
-        console.debug('Daily reward system initialized - using chest icon in header');
-    }
-};
-
-UIFeatures.prototype.collectDailyReward = function () {
-    const result = this.storageManager.collectDailyReward();
-    if (result.success) {
-        this.showDailyRewardAnimation(result.fpEarned || result.pointsEarned);
-        this.updateXPHeader();
-    }
-};
-
-UIFeatures.prototype.setupStorageEvents = function () {
-    this._onStorageUpdated = () => this.updateXPHeader();
-    window.addEventListener('storage-updated', this._onStorageUpdated);
 };
 
 //================================================================================
