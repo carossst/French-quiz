@@ -1,21 +1,24 @@
-/* sw.js - Service Worker v3.0 pour Test Your French */
+/* sw.js - Service Worker v3.1 pour Test Your French */
 
-const CACHE_NAME = "tyf-cache-v3.0";
-const DYNAMIC_CACHE = "tyf-dynamic-v3.0";
+const APP_VERSION = "3.1.0";   // À incrémenter à chaque gros déploiement
+const CACHE_PREFIX = "tyf";
+
+const CACHE_NAME = `${CACHE_PREFIX}-cache-${APP_VERSION}`;
+const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;
 
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./style.css",
-  "./manifest.json",       // ✅ manifest.json réel
-  "./main.js",             // ✅ fichiers JS à la racine
+  "./manifest.json",       // manifest.json à la racine
+  "./main.js",             // fichiers JS à la racine
   "./ui-core.js",
   "./ui-features.js",
   "./ui-charts.js",
   "./quizManager.js",
   "./resourceManager.js",
   "./storage.js",
-  "./metadata.json",       // ✅ metadata à la racine
+  "./metadata.json",       // metadata à la racine
   "./icons/icon-192x192.png"
 ];
 
@@ -34,7 +37,7 @@ const error = (...args) => console.error("[SW]", ...args);
    INSTALL
 ============================================================ */
 self.addEventListener("install", event => {
-  log("Install - Version:", CACHE_NAME);
+  log("Install - Cache:", CACHE_NAME, "Version:", APP_VERSION);
   self.skipWaiting();
 
   event.waitUntil(
@@ -43,7 +46,7 @@ self.addEventListener("install", event => {
         Promise.allSettled(
           ASSETS_TO_CACHE.map(asset =>
             cache.add(asset).catch(err => {
-              warn(`Failed to cache ${asset}:`, err.message);
+              warn(`Failed to cache ${asset}:`, err && err.message ? err.message : err);
               return null;
             })
           )
@@ -63,14 +66,18 @@ self.addEventListener("install", event => {
    ACTIVATE
 ============================================================ */
 self.addEventListener("activate", event => {
-  log("Activate - Version:", CACHE_NAME);
+  log("Activate - Version:", APP_VERSION, "Cache:", CACHE_NAME);
 
   event.waitUntil(
     Promise.all([
       caches.keys().then(keys =>
         Promise.all(
           keys
-            .filter(key => key.startsWith("tyf-") && key !== CACHE_NAME && key !== DYNAMIC_CACHE)
+            .filter(key =>
+              key.startsWith(`${CACHE_PREFIX}-`) &&
+              key !== CACHE_NAME &&
+              key !== DYNAMIC_CACHE
+            )
             .map(key => {
               log(`Deleting old cache: ${key}`);
               return caches.delete(key);
@@ -90,29 +97,29 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Allow browser extensions
+  // Laisse passer les extensions navigateur
   if (!url.protocol.startsWith("http")) return;
   if (url.protocol === "chrome-extension:" || url.protocol === "moz-extension:") return;
 
-  // HEAD passthrough
+  // HEAD en direct réseau
   if (request.method === "HEAD") {
     event.respondWith(fetch(request));
     return;
   }
 
-  // Audio files
+  // Audio
   if (url.pathname.includes("/audio/") && /\.(mp3|ogg|wav)$/i.test(url.pathname)) {
     event.respondWith(handleAudioRequest(request));
     return;
   }
 
-  // JSON files
+  // JSON (metadata + quizzes)
   if (url.pathname.endsWith(".json")) {
     event.respondWith(handleJsonRequest(request));
     return;
   }
 
-  // All other static files
+  // Reste des fichiers statiques
   event.respondWith(handleStaticRequest(request));
 });
 
@@ -147,7 +154,7 @@ async function handleAudioRequest(request) {
     return response;
 
   } catch (err) {
-    warn(`Audio request failed: ${request.url}`, err.message);
+    warn(`Audio request failed: ${request.url}`, err && err.message ? err.message : err);
 
     try {
       return await fetch(request);
@@ -168,6 +175,7 @@ async function handleJsonRequest(request) {
   log(`JSON request: ${request.url}`);
 
   try {
+    // Stratégie réseau-d'abord, cache en secours
     const response = await fetch(request);
 
     if (response.ok) {
@@ -180,7 +188,7 @@ async function handleJsonRequest(request) {
     throw new Error(`HTTP ${response.status}`);
 
   } catch (err) {
-    warn(`JSON network failed: ${request.url}`, err.message);
+    warn(`JSON network failed: ${request.url}`, err && err.message ? err.message : err);
 
     const cached = await caches.match(request);
     if (cached) return cached;
@@ -188,6 +196,7 @@ async function handleJsonRequest(request) {
     const cachedMain = await caches.match(request, { cacheName: CACHE_NAME });
     if (cachedMain) return cachedMain;
 
+    // Dernière chance : retry réseau brut
     return fetch(request);
   }
 }
@@ -215,7 +224,7 @@ async function handleStaticRequest(request) {
     try {
       urlObj = new URL(response.url);
     } catch {
-      warn(`Invalid URL: ${response.url}`);
+      warn(`Invalid URL in response: ${response.url}`);
       return response;
     }
 
@@ -246,9 +255,9 @@ async function handleStaticRequest(request) {
           <title>Offline - Test Your French</title>
           <style>
             body {
-              font-family: system-ui;
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
               background: #111f46;
-              color: white;
+              color: #ffffff;
               display: flex;
               align-items: center;
               justify-content: center;
@@ -257,11 +266,13 @@ async function handleStaticRequest(request) {
               padding: 20px;
             }
             .btn {
+              display: inline-block;
               background: #4CAF50;
               padding: 12px 24px;
               border-radius: 30px;
-              color: white;
+              color: #ffffff;
               text-decoration: none;
+              margin-top: 16px;
             }
           </style>
         </head>
@@ -290,39 +301,49 @@ async function handleStaticRequest(request) {
 self.addEventListener("message", event => {
   log("Message:", event.data);
 
-  switch (event.data.type) {
+  switch (event.data && event.data.type) {
     case "SKIP_WAITING":
       self.skipWaiting();
       break;
 
     case "GET_VERSION":
-      event.ports[0].postMessage({ version: CACHE_NAME });
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({ version: APP_VERSION, cacheName: CACHE_NAME });
+      }
       break;
 
     case "CLEAR_CACHE":
-      clearAllCaches().then(() =>
-        event.ports[0].postMessage({ success: true })
-      );
+      if (event.ports && event.ports[0]) {
+        clearAllCaches().then(() =>
+          event.ports[0].postMessage({ success: true })
+        );
+      } else {
+        clearAllCaches();
+      }
       break;
 
     case "CACHE_AUDIO":
       if (Array.isArray(event.data.audioUrls)) {
-        cacheAudioFiles(event.data.audioUrls).then(results =>
-          event.ports[0].postMessage({
-            success: true,
-            cached: results.filter(r => r.success).length,
-            failed: results.filter(r => !r.success).length,
-            details: results
-          })
-        );
+        cacheAudioFiles(event.data.audioUrls).then(results => {
+          if (event.ports && event.ports[0]) {
+            event.ports[0].postMessage({
+              success: true,
+              cached: results.filter(r => r.success).length,
+              failed: results.filter(r => !r.success).length,
+              details: results
+            });
+          }
+        });
       } else {
         warn("CACHE_AUDIO called without valid audioUrls");
-        event.ports[0].postMessage({ success: false, message: "Invalid audioUrls" });
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ success: false, message: "Invalid audioUrls" });
+        }
       }
       break;
 
     default:
-      warn("Unknown message type:", event.data.type);
+      warn("Unknown message type:", event.data && event.data.type);
   }
 });
 
@@ -335,7 +356,6 @@ async function cacheAudioFiles(urls) {
 
   for (const url of urls) {
     try {
-      // ✅ API correcte : on laisse le navigateur chercher dans tous les caches
       const exists = await caches.match(url);
       if (exists) {
         results.push({ url, success: true, status: "Already cached" });
@@ -350,7 +370,7 @@ async function cacheAudioFiles(urls) {
         results.push({ url, success: false, error: `HTTP ${response.status}` });
       }
     } catch (err) {
-      results.push({ url, success: false, error: err.message });
+      results.push({ url, success: false, error: err && err.message ? err.message : String(err) });
     }
   }
   return results;
@@ -361,7 +381,7 @@ async function cacheAudioFiles(urls) {
 ============================================================ */
 async function clearAllCaches() {
   const names = await caches.keys();
-  const toDelete = names.filter(n => n.startsWith("tyf-"));
+  const toDelete = names.filter(n => n.startsWith(`${CACHE_PREFIX}-`));
   await Promise.all(toDelete.map(n => caches.delete(n)));
 }
 
@@ -373,11 +393,11 @@ async function cleanOldDynamicCache() {
     const cache = await caches.open(DYNAMIC_CACHE);
     const requests = await cache.keys();
     const now = Date.now();
-    const maxAge = 7 * 24 * 60 * 60 * 1000;
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 jours
 
     for (const request of requests) {
       const response = await cache.match(request);
-      const dateHeader = response?.headers.get("date");
+      const dateHeader = response && response.headers.get("date");
       const cacheDate = dateHeader ? new Date(dateHeader).getTime() : now;
 
       if (now - cacheDate > maxAge) {
@@ -401,4 +421,4 @@ self.addEventListener("unhandledrejection", e =>
 /* ============================================================
    BOOT LOG
 ============================================================ */
-log("Service Worker v3.0 loaded successfully – Test Your French ready!");
+log(`Service Worker loaded – Test Your French ready! Version: ${APP_VERSION}`);
