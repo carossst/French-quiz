@@ -231,8 +231,8 @@ StorageManager.prototype.getFrenchPoints = function () {
 StorageManager.prototype.addFrenchPoints = function (amount, reason = "unknown") {
   if (typeof amount !== "number" || amount <= 0) return false;
 
-  // Anti-farming: on refuse l'ancien motif errone
-  if (reason === "correct_answer") return false;
+  // Anti-farming: bloquer les anciens motifs + abus
+  if (reason === "correct_answer" || reason === "correct_answers") return false;
 
   const oldLevel = this.getUserLevel();
   this.data.frenchPoints += amount;
@@ -418,22 +418,23 @@ StorageManager.prototype.canUnlockTheme = function (themeId) {
   // Theme 1 (Colors) toujours gratuit
   if (themeId === 1) return { canUnlock: true, reason: "FREE" };
 
+  // Systeme progressif - calculer cost D'ABORD
+  const unlockedCount = this.getUnlockedPremiumThemesCount();
+  const cost = this.getUnlockCost(unlockedCount);
+
   // Verifier que le theme precedent est debloque
   const previousThemeId = themeId - 1;
-
   const previousCompleted = this.isThemeUnlocked(previousThemeId);
 
   if (!previousCompleted) {
     return {
       canUnlock: false,
+      cost: cost,
       reason: "PREVIOUS_LOCKED",
       message: "Unlock theme " + previousThemeId + " first"
     };
   }
 
-  // Systeme progressif
-  const unlockedCount = this.getUnlockedPremiumThemesCount();
-  const cost = this.getUnlockCost(unlockedCount);
   const hasFP = this.data.frenchPoints >= cost;
 
   if (!hasFP) {
@@ -493,10 +494,15 @@ StorageManager.prototype.collectDailyReward = function () {
 
   this.addFrenchPoints(earned, "daily_reward");
   this.data.fpStats.dailyRewardsCount += 1;
-  this.updateStreakDays();
 
-  // Horodater maintenant (rolling 24h)
+  // Sauvegarder l'ancienne date AVANT de la mettre à jour
+  const previousRewardDate = this.data.lastDailyReward;
+
+  // Horodater maintenant (rolling 24h) AVANT updateStreakDays
   this.setLastDailyRewardTimestamp(Date.now());
+
+  // Calculer streak avec l'ancienne date
+  this.updateStreakDaysFromPrevious(previousRewardDate);
 
   this.dispatchFPEvent("daily-reward-collected", {
     chestsCollected: 1,
@@ -518,6 +524,24 @@ StorageManager.prototype.collectDailyReward = function () {
 StorageManager.prototype.updateStreakDays = function () {
   if (this.data.lastDailyReward) {
     const lastDate = new Date(this.data.lastDailyReward);
+    const now = new Date();
+    const daysDiff = Math.floor(
+      (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysDiff === 1) {
+      this.data.fpStats.streakDays++;
+    } else if (daysDiff > 1) {
+      this.data.fpStats.streakDays = 1;
+    }
+  } else {
+    this.data.fpStats.streakDays = 1;
+  }
+};
+
+StorageManager.prototype.updateStreakDaysFromPrevious = function (previousDate) {
+  if (previousDate) {
+    const lastDate = new Date(previousDate);
     const now = new Date();
     const daysDiff = Math.floor(
       (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
@@ -618,7 +642,7 @@ StorageManager.prototype.markQuizCompleted = function (
     }
 
     // Attribution des points de base
-    this.addFrenchPoints(basePoints, "correct_answers");
+    this.addFrenchPoints(basePoints, "quiz_completion");
 
     // Bonus perfect score reduit
     if (percentage === 100) {
@@ -1023,4 +1047,21 @@ StorageManager.prototype.getNextThemeUnlockCost = function () {
   return this.getUnlockCost(this.getUnlockedPremiumThemesCount());
 };
 
+// Fin du fichier StorageManager
+
+/**
+ * Check if there are unplayed free quizzes in Colors theme
+ */
+StorageManager.prototype.hasUnplayedFreeQuizzes = function () {
+  const freeQuizIds = [101, 102, 103, 104, 105];
+  for (let i = 0; i < freeQuizIds.length; i++) {
+    const quizId = freeQuizIds[i];
+    if (this.isQuizUnlocked(quizId) && !this.isQuizCompleted(quizId)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 window.StorageManager = StorageManager;
+
