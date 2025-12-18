@@ -90,31 +90,49 @@ StorageManager.prototype.init = function () {
 };
 
 StorageManager.prototype.ensureDataStructure = function () {
-  if (!this.data.fpStats) {
-    this.data.fpStats = JSON.parse(JSON.stringify(this.defaultData.fpStats));
+  // Arrays / objects critiques
+  if (!Array.isArray(this.data.unlockedQuizzes)) {
+    this.data.unlockedQuizzes = JSON.parse(JSON.stringify(this.defaultData.unlockedQuizzes));
   }
-  if (!this.data.globalStats) {
-    this.data.globalStats = JSON.parse(JSON.stringify(this.defaultData.globalStats));
+  if (!this.data.themeStats || typeof this.data.themeStats !== "object") {
+    this.data.themeStats = {};
   }
-  if (!this.data.userProfile) {
-    this.data.userProfile = JSON.parse(JSON.stringify(this.defaultData.userProfile));
+  if (!this.data.streak || typeof this.data.streak !== "object") {
+    this.data.streak = JSON.parse(JSON.stringify(this.defaultData.streak));
   }
-  if (!this.data.history) {
+  if (!Array.isArray(this.data.badges)) {
+    this.data.badges = [];
+  }
+  if (!Array.isArray(this.data.history)) {
     this.data.history = [];
   }
-  if (!this.data.conversionTracking) {
-    this.data.conversionTracking = JSON.parse(
-      JSON.stringify(this.defaultData.conversionTracking)
-    );
+  if (!this.data.settings || typeof this.data.settings !== "object") {
+    this.data.settings = JSON.parse(JSON.stringify(this.defaultData.settings));
   }
-  // Assurer compatibilite tracking UX
-  if (!this.data.conversionTracking.totalQuizAttempted) {
+
+  // Stats objects
+  if (!this.data.fpStats || typeof this.data.fpStats !== "object") {
+    this.data.fpStats = JSON.parse(JSON.stringify(this.defaultData.fpStats));
+  }
+  if (!this.data.globalStats || typeof this.data.globalStats !== "object") {
+    this.data.globalStats = JSON.parse(JSON.stringify(this.defaultData.globalStats));
+  }
+  if (!this.data.userProfile || typeof this.data.userProfile !== "object") {
+    this.data.userProfile = JSON.parse(JSON.stringify(this.defaultData.userProfile));
+  }
+
+  // Conversion tracking + champs optionnels
+  if (!this.data.conversionTracking || typeof this.data.conversionTracking !== "object") {
+    this.data.conversionTracking = JSON.parse(JSON.stringify(this.defaultData.conversionTracking));
+  }
+  if (typeof this.data.conversionTracking.totalQuizAttempted !== "number") {
     this.data.conversionTracking.totalQuizAttempted = 0;
   }
-  if (!this.data.conversionTracking.conversionClickedAt) {
+  if (this.data.conversionTracking.conversionClickedAt === undefined) {
     this.data.conversionTracking.conversionClickedAt = null;
   }
 };
+
 
 StorageManager.prototype.save = function () {
   if (!this.initialized) return false;
@@ -169,8 +187,10 @@ StorageManager.prototype.save = function () {
 StorageManager.prototype.emergencyCleanup = function () {
   // Garder seulement les donnees essentielles
   if (this.data.history && this.data.history.length > 10) {
-    this.data.history = this.data.history.slice(-10); // Garde les 10 derniers
+    // history est en "newest-first" (unshift), donc on garde les 10 plus récents
+    this.data.history = this.data.history.slice(0, 10);
   }
+
 
   // Nettoyer le cache de quiz anciens
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
