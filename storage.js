@@ -386,27 +386,71 @@ StorageManager.prototype.getNextDailyRewardTime = function () {
 StorageManager.prototype.canUnlockWithFP = function () {
   if (this.isPremiumUser()) return { canUnlock: true, cost: 0 };
 
-  // Utiliser le nombre de THEMES premium deja debloques, pas les quiz completes
-  const unlockedThemes = this.getUnlockedPremiumThemesCount(); // 2..10
-  const cost = this.getUnlockCost(unlockedThemes); // [25,50,75,100]
+  // Nombre de thèmes premium déjà débloqués (0..9)
+  const unlockedThemes = this.getUnlockedPremiumThemesCount();
+  const nextThemeId = 2 + unlockedThemes;
+
+  if (nextThemeId > 10) {
+    return { canUnlock: false, cost: 0, currentFP: this.data.frenchPoints, reason: "ALL_UNLOCKED" };
+  }
+
+  // Coût du prochain déverrouillage
+  const cost = this.getUnlockCost(unlockedThemes);
   const canUnlock = this.data.frenchPoints >= cost;
 
-  return { canUnlock, cost, currentFP: this.data.frenchPoints };
+  return { canUnlock, cost, currentFP: this.data.frenchPoints, nextThemeId };
 };
 
+
+// Remplace unlockQuizWithFP: ici on débloque le prochain THEME premium (2..10)
+// et on marque le thème comme "unlocked" via le quiz de base (theme*100 + 1).
 StorageManager.prototype.unlockQuizWithFP = function () {
-  const result = this.canUnlockWithFP();
-  const canUnlock = result.canUnlock;
-  const cost = result.cost;
+  // Premium: rien à faire
+  if (this.isPremiumUser()) {
+    return { success: true, cost: 0, themeId: null, remainingFP: this.data.frenchPoints };
+  }
 
-  if (!canUnlock) return { success: false, reason: "INSUFFICIENT_FP" };
+  // Déterminer le prochain thème premium à débloquer
+  const unlockedCount = this.getUnlockedPremiumThemesCount(); // 0..9
+  const nextThemeId = 2 + unlockedCount;
 
+  if (nextThemeId > 10) {
+    return { success: false, reason: "ALL_UNLOCKED", cost: 0 };
+  }
+
+  // Vérifier règles (thème précédent + FP)
+  const check = this.canUnlockTheme(nextThemeId);
+  if (!check.canUnlock) {
+    return {
+      success: false,
+      reason: check.reason || "LOCKED",
+      cost: typeof check.cost === "number" ? check.cost : 0,
+      currentFP: this.data.frenchPoints
+    };
+  }
+
+  // Dépenser FP
+  const cost = check.cost;
   this.data.frenchPoints -= cost;
-  this.data.conversionTracking.premiumQuizCompleted++;
+
+  // Marquer le thème comme débloqué (base quiz)
+  const baseQuizId = nextThemeId * 100 + 1;
+  if (!this.data.unlockedQuizzes.includes(baseQuizId)) {
+    this.data.unlockedQuizzes.push(baseQuizId);
+  }
+
+  // IMPORTANT: ne PAS incrémenter premiumQuizCompleted ici (ce n'est pas un quiz complété)
+
   this.save();
 
-  return { success: true, cost, remainingFP: this.data.frenchPoints };
+  return {
+    success: true,
+    cost: cost,
+    themeId: nextThemeId,
+    remainingFP: this.data.frenchPoints
+  };
 };
+
 
 StorageManager.prototype.isThemeUnlocked = function (themeId) {
   if (themeId === 1) return true; // Colors toujours gratuit
