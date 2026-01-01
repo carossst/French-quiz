@@ -275,8 +275,10 @@ QuizManager.prototype.finishQuiz = function () {
     score: this.score,
     total: totalQuestions,
     percentage: totalQuestions > 0 ? Math.round((this.score / totalQuestions) * 100) : 0,
-    themeId: this.currentThemeId
+    themeId: this.currentThemeId,
+    quizId: this.currentQuizId
   };
+
 
   if (typeof window.track === "function") {
     window.track("quiz_completed", {

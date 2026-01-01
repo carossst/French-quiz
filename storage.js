@@ -472,28 +472,33 @@ StorageManager.prototype.unlockQuizWithFP = function () {
 };
 
 
-StorageManager.prototype.isThemeUnlocked = function (themeId) {
+SStorageManager.prototype.isThemeUnlocked = function (themeId) {
   if (themeId === 1) return true; // Colors toujours gratuit
-  const baseQuizId = themeId * 100;
-  return this.data.unlockedQuizzes.includes(baseQuizId + 1);
+  const base = themeId * 100;
+  // Compat: certaines anciennes versions ont pu stocker 200 au lieu de 201
+  return this.data.unlockedQuizzes.includes(base + 1) || this.data.unlockedQuizzes.includes(base);
 };
+
 
 StorageManager.prototype.canUnlockTheme = function (themeId) {
   // Theme 1 (Colors) toujours gratuit
   if (themeId === 1) return { canUnlock: true, reason: "FREE" };
 
-  // Systeme progressif - calculer cost D'ABORD
-  const unlockedCount = this.getUnlockedPremiumThemesCount();
-  const cost = this.getUnlockCost(unlockedCount);
+  // Coût FIXE du thème ciblé (Theme 2 = 25, Theme 3 = 50, etc.)
+  const cost =
+    typeof this.getThemeCost === "function"
+      ? this.getThemeCost(themeId)
+      : this.getUnlockCost(Math.max(0, themeId - 2));
 
   // Verifier que le theme precedent est debloque
   const previousThemeId = themeId - 1;
   const previousCompleted = this.isThemeUnlocked(previousThemeId);
 
   if (!previousCompleted) {
+    // Game master: pas de coût “actionnable” tant que la marche précédente n’est pas ouverte
     return {
       canUnlock: false,
-      cost: cost,
+      cost: null,
       reason: "PREVIOUS_LOCKED",
       message: "Unlock theme " + previousThemeId + " first"
     };
@@ -511,7 +516,6 @@ StorageManager.prototype.canUnlockTheme = function (themeId) {
     };
   }
 
-  // Peut debloquer
   return {
     canUnlock: true,
     cost: cost,
@@ -1095,6 +1099,15 @@ StorageManager.prototype.dispatchFPEvent = function (eventName, detail) {
 StorageManager.prototype.getUnlockCost = function (premiumQuizCount) {
   const costs = [25, 50, 75, 100];
   return costs[Math.min(premiumQuizCount, costs.length - 1)];
+};
+
+// Retourne le coût d'un thème spécifique basé sur sa position (informatif)
+// Utilisé pour : roadmap, affichage (futur)
+// Ne change PAS la logique de canUnlockTheme (qui reste "next unlock cost")
+StorageManager.prototype.getThemeCost = function (themeId) {
+  if (themeId === 1) return 0; // Colors gratuit
+  const stepIndex = themeId - 2; // Theme 2 = step 0
+  return this.getUnlockCost(stepIndex);
 };
 
 // Compte les themes premium (2..10) deja debloques

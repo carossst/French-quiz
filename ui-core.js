@@ -15,6 +15,8 @@
         this.isInitialized = false;
         this.features = null;
         this.charts = null;
+
+        this._roadmapListenerAttached = false;
     }
 
     /* ----------------------------------------
@@ -511,12 +513,8 @@
         return (
             '\n<div class="question-audio-container mb-6 text-center">' +
             '\n  <div class="bg-blue-50 rounded-lg p-4 inline-block">' +
-            '\n    <audio class="question-audio hidden" preload="metadata" src="' +
-            audioPath +
-            '">' +
-            '\n      <source src="' +
-            audioPath +
-            '" type="audio/mpeg">' +
+            '\n    <audio class="question-audio hidden" preload="metadata">' +
+            '\n      <source src="' + audioPath + '" type="audio/mpeg">' +
             "Your browser does not support audio." +
             "\n    </audio>" +
             '\n    <button type="button" class="audio-play-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">' +
@@ -526,6 +524,7 @@
             "\n</div>"
         );
     };
+
 
     UICore.prototype._stripChoiceLabel = function (s) {
         return String(s).replace(/^[A-D]\s*[.)]\s*/i, "").trim();
@@ -775,9 +774,15 @@
     };
 
     UICore.prototype.getThemeProgressDisplay = function (themeId) {
+        if (themeId === 1) {
+            return '<div class="text-xs text-green-600 mt-2">Free</div>';
+        }
+
         // Cas 1 : thème déjà débloqué → on affiche juste la progression
         if (this.storageManager.isThemeUnlocked &&
             this.storageManager.isThemeUnlocked(themeId)) {
+
+
 
             if (typeof this.storageManager.getThemeProgress === "function") {
                 const progress = this.storageManager.getThemeProgress(themeId) || {
@@ -805,48 +810,68 @@
             return '<div class="text-xs text-gray-500 mt-2">Premium theme – unlock via purchase.</div>';
         }
 
-        // Cas 3 : logique French Points disponible
+        // Déterminer le prochain thème atteignable (game loop)
+        const themeData = this.themeIndexCache || [];
+        const self = this;
+
+        const nextThemeId = (function () {
+            // plus petit thème premium non débloqué dont le précédent est débloqué
+            for (let i = 0; i < themeData.length; i++) {
+                const t = themeData[i];
+                if (!t || typeof t.id !== "number") continue;
+                if (t.id === 1) continue;
+
+                const unlocked = self.storageManager.isThemeUnlocked?.(t.id);
+                const prevUnlocked = self.storageManager.isThemeUnlocked?.(t.id - 1);
+
+                if (!unlocked && prevUnlocked) return t.id;
+            }
+            // fallback: Numbers
+            return 2;
+        })();
+
+        // Logique French Points disponible
         const unlockStatus = this.storageManager.canUnlockTheme(themeId) || {};
 
+        // Si bloqué par progression: guidance uniquement (pas de coût, pas de FP)
         if (unlockStatus.reason === "PREVIOUS_LOCKED") {
-            const themeNames = {
-                1: "Colors",
-                2: "Numbers",
-                3: "Gender",
-                4: "Singular and plural",
-                5: "Present tense",
-                6: "Accents",
-                7: "Feelings",
-                8: "Metro",
-                9: "Bakery",
-                10: "Cafe"
-            };
-            const previousTheme = themeNames[themeId - 1] || "previous theme";
-            const costInfo = typeof unlockStatus.cost === "number" ? unlockStatus.cost : "";
+            const prevThemeObj = (this.themeIndexCache || []).find(function (t) {
+                return t && Number(t.id) === Number(themeId - 1);
+            });
+            const previousTheme = (prevThemeObj && prevThemeObj.name) ? prevThemeObj.name : "previous theme";
 
             return (
-                '<div class="text-xs text-gray-500 mt-2">Unlock ' +
-                previousTheme +
-                " first. Cost: " +
-                costInfo +
-                " French Points or purchase premium access.</div>"
+                '<div class="text-xs text-gray-400 mt-2">' +
+                '🔒 Complete <strong>' + previousTheme + '</strong> first · ' +
+                '<button type="button" class="text-purple-600 hover:underline" data-action="show-roadmap">See roadmap</button>' +
+                '</div>'
             );
         }
 
-        if (unlockStatus.canUnlock === false && typeof unlockStatus.cost === "number") {
+
+        // Game master: n’afficher “needed FP” QUE pour le prochain thème atteignable
+        if (themeId === nextThemeId && unlockStatus.reason === "INSUFFICIENT_FP") {
             const fp = typeof this.storageManager.getFrenchPoints === "function"
                 ? this.storageManager.getFrenchPoints()
                 : 0;
-            const needed = unlockStatus.cost - fp;
 
-            return (
-                '<div class="text-xs text-gray-500 mt-2">' +
-                needed +
-                " more French Points needed or purchase premium access.</div>"
-            );
+            const themeCost = typeof this.storageManager.getThemeCost === "function"
+                ? this.storageManager.getThemeCost(themeId)
+                : unlockStatus.cost;
+
+            if (typeof themeCost === "number") {
+                const needed = Math.max(0, themeCost - fp);
+
+                return (
+                    '<div class="text-xs text-gray-500 mt-2">' +
+                    needed +
+                    " more French Points needed or purchase premium access.</div>"
+                );
+            }
         }
 
-        if (unlockStatus.canUnlock && typeof unlockStatus.cost === "number") {
+        // Message “Ready to unlock” uniquement pour le prochain thème atteignable
+        if (themeId === nextThemeId && unlockStatus.canUnlock && typeof unlockStatus.cost === "number") {
             return (
                 '<div class="text-xs text-blue-600 mt-2">Unlock with ' +
                 unlockStatus.cost +
@@ -854,9 +879,10 @@
             );
         }
 
-        // Fallback ultra-safe
-        return '<div class="text-xs text-gray-500 mt-2">Premium theme.</div>';
+        // Sinon: rien (évite d’empiler des objectifs)
+        return '<div class="text-xs text-gray-500 mt-2"></div>';
     };
+
 
 
     /* ----------------------------------------
@@ -931,11 +957,11 @@
             let total = 0;
             for (let i = 0; i < themeData.length; i++) {
                 const t = themeData[i];
-                if (t.id <= targetThemeId && t.id !== 1) { // Pas Colors (gratuit)
-                    const s = self.storageManager.canUnlockTheme?.(t.id);
-                    if (s && typeof s.cost === 'number') {
-                        total += s.cost;
-                    }
+                if (t.id <= targetThemeId && t.id !== 1) {
+                    const themeCost = typeof self.storageManager.getThemeCost === 'function'
+                        ? self.storageManager.getThemeCost(t.id)
+                        : 0;
+                    total += themeCost;
                 }
             }
             return total;
@@ -945,7 +971,11 @@
         const lastThemeId = themeData.length > 0 ? themeData[themeData.length - 1].id : 10;
         const totalNeeded = getCumulativeForTheme(lastThemeId);
         const remaining = Math.max(0, totalNeeded - currentFP);
-        const daysNeeded = remaining === 0 ? 0 : Math.ceil(remaining / 15);
+
+        // Estimation réaliste: 1 coffre (3 FP) + 1 quiz moyen (3-5 FP)
+        const FP_PER_DAY_ESTIMATE = 8;
+        const daysNeeded = remaining === 0 ? 0 : Math.ceil(remaining / FP_PER_DAY_ESTIMATE);
+
 
         // Générer lignes de thèmes
         let rows = '';
@@ -954,8 +984,10 @@
             const isFree = theme.id === 1; // Colors est gratuit
             const isUnlocked = self.storageManager.isThemeUnlocked?.(theme.id) || isFree;
             const unlockStatus = isFree ? null : (self.storageManager.canUnlockTheme?.(theme.id) || {});
-            // PATCH 2: Ne pas inventer 0 si cost inconnu - utiliser null
-            const cost = isFree ? 0 : (typeof unlockStatus.cost === "number" ? unlockStatus.cost : null);
+            // Roadmap = coût fixe du thème (25/50/75/100...), pas le “next unlock cost”
+            const cost = isFree ? 0 : (typeof self.storageManager.getThemeCost === "function"
+                ? self.storageManager.getThemeCost(theme.id)
+                : null);
             const cumulative = isFree ? 0 : getCumulativeForTheme(theme.id);
 
             // Déterminer status et couleur
@@ -1044,7 +1076,7 @@
                 (remaining === 0 ?
                     '<strong>✅ You have enough French Points to unlock more themes!</strong>' :
                     '<div class="space-y-1">' +
-                    '<div><strong>Free path:</strong> Unlock all themes in ~' + daysNeeded + ' days (estimate)</div>' +
+                    '<div><strong>Free path:</strong> Unlock all themes in ~' + daysNeeded + ' days with regular play</div>' +
                     '<div><strong>Premium path:</strong> One-time $12 → all themes unlocked instantly ⚡</div>' +
                     '</div>'
                 )
@@ -1227,9 +1259,23 @@
             self.showUnlockRoadmap();
         });
 
+        // Event delegation pour "See roadmap" dans les cartes
+        if (!this._roadmapListenerAttached) {
+            document.addEventListener('click', function (e) {
+                const target = e.target.closest('[data-action="show-roadmap"]');
+                if (target && typeof self.showUnlockRoadmap === 'function') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    self.showUnlockRoadmap();
+                }
+            });
+            this._roadmapListenerAttached = true;
+        }
+
         // Theme tiles
         this.setupThemeClickEvents();
     };
+
 
     UICore.prototype.setupQuizSelectionEvents = function () {
         const self = this;
@@ -1496,6 +1542,7 @@
         }
     };
 
+
     /* ----------------------------------------
        DETAILED REVIEW
        ---------------------------------------- */
@@ -1504,6 +1551,7 @@
             const reviewContainer = document.getElementById("questions-review");
             if (!reviewContainer || !this.quizManager.currentQuiz) return;
 
+            const self = this;
             const questions = this.quizManager.currentQuiz.questions;
             const userAnswers = this.quizManager.userAnswers;
             const questionStatus = this.quizManager.questionStatus;
@@ -1513,6 +1561,16 @@
                     const userAnswerIndex = userAnswers[index];
                     const isCorrect = questionStatus[index] === "correct";
                     const correctIndex = question.correctIndex;
+
+                    const userAnswerRaw = (question.options && typeof userAnswerIndex === "number")
+                        ? question.options[userAnswerIndex]
+                        : null;
+                    const correctAnswerRaw = (question.options && typeof correctIndex === "number")
+                        ? question.options[correctIndex]
+                        : null;
+
+                    const userAnswerClean = userAnswerRaw ? self._stripChoiceLabel(userAnswerRaw) : "Not answered";
+                    const correctAnswerClean = correctAnswerRaw ? self._stripChoiceLabel(correctAnswerRaw) : "";
 
                     return (
                         '\n<div class="review-question mb-4 p-4 border rounded-lg ' +
@@ -1537,14 +1595,14 @@
                         '\n      <span class="ml-2 ' +
                         (isCorrect ? "text-green-600" : "text-red-600") +
                         ' font-medium">' +
-                        (question.options[userAnswerIndex] || "Not answered") +
+                        userAnswerClean +
                         "</span>" +
                         "\n    </div>" +
                         (!isCorrect
                             ? '\n    <div class="text-sm">' +
                             '\n      <span class="text-gray-600">Correct answer:</span>' +
                             '\n      <span class="ml-2 text-green-600 font-medium">' +
-                            (question.options[correctIndex] || "") +
+                            correctAnswerClean +
                             "</span>" +
                             "\n    </div>"
                             : "") +
@@ -1565,6 +1623,7 @@
             console.error("Error generating detailed review:", error);
         }
     };
+
 
     /* ----------------------------------------
        TEXT HELPERS (PROGRESS / CEFR STYLE)
@@ -1650,16 +1709,14 @@
         );
     };
 
-    // MODIFIÉ: Anti-doublon via dataset.bound (évite listeners empilés)
+    // CLICK HANDLER: simple et fiable (les écrans sont re-rendus, donc pas de doublons sur les mêmes nodes)
     UICore.prototype.addClickHandler = function (elementId, handler) {
         const el = document.getElementById(elementId);
         if (!el) return;
 
-        if (el.dataset.bound === "1") return; // Anti-doublon
-        el.dataset.bound = "1";
-
         el.addEventListener("click", handler);
     };
+
 
     // MODIFIÉ: bindEvent utilise addClickHandler (binding unique)
     UICore.prototype.bindEvent = function (elementId, action) {
@@ -1682,8 +1739,9 @@
     };
 
     if (global.TYF_CONFIG && global.TYF_CONFIG.debug && global.TYF_CONFIG.debug.enabled) {
-        console.log("UICore v3.1 loaded");
+        console.log("UICore v3.0 loaded");
     }
+
 
     global.UICore = UICore;
 })(window);
