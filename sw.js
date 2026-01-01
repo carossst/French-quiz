@@ -1,6 +1,6 @@
-/* sw.js - Service Worker v3.1 pour Test Your French */
+/* sw.js - Service Worker v3.0 pour Test Your French */
 
-const APP_VERSION = "3.1.0";   // À incrémenter à chaque gros déploiement
+const APP_VERSION = "3.0";   // À incrémenter à chaque gros déploiement
 const CACHE_PREFIX = "tyf";
 
 const CACHE_NAME = `${CACHE_PREFIX}-cache-${APP_VERSION}`;
