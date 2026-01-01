@@ -427,7 +427,7 @@ UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
 
     container.innerHTML = this.generateSimpleFeedback(isCorrect, question);
     container.classList.remove("hidden");
-    container.classList.add("as-toast");
+    // container.classList.add("as-toast"); // Removed - feedback displays inline below question
     container.setAttribute("role", "status");
     container.setAttribute("aria-live", "polite");
     container.tabIndex = -1;
