@@ -472,12 +472,13 @@ StorageManager.prototype.unlockQuizWithFP = function () {
 };
 
 
-SStorageManager.prototype.isThemeUnlocked = function (themeId) {
+StorageManager.prototype.isThemeUnlocked = function (themeId) {
   if (themeId === 1) return true; // Colors toujours gratuit
   const base = themeId * 100;
   // Compat: certaines anciennes versions ont pu stocker 200 au lieu de 201
   return this.data.unlockedQuizzes.includes(base + 1) || this.data.unlockedQuizzes.includes(base);
 };
+
 
 
 StorageManager.prototype.canUnlockTheme = function (themeId) {

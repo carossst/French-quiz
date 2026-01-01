@@ -466,14 +466,22 @@
         const totalQuestions =
             (this.quizManager.currentQuiz && this.quizManager.currentQuiz.questions.length) || 0;
 
+        // ✅ NORMALISATION ICI
+        const quizName = this.quizManager.currentQuiz
+            ? this.quizManager.currentQuiz.name
+                .replace(/[–—]/g, "-")
+                .replace(/[·•]/g, "|")
+            : "";
+
+
         return (
             '\n<div class="question-content">' +
             (hasAudio ? this.generateAudioHTML(question.audio) : "") +
             '\n  <div class="question-header mb-4">' +
             '\n    <div class="flex items-center justify-between mb-4">' +
             '\n      <span class="text-sm font-medium text-gray-600">' +
-            (this.quizManager.currentQuiz ? this.quizManager.currentQuiz.name : "") +
-            " · Question " +
+            quizName +
+            " | Question " +
             questionNumber +
             " of " +
             totalQuestions +
@@ -815,18 +823,22 @@
         const self = this;
 
         const nextThemeId = (function () {
-            // plus petit thème premium non débloqué dont le précédent est débloqué
-            for (let i = 0; i < themeData.length; i++) {
-                const t = themeData[i];
-                if (!t || typeof t.id !== "number") continue;
+            const list = (themeData || [])
+                .filter(t => t && t.id != null)
+                .map(t => ({ ...t, id: Number(t.id) }))
+                .filter(t => Number.isFinite(t.id))
+                .sort((a, b) => a.id - b.id);
+
+            for (let i = 0; i < list.length; i++) {
+                const t = list[i];
                 if (t.id === 1) continue;
 
-                const unlocked = self.storageManager.isThemeUnlocked?.(t.id);
-                const prevUnlocked = self.storageManager.isThemeUnlocked?.(t.id - 1);
+                const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
+                const prev = list[i - 1];
+                const prevUnlocked = prev ? !!self.storageManager.isThemeUnlocked?.(prev.id) : true;
 
                 if (!unlocked && prevUnlocked) return t.id;
             }
-            // fallback: Numbers
             return 2;
         })();
 
@@ -842,7 +854,7 @@
 
             return (
                 '<div class="text-xs text-gray-400 mt-2">' +
-                '🔒 Complete <strong>' + previousTheme + '</strong> first · ' +
+                '🔒 Complete <strong>' + previousTheme + '</strong> first | ' +
                 '<button type="button" class="text-purple-600 hover:underline" data-action="show-roadmap">See roadmap</button>' +
                 '</div>'
             );
@@ -1109,8 +1121,9 @@
     UICore.prototype.generateQuizSelectionHTML = function () {
         const themeId = this.quizManager.currentThemeId;
         const theme = (this.themeIndexCache || []).find(function (t) {
-            return t.id === themeId;
+            return Number(t.id) === Number(themeId);
         });
+
 
         if (!theme) {
             return this.generateErrorHTML("Theme not found");
