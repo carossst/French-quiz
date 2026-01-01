@@ -1,0 +1,119 @@
+{
+  "id": 1002,
+  "themeId": 10,
+  "name": "Writing and Reading Conversation Café Test 2",
+  "description": "Use café vocabulary in everyday conversation contexts.",
+  "version": "3.0.0",
+  "questions": [
+    {
+      "question": "Translate into French \"Can we meet up for coffee tomorrow?\"",
+      "options": [
+        "A. On se retrouve où?",
+        "B. On va au café demain ?",
+        "C. Tu achètes du café demain ?",
+        "D. Viens prendre un café."
+      ],
+      "correctAnswer": "B. On va au café demain ?",
+      "explanation": "This is the most natural and common way to suggest meeting for coffee in French. It uses the informal \"on\" and the future time marker \"demain.\""
+    },
+    {
+      "question": "Translate into French \"I'd like to but I am already going to see a friend tomorrow.\"",
+      "options": [
+        "A. J'aime bien l'idée parce que je vais déjà au café avec un ami demain.",
+        "B. J'aimerais bien mais je vais déjà au cinéma.",
+        "C. J'aimerais bien mais j'ai déjà prévu de voir une amie demain.",
+        "D. Non mais je vais déjà prendre un café demain."
+      ],
+      "correctAnswer": "C. J'aimerais bien mais j'ai déjà prévu de voir une amie demain.",
+      "explanation": "This uses the conditional \"j'aimerais\" (I would like) with \"mais\" (but) to politely decline, followed by the reason using \"j'ai déjà prévu de\" (I've already planned to)."
+    },
+    {
+      "question": "Translate into French \"What about Saturday?\" (informal)",
+      "options": [
+        "A. Et samedi, tu peux ?",
+        "B. Et samedi, tu viens jamais ?",
+        "C. Et samedi, vous voulez venir ?",
+        "D. Et samedi, c'est bien pour vous ?"
+      ],
+      "correctAnswer": "A. Et samedi, tu peux ?",
+      "explanation": "This is a natural informal way to suggest an alternative day. \"Tu peux\" means \"can you\" in the familiar form."
+    },
+    {
+      "question": "Translate into French \"Yes. I can on Saturday. After 4pm?\"",
+      "options": [
+        "A. Oui, c'est possible samedi. A partir de 17h, ça te va ?",
+        "B. Oui, c'est possible samedi. A partir de 4h, ça te va ?",
+        "C. Oui, c'est possible samedi. On va partir de 16h, ça te va ?",
+        "D. Oui, c'est possible samedi. A partir de 16h, ça te va ?"
+      ],
+      "correctAnswer": "D. Oui, c'est possible samedi. A partir de 16h, ça te va ?",
+      "explanation": "In French, 4pm is expressed as 16h (24-hour format is standard in France). \"A partir de\" means \"from/starting at\" and \"ça te va\" means \"does that work for you.\""
+    },
+    {
+      "question": "Translate into French \"Yes. It's ok. But let's go to get drinks instead?\"",
+      "options": [
+        "A. Oui, c'est bon. Mais on peut aller prendre un verre à la place ?",
+        "B. Oui, c'est bien. Mais on peut pas aller prendre des verres à la place ?",
+        "C. Oui, c'est bon. Mais on va manger un truc à la place ?",
+        "D. Oui, c'est bien. Mais on peut pas aller prendre du vin à la place ?"
+      ],
+      "correctAnswer": "A. Oui, c'est bon. Mais on peut aller prendre un verre à la place ?",
+      "explanation": "\"Prendre un verre\" is the idiomatic expression for \"to have a drink\" in French. \"A la place\" means \"instead.\""
+    },
+    {
+      "question": "Translate into French \"Let's go to Café Charbon. You can have a drink and I'll have a coffee.\"",
+      "options": [
+        "A. Allons aux Café Charbon, tu pourras boire de l'alcool sans café.",
+        "B. Allons aux Café Charbon, on pourra boire des coups.",
+        "C. Allons aux Café Charbon, tu pourras prendre un verre et moi un café.",
+        "D. Allez aux Café Charbon, vous pourrez prendre des verres et moi un café."
+      ],
+      "correctAnswer": "C. Allons aux Café Charbon, tu pourras prendre un verre et moi un café.",
+      "explanation": "\"Allons\" is the imperative form of \"aller\" (let's go). Note: it should be \"Allons au Café Charbon\" (singular, masculine) not \"aux.\""
+    },
+    {
+      "question": "Translate into French \"Ok. I'm looking forward to seeing you.\"",
+      "options": [
+        "A. Ça marche. J'ai hâte de te voir.",
+        "B. Ça court. J'ai hâte de te voir.",
+        "C. Ça saute. J'ai hâte de te voir.",
+        "D. Ça descend. J'ai hâte de te voir."
+      ],
+      "correctAnswer": "A. Ça marche. J'ai hâte de te voir.",
+      "explanation": "\"Ça marche\" is a colloquial way to say \"okay/that works.\" \"J'ai hâte de\" means \"I'm looking forward to\" or \"I can't wait to.\""
+    },
+    {
+      "question": "Translate into French \"Me too. And they have very good non-dairy milks there.\"",
+      "options": [
+        "A. Moi aussi. Et ils ont de mauvais laits végétaux.",
+        "B. Moi aussi. Et ils ont des laits végétaux là-bas.",
+        "C. Moi aussi. Et ils ont de très bons laits végétaux là-bas.",
+        "D. Moi aussi. Et ils ont des très bons laits."
+      ],
+      "correctAnswer": "C. Moi aussi. Et ils ont de très bons laits végétaux là-bas.",
+      "explanation": "\"Laits végétaux\" is the term for non-dairy/plant-based milks in French. \"De très bons\" means \"very good\" (plural agreement)."
+    },
+    {
+      "question": "Translate into French \"Yummy. We will be able to sit outside. See you on Saturday!\"",
+      "options": [
+        "A. Miam. On ne pourra pas s'installer en terrasse. Au samedi !",
+        "B. Miam. On pourra s'installer en terrasse. A samedi !",
+        "C. Bon. On pourra nous installer en terrasse. Au samedi !",
+        "D. Bon. On pourra t'installer en terrasse. A le samedi !"
+      ],
+      "correctAnswer": "B. Miam. On pourra s'installer en terrasse. A samedi !",
+      "explanation": "\"Miam\" expresses yummy/yum. \"S'installer en terrasse\" means to sit outside. \"A samedi\" is the correct way to say \"see you on Saturday\" (no article before days)."
+    },
+    {
+      "question": "Translate into French \"Great idea for outdoor sitting. See you on Saturday! Kiss.\"",
+      "options": [
+        "A. Génial pour la terrasse. A demain ! Bisous.",
+        "B. Génial pour la terrasse. A samedi ! Bisous.",
+        "C. Génial pour la terrasse. A vendredi ! Bisous.",
+        "D. Géniale pour la terrasse. A samedi ! Bisous."
+      ],
+      "correctAnswer": "B. Génial pour la terrasse. A samedi ! Bisous.",
+      "explanation": "\"Génial\" (not \"géniale\" because it refers to \"pour la terrasse\" which is feminine but the adjective stays invariable in this context). \"Bisous\" is a casual way to sign off messages among friends."
+    }
+  ]
+}

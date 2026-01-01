@@ -1,0 +1,129 @@
+{
+  "id": 1004,
+  "themeId": 10,
+  "name": "Listening Café Conversation Test 4",
+  "description": "Practice listening in realistic café dialogues.",
+  "version": "3.0.0",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Salut, ça va bien ?",
+        "B. Salut, tu vas bien ?",
+        "C. Salut, ça va-tu ?",
+        "D. Salut, ça va ?"
+      ],
+      "correctAnswer": "D. Salut, ça va ?",
+      "explanation": "Salut, ça va ? (Hi, how are you?)",
+      "audio": "TYF_Cafe_4_1.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Oui, superé toi ?",
+        "B. Oui, souper. Et toi ?",
+        "C. Oui, super. Et toi ?",
+        "D. Oui, super. E toi ?"
+      ],
+      "correctAnswer": "C. Oui, super. Et toi ?",
+      "explanation": "Oui, super. Et toi ? (Yeah, great. How about you?)",
+      "audio": "TYF_Cafe_4_2.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Un peu fatiguée. Ça va me faire du bien de boire un café !",
+        "B. Un peu fatiguée. Ça va faire du bien de boire du café !",
+        "C. Je suis fatiguée. Ça va faire du bien de boire un café !",
+        "D. Un peu fatiguée. Ça va faire du bien de boire avec un café !"
+      ],
+      "correctAnswer": "A. Un peu fatiguée. Ça va me faire du bien de boire un café !",
+      "explanation": "Un peu fatiguée. Ça va me faire du bien de boire un café ! (A little tired. It'll do me good to have a coffee!)",
+      "audio": "TYF_Cafe_4_3.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. C'est sûr. De plus, c'est pas bon ici. Ils ne torrefient pas eux-mêmes leur café.",
+        "B. C'est pas sûr. De plus, c'est très bon. Ils torrefient eux-mêmes leur café.",
+        "C. C'est sûr. De plus, c'est trop bon ici. Ils torrefient eux-mêmes leur café.",
+        "D. C'est sûr. En plus, c'est trop bon ici. Ils torrefient eux-mêmes le café."
+      ],
+      "correctAnswer": "C. C'est sûr. De plus, c'est trop bon ici. Ils torrefient eux-mêmes leur café.",
+      "explanation": "C'est sûr. De plus, c'est trop bon ici. Ils torrefient eux-mêmes leur café. (That's for sure. Plus, it's so good here. They roast their own coffee.)",
+      "audio": "TYF_Cafe_4_4.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ahmai ç'est pas trop fort du coup ?",
+        "B. Ah mais ç'est pas trop fort du coup ?",
+        "C. Ah mais çe n'est pas trop fort du coup ?",
+        "D. Ah mais ç'est pas trop forte du coup ?"
+      ],
+      "correctAnswer": "B. Ah mais ç'est pas trop fort du coup ?",
+      "explanation": "Ah mais ç'est pas trop fort du coup ? (Ah, but isn't that too strong?)",
+      "audio": "TYF_Cafe_4_5.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Non, ça va pas. C'est bien dosé je trouve. Allez, je commande. Tu veux quoi ?",
+        "B. Non, ça va. C'est bien dosé je trouve. Allez, je commande. Tu veux quoi ?",
+        "C. Non, ça va. C'est très bien dosé je trouve. Allez, je commande. Tu veux quoi ?",
+        "D. Non, ça va pas. C'est bien dosé je trouve. Allez, je nous commande. Tu veux quoi ?"
+      ],
+      "correctAnswer": "B. Non, ça va. C'est bien dosé je trouve. Allez, je commande. Tu veux quoi ?",
+      "explanation": "Non, ça va. C'est bien dosé je trouve. Allez, je commande. Tu veux quoi ? (No, it's fine. I think it's well-balanced. Come on, I'll order. What would you like?)",
+      "audio": "TYF_Cafe_4_6.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Un café et un croissant, s'il te plaît.",
+        "B. Une café et un croissant, s'il te plaît.",
+        "C. Un café et une croissant, s'il te plaît.",
+        "D. Une café et une croissant, s'il te plaît."
+      ],
+      "correctAnswer": "A. Un café et un croissant, s'il te plaît.",
+      "explanation": "Un café et un croissant, s'il te plaît. (A coffee and a croissant, please.) Note that here plaît has a circumflex accent on 'i'. Since 1990, it's not mandatory to have a circumflex accent. You can also write plait without an accent circumflex.",
+      "audio": "TYF_Cafe_4_7.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Ok. ça marche. Excusez-moi ? Un caféset un croissant s'il vous plaît",
+        "B. Ok. ça marche. Excusez-nous ? Deux cafés et un croissant s'il vous plaît ?",
+        "C. Ok. ça marche. Excusez-moi ? Deux cafés et une croissant s'il vous plaît ?",
+        "D. Ok. ça marche. Excusez-moi ? Deux cafés et un croissant s'il vous plaît ?"
+      ],
+      "correctAnswer": "D. Ok. ça marche. Excusez-moi ? Deux cafés et un croissant s'il vous plaît ?",
+      "explanation": "Ok. ça marche. Excusez-moi ? Deux cafés et un croissant s'il vous plaît ? (Okay. You got it. Excuse me? Two coffees and a croissant, please?)",
+      "audio": "TYF_Cafe_4_8.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Deux verres d'eau s'il vous plaît ?",
+        "B. Et des verres d'eau aussi s'il te plaît ?",
+        "C. Et deux verres d'eau aussi s'il vous plaît ?",
+        "D. Je veux deux verres d'eau aussi s'il vous plaît ?"
+      ],
+      "correctAnswer": "C. Et deux verres d'eau aussi s'il vous plaît ?",
+      "explanation": "Et deux verres d'eau aussi s'il vous plaît ? (And two glasses of water too, please?)",
+      "audio": "TYF_Cafe_4_9.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Bon bah voilà, ça va arriver. Alors pourquoi tu es fatiguée? C'est le boulot ?",
+        "B. Bon voilà, ça va arriver. Alors pourquoi tu es fatiguée? C'est le boulot ?",
+        "C. Bon voilà, ça va arriver. Alors pour quoi tu es si fatiguée? C'est le boulot ?",
+        "D. Bon voilà, ça va arriver. Alors pourquoi t'es fatiguée? C'est le boulot ?"
+      ],
+      "correctAnswer": "B. Bon voilà, ça va arriver. Alors pourquoi tu es fatiguée? C'est le boulot ?",
+      "explanation": "Bon voilà, ça va arriver. Alors pourquoi tu es fatiguée? C'est le boulot ? (Well, it's about to happen. So why are you tired? Is it work?)",
+      "audio": "TYF_Cafe_4_10.mp3"
+    }
+  ]
+}

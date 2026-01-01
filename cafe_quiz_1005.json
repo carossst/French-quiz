@@ -1,0 +1,129 @@
+{
+  "id": 1005,
+  "themeId": 10,
+  "name": "Writing and Reading & Listening Café Test 5",
+  "description": "Mix of writing, reading and listening skills for café situations.",
+  "version": "3.0.0",
+  "questions": [
+    {
+      "question": "Je vais commander un café ___ (fill the blank)",
+      "options": [
+        "A. au bar.",
+        "B. allongé.",
+        "C. avec du sucre.",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Je vais commander un café allongé. (I'll order a café allongé.) Je vais commander un café au bar. (I'll order a coffee from the bar.) Je vais commander un café avec du sucre. (I'll order a coffee with sugar.)",
+      "audio": null
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Bonjour, vous voulez quoi ?",
+        "B. Bonjour, vous pouvez quoi ?",
+        "C. Bonjour, vous en voulez quoi ?",
+        "D. Bonjour, vous le voulez quoi ?"
+      ],
+      "correctAnswer": "A. Bonjour, vous voulez quoi ?",
+      "explanation": "Bonjour, vous voulez quoi ? (Hello, what do you want?)",
+      "audio": "TYF_Cafe_5_2.mp3"
+    },
+    {
+      "question": "J'aimerais ___ un café. (fill the blank)",
+      "options": [
+        "A. lancer",
+        "B. digérer",
+        "C. avoir",
+        "D. commander"
+      ],
+      "correctAnswer": "D. commander",
+      "explanation": "J'aimerais commander un café. (I'd like to order a coffee.)",
+      "audio": null
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Quoi comme café ?",
+        "B. Quel café ?",
+        "C. Comment le café ?",
+        "D. Café quoi ?"
+      ],
+      "correctAnswer": "A. Quoi comme café ?",
+      "explanation": "Quoi comme café ? (What kind of coffee?)",
+      "audio": "TYF_Cafe_5_4.mp3"
+    },
+    {
+      "question": "Un café filtre ___. (fill the blank)",
+      "options": [
+        "A. sans sucré",
+        "B. bien secoué",
+        "C. et une orange pressée",
+        "D. et une verre d'eau"
+      ],
+      "correctAnswer": "C. et une orange pressée",
+      "explanation": "Un café filtre et une orange pressée. (A drip coffee and a fresh-squeezed orange juice)",
+      "audio": null
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Très bien. Je vous apporte ça.",
+        "B. Ok. Très bon. Je vous apporte ça.",
+        "C. Ok. Très bien. Je vous l'apporte ça.",
+        "D. Ok. Très bien. Je vous apporte ça."
+      ],
+      "correctAnswer": "D. Ok. Très bien. Je vous apporte ça.",
+      "explanation": "Ok. Très bien. Je vous apporte ça. (Okay. All right, then. I'll get that for you.)",
+      "audio": "TYF_Cafe_5_6.mp3"
+    },
+    {
+      "question": "Entendu. ___ (fill the blank)",
+      "options": [
+        "A. Merci.",
+        "B. Merci beaucoup.",
+        "C. Merci à vous.",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Entendu. Merci. (All right. Thank you.) Entendu. Merci beaucoup. (All right. Thank you very much.) Entendu. Merci à vous. (All right. Thank you.) It's a more formal response with à vous.",
+      "audio": null
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Vous pouvez du lait ?",
+        "B. Vous pouvez aussi boire du lait ?",
+        "C. Vous voulez du lait aussi ?",
+        "D. Vous voulez le lait après ?"
+      ],
+      "correctAnswer": "C. Vous voulez du lait aussi ?",
+      "explanation": "Vous voulez du lait aussi ? (Would you like some milk as well?)",
+      "audio": "TYF_Cafe_5_8.mp3"
+    },
+    {
+      "question": "Oui merci. Avec du lait végétal, ___ (fill the blank), s'il vous plaît.",
+      "options": [
+        "A. de l'eau d'avoine si vous avez",
+        "B. du lait d'avoine si vous avez",
+        "C. du jus d'avoine si vous avez",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. du lait d'avoine si vous avez",
+      "explanation": "Oui merci. Avec du lait végétal, du lait d'avoine si vous avez, s'il vous plaît. (Yes, thank you. With non-dairy milk, oat milk if you have it, please.)",
+      "audio": null
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. J'ai noté.",
+        "B. C'est annoté.",
+        "C. C'est noté.",
+        "D. Avec du thé ?"
+      ],
+      "correctAnswer": "C. C'est noté.",
+      "explanation": "C'est noté. (Noted.)",
+      "audio": "TYF_Cafe_5_10.mp3"
+    }
+  ]
+}

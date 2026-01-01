@@ -1,0 +1,119 @@
+{
+  "id": 1001,
+  "themeId": 10,
+  "name": "Writing and Reading Café Test 1",
+  "description": "Practice café vocabulary and grammar through writing and reading exercises.",
+  "version": "3.0.0",
+  "questions": [
+    {
+      "question": "To politely call/address the waiter/waitress, it is best to use the greeting ___.",
+      "options": [
+        "A. Salut",
+        "B. Bonjour ou Bonsoir",
+        "C. Serveur ou Serveuse",
+        "D. No greeting. Just starting a sentence."
+      ],
+      "correctAnswer": "B. Bonjour ou Bonsoir",
+      "explanation": "Polite greetings like \"Bonjour ou Bonsoir\" are customary when addressing the waiter. While the other options include greetings, they lack the appropriate formality and cultural resonance needed in a polite conversation. Cultural tip: In France, it is polite to greet people with a \"Bonjour\" (in the morning or during the day) or a \"Bonsoir\" (in the evening) when entering a public place or starting a conversation."
+    },
+    {
+      "question": "How would you ask for a coffee and a croissant in a café?",
+      "options": [
+        "A. Un café et un croissant, s'il vous plait.",
+        "B. Je veux un latte et un croissant.",
+        "C. Donnez café et croissant.",
+        "D. Puis-je commander un café et une viennoiserie?"
+      ],
+      "correctAnswer": "A. Un café et un croissant, s'il vous plait.",
+      "explanation": "Using s'il vous plait expresses your request politely in a typical French café conversation. While the other options convey similar intentions, they lack the specific politeness and common usage found in everyday French. You can say Bonjour as well if you have not said it yet."
+    },
+    {
+      "question": "Which sentence is correct?",
+      "options": [
+        "A. J'aimes Les Deux Magots",
+        "B. Je vais au Le Café de Flore",
+        "C. J'adore commander La Closerie des Lilas",
+        "D. Mes deux cafés littéraires préférés sont les Deux Magots et le Café de Flore."
+      ],
+      "correctAnswer": "D. Mes deux cafés littéraires préférés sont les Deux Magots et le Café de Flore.",
+      "explanation": "Les Deux Magots et le Café de Flore are renowned literary cafés frequented by celebrated writers. But be careful, the service can be a bit outdated sometimes (not the most attentive). Les Deux Magots was named after Les Deux Magots de la Chine (two statues representing Chinese \"mandarins,\" or \"magicians\" who gaze serenely over the room and keep an eye on things), this cultural landmark cafe is facing the Café de Flore. Café de Flore was opened in the 1880s, its name comes from a sculpture of Flora, the goddess of flowers and the season of spring in Roman mythology."
+    },
+    {
+      "question": "What does \"on va au café\" mean?",
+      "options": [
+        "A. Let's go buy a coffee.",
+        "B. Let's go to a coffee shop.",
+        "C. Let's grow coffee.",
+        "D. Let's go relax."
+      ],
+      "correctAnswer": "B. Let's go to a coffee shop.",
+      "explanation": "In French, \"café\" commonly refers to a place where you can order café in a vibrant social atmosphere. While the other options touch on aspects of coffee, they don't capture the broader sense of a café as a social space."
+    },
+    {
+      "question": "What does \"avec du sucre, s'il vous plait\" mean?",
+      "options": [
+        "A. With sweets, please.",
+        "B. With salt, please.",
+        "C. With sugar, please.",
+        "D. With spices, please."
+      ],
+      "correctAnswer": "C. With sugar, please.",
+      "explanation": "When in France, asking for sugar is as simple as saying \"C. Avec du sucre, s'il vous plait.\" Before the introduction of sugar in the 12th century, mediaeval European cuisine relied on alternative sweeteners such as honey and fruits to add sweetness to dishes and beverages."
+    },
+    {
+      "question": "What does \"prendre un café en terrasse\" mean?",
+      "options": [
+        "A. Drink a hot coffee at the café counter",
+        "B. Enjoy a full meal inside the café",
+        "C. Go somewhere where we can enjoy a coffee outside",
+        "D. Order a dessert to share with friends"
+      ],
+      "correctAnswer": "C. Go somewhere where we can enjoy a coffee outside",
+      "explanation": "\"Prendre un café en terrasse\" means to enjoy a coffee outside, typically on the terrace of a café. This is a beloved French tradition, especially in nice weather."
+    },
+    {
+      "question": "What does \"un café allongé\" mean?",
+      "options": [
+        "A. A coffee served with a sweet pastry",
+        "B. A coffee with added almond flavor",
+        "C. An espresso diluted with hot water",
+        "D. A coffee with a dash of cinnamon"
+      ],
+      "correctAnswer": "C. An espresso diluted with hot water",
+      "explanation": "Un café allongé actually translates to \"an elongated coffee\" in French cafe slang. It refers to an espresso that's been diluted with hot water, resulting in a milder taste and a larger volume compared to a traditional espresso shot. However, it's still served in a smaller cup than a typical American coffee."
+    },
+    {
+      "question": "What does \"un café gourmand\" mean?",
+      "options": [
+        "A. A strong coffee",
+        "B. A coffee served with a selection of tiny pastries",
+        "C. A coffee with a lot of sugar",
+        "D. A delicious latte"
+      ],
+      "correctAnswer": "B. A coffee served with a selection of tiny pastries",
+      "explanation": "\"Café gourmand\" treats you to a delightful coffee paired with an assortment of tiny pastries. While the other options suggest different types of coffee, they miss the cultural context of the term \"gourmand,\" which refers to the indulgent combination of coffee and pastries."
+    },
+    {
+      "question": "You might have heard of \"French roast\". What is it?",
+      "options": [
+        "A. C'est un café de couleur très claire.",
+        "B. C'est un café au goût intense et corsé.",
+        "C. C'est un café très acide.",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. C'est un café au goût intense et corsé.",
+      "explanation": "Corsé describes something with a strong flavor or body. A \"café corsé\" translates to \"strong coffee\" or \"full-bodied coffee.\" It can also be used for sauces or wines. The profile of French roast coffee is: Intense and bold, Very dark (nearly burnt, often smoky), Somewhat sweet, Much less acidic than lighter roasts, Thin in body, with a more watery mouthfeel than some coffees. Only speciality coffee shops will offer French roast coffees. It's very unlikely to find it in regular cafés."
+    },
+    {
+      "question": "What does \"lait de soja\" mean?",
+      "options": [
+        "A. Soy milk",
+        "B. Almond milk",
+        "C. Plant-based milk",
+        "D. Milk"
+      ],
+      "correctAnswer": "A. Soy milk",
+      "explanation": "\"Lait de soja\" specifically means soy milk in French. While it is a plant-based milk (C), the most precise translation is soy milk."
+    }
+  ]
+}

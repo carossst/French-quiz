@@ -1,0 +1,129 @@
+{
+  "id": 1003,
+  "themeId": 10,
+  "name": "Listening Café Test 3",
+  "description": "Improve your listening skills with café phrases and expressions.",
+  "version": "3.0.0",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Tu veux aller au café ?",
+        "B. Tu peux aller au café ?",
+        "C. Tu veux un café ?",
+        "D. Tu veux prendre un café ?"
+      ],
+      "correctAnswer": "A. Tu veux aller au café ?",
+      "explanation": "Tu veux aller au café ? (Do you want to go to the café?)",
+      "audio": "TYF_Cafe_3_1.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. On va prendre un café en terrasse ?",
+        "B. On va manger et boire un café ?",
+        "C. On va en terrasse ?",
+        "D. Tu veux prendre un café en terrasse ?"
+      ],
+      "correctAnswer": "D. Tu veux prendre un café en terrasse ?",
+      "explanation": "Tu veux prendre un café en terrasse ? (Would you like a coffee on the terrace?)",
+      "audio": "TYF_Cafe_3_2.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Bonsoir",
+        "B. Bonne journée",
+        "C. Bonjourr",
+        "D. Bonjour"
+      ],
+      "correctAnswer": "D. Bonjour",
+      "explanation": "Bonjour (Hello)",
+      "audio": "TYF_Cafe_3_3.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. La torréfaction, c'est très intéressant.",
+        "B. La torréfaction, c'est pas intéressant.",
+        "C. La torréfaction, ce n'est pas intéressant.",
+        "D. La torréfaction, c'est pas très intéressant."
+      ],
+      "correctAnswer": "D. La torréfaction, c'est pas très intéressant.",
+      "explanation": "La torréfaction, c'est pas très intéressant. (Roasting isn't very interesting.)",
+      "audio": "TYF_Cafe_3_4.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Est-ce que votre café est tort ?",
+        "B. Est-ce que votre café a fort ?",
+        "C. Est-ce que votre café est fort ?",
+        "D. Est-ce que votre café a tort ?"
+      ],
+      "correctAnswer": "C. Est-ce que votre café est fort ?",
+      "explanation": "Est-ce que votre café est fort ? (Is your coffee strong?)",
+      "audio": "TYF_Cafe_3_5.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Carbon, Loustic et Coutume sont mes cafés préférés.",
+        "B. Charbon, Lustic et Coutume sont mes cafés préférés.",
+        "C. Charbon, Lustic et Cutume sont mes cafés préférés.",
+        "D. Charbon, Loustic et Coutume sont mes cafés préférés."
+      ],
+      "correctAnswer": "D. Charbon, Loustic et Coutume sont mes cafés préférés.",
+      "explanation": "Charbon, Loustic et Coutume sont mes cafés préférés. (Charbon, Loustic and Coutume are my favorite coffees.)",
+      "audio": "TYF_Cafe_3_6.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Un café et un croissant, s'il vous plaît.",
+        "B. Un petit café et un croissant, s'il vous plaît.",
+        "C. Un, non, deux cafés et un croissant, s'il vous plaît.",
+        "D. Un bon café et un croissant, s'il vous plaît."
+      ],
+      "correctAnswer": "C. Un, non, deux cafés et un croissant, s'il vous plaît.",
+      "explanation": "Un, non, deux cafés et un croissant, s'il vous plaît. (One, no, two coffees and a croissant, please.)",
+      "audio": "TYF_Cafe_3_7.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Bonjour, j'aimerais un café gourmand, s'il vous plaît.",
+        "B. Bonjour, j'aimerais un café tournant s'il vous plaît.",
+        "C. Bonjour, j'aimerais deux cafés, s'il vous plaît.",
+        "D. Bonjour, je voudrais un café normand, s'il vous plaît."
+      ],
+      "correctAnswer": "A. Bonjour, j'aimerais un café gourmand, s'il vous plaît.",
+      "explanation": "Bonjour, j'aimerais un café gourmand, s'il vous plaît. (Hello, I'd like a café gourmand, please).",
+      "audio": "TYF_Cafe_3_8.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Sucre",
+        "B. Sucré",
+        "C. Sacré",
+        "D. Soucre"
+      ],
+      "correctAnswer": "C. Sacré",
+      "explanation": "Sacré (Holy). It's out of context here but it's what she said.",
+      "audio": "TYF_Cafe_3_9.mp3"
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "options": [
+        "A. Un café, s'il vous plaît. Allongé.",
+        "B. Un café, s'il vous plaît. Prolongé.",
+        "C. Un café, s'il vous plaît. A manger.",
+        "D. Un café, s'il vous plaît. Bien corsé."
+      ],
+      "correctAnswer": "D. Un café, s'il vous plaît. Bien corsé.",
+      "explanation": "Un café, s'il vous plaît. Bien corsé. (Coffee, please. Strong.)",
+      "audio": "TYF_Cafe_3_10.mp3"
+    }
+  ]
+}
