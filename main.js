@@ -117,8 +117,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!validatePrerequisites() || !validateJavaScriptModules()) return;
 
-  initServiceWorker();
+  if (typeof initServiceWorker === "function") {
+    initServiceWorker();
+  } else if (typeof window.initServiceWorker === "function") {
+    window.initServiceWorker();
+  } else {
+    Logger.warn("initServiceWorker is not defined - continuing without service worker");
+  }
+
+
   startApplication();
+
 });
 
 function validatePrerequisites() {
@@ -178,8 +187,20 @@ async function startApplication() {
     uiCore = new window.UICore(quizManager, appContainer, resourceManager, storageManager);
     quizManager.ui = uiCore;
 
-    loadUserPreferences(quizManager, storageManager);
-    setupGamificationEvents();
+    if (typeof setupGamificationEvents === "function") {
+      try {
+        setupGamificationEvents();
+      } catch (e) {
+        Logger.warn("Gamification events init failed", e);
+      }
+    }
+
+    if (typeof window.loadUserPreferences === "function") {
+      window.loadUserPreferences(quizManager, storageManager);
+    } else {
+      Logger.warn("loadUserPreferences is not defined - using defaults");
+    }
+
 
     Logger.debug("Managers initialized");
 
@@ -205,19 +226,21 @@ function setupGamificationEvents() {
   cleanupGamificationEvents();
 
   const events = [
-    ["badges-earned", handleBadgeEarned],
-    ["fp-gained", handleFPGained],
-    ["level-up", handleLevelUp],
-    ["premium-unlocked", handlePremiumUnlocked]
-  ];
+    ["badges-earned", window.handleBadgeEarned],
+    ["fp-gained", window.handleFPGained],
+    ["level-up", window.handleLevelUp],
+    ["premium-unlocked", window.handlePremiumUnlocked]
+  ].filter(([_, fn]) => typeof fn === "function");
+
 
   if (!window.TYF_EVENT_HANDLERS) window.TYF_EVENT_HANDLERS = [];
 
   // IMPORTANT: StorageManager dispatch avec window.dispatchEvent -> écouter sur window
-  events.forEach(([eventName, handler]) => {
-    window.addEventListener(eventName, handler);
-    window.TYF_EVENT_HANDLERS.push({ eventName, handler });
+  events.forEach(([eventName, fn]) => {
+    window.addEventListener(eventName, fn);
+    window.TYF_EVENT_HANDLERS.push({ eventName, handler: fn });
   });
+
 
   Logger.debug("Gamification events setup");
 }
