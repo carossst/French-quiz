@@ -133,6 +133,8 @@ UIFeatures.prototype.initializeXPSystem = function () {
     this.setupStorageEvents();
     this.initializeNotifications();
     this.updateFPProgressIndicator();
+
+    this.setupChestTooltip();
 };
 
 UIFeatures.prototype.showXPHeader = function () {
@@ -1071,6 +1073,61 @@ UIFeatures.prototype.getChestInfo = function () {
     const etaText = available ? '' : this.formatDuration(msLeft);
 
     return { available, points: 3, etaText };
+};
+
+UIFeatures.prototype.setupChestTooltip = function () {
+    const btn = document.getElementById("daily-chest-info-btn");
+    const tip = document.getElementById("daily-chest-tooltip");
+    const tipText = document.getElementById("daily-chest-tooltip-text");
+
+    if (!btn || !tip || !tipText) return;
+    if (btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+
+    const isTouch = () =>
+        window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+
+    const buildText = () => {
+        const info = this.getChestInfo();
+        const etaLine = info.available
+            ? "Available now."
+            : `Available in ${info.etaText}.`;
+
+        return (
+            `🎁 One daily chest (calendar streak).\n` +
+            `Minimum: ${info.points} French Points. Bonus possible.\n` +
+            etaLine
+        );
+    };
+
+    const open = () => {
+        tipText.textContent = buildText();
+        tip.classList.remove("hidden");
+        btn.setAttribute("aria-expanded", "true");
+    };
+
+    const close = () => {
+        tip.classList.add("hidden");
+        btn.setAttribute("aria-expanded", "false");
+    };
+
+    btn.addEventListener("mouseenter", () => { if (!isTouch()) open(); });
+    btn.addEventListener("mouseleave", () => { if (!isTouch()) close(); });
+    btn.addEventListener("focus", () => { if (!isTouch()) open(); });
+    btn.addEventListener("blur", () => { if (!isTouch()) close(); });
+
+    btn.addEventListener("click", (e) => {
+        if (!isTouch()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        tip.classList.contains("hidden") ? open() : close();
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!isTouch()) return;
+        if (btn.contains(e.target) || tip.contains(e.target)) return;
+        close();
+    });
 };
 
 UIFeatures.prototype.setupResultsEventListeners = function () {
