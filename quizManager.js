@@ -42,6 +42,17 @@ QuizManager.prototype.resetQuizState = function () {
   console.log("QuizManager: State reset");
 };
 
+QuizManager.prototype.normalizeText = function (s) {
+  return String(s || "")
+    .replace(/â€“/g, "-")
+    .replace(/â€”/g, "-")
+    .replace(/[–—]/g, "-")
+    .replace(/[·•]/g, "|")
+    .replace(/\u00A0/g, " ")
+    .trim();
+};
+
+
 QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
   console.log(`QuizManager: Loading quiz Theme ${themeId}, Quiz ${quizId}`);
 
@@ -57,7 +68,23 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
 
     this.currentThemeId = themeId;
     this.currentQuizId = quizId;
-    this.currentQuiz = quizData;
+    this.currentQuiz = {
+      ...quizData,
+      name: this.normalizeText(quizData.name),
+      description: this.normalizeText(quizData.description),
+      questions: Array.isArray(quizData.questions)
+        ? quizData.questions.map(q => ({
+          ...q,
+          question: this.normalizeText(q.question),
+          text: this.normalizeText(q.text),
+          explanation: this.normalizeText(q.explanation),
+          options: Array.isArray(q.options)
+            ? q.options.map(o => this.normalizeText(o))
+            : q.options
+        }))
+        : quizData.questions
+    };
+
 
     if (
       typeof this.storageManager.isQuizCompleted === "function" &&
@@ -71,7 +98,7 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
 
     this.preprocessQuestions();
 
-    const questionCount = quizData.questions.length;
+    const questionCount = this.currentQuiz.questions.length;
     this.userAnswers = new Array(questionCount).fill(null);
     this.questionStatus = new Array(questionCount).fill(null);
     this.questionTimes = new Array(questionCount).fill(0);

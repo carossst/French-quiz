@@ -30,12 +30,25 @@
         }
     };
 
+
+    /* ----------------------------------------
+       TEXT NORMALIZATION
+       ---------------------------------------- */
+    UICore.prototype.normalizeText = function (s) {
+        return String(s || "")
+            .replace(/â€“/g, "-")
+            .replace(/â€”/g, "-")
+            .replace(/[–—]/g, "-")
+            .replace(/[·•]/g, "|")
+            .replace(/\u00A0/g, " ")
+            .trim();
+    };
+
     /* ----------------------------------------
        LIFECYCLE
        ---------------------------------------- */
     UICore.prototype.start = async function () {
         if (this.isInitialized) return;
-
         try {
             await this.loadThemeIndex();
             this.initializeDependencies();
@@ -466,12 +479,11 @@
         const totalQuestions =
             (this.quizManager.currentQuiz && this.quizManager.currentQuiz.questions.length) || 0;
 
-        // ✅ NORMALISATION ICI
         const quizName = this.quizManager.currentQuiz
-            ? this.quizManager.currentQuiz.name
-                .replace(/[–—]/g, "-")
-                .replace(/[·•]/g, "|")
+            ? this.normalizeText(this.quizManager.currentQuiz.name)
             : "";
+
+
 
 
         return (
@@ -753,7 +765,8 @@
         return this.themeIndexCache
             .map(function (theme) {
                 var isLocked = self.getThemeStateClass(theme) === 'section-theme-locked';
-                var ariaLabel = theme.name + (isLocked ? ' (locked)' : '');
+                var ariaLabel =
+                    self.normalizeText(theme.name) + (isLocked ? " (locked)" : "");
                 return (
                     '\n<div class="theme-item ' +
                     self.getThemeStateClass(theme) +
@@ -767,10 +780,10 @@
                     (theme.icon || "") +
                     "</div>" +
                     '\n    <h3 class="text-sm font-bold mb-1">' +
-                    theme.name +
+                    self.normalizeText(theme.name) +
                     "</h3>" +
                     '\n    <p class="text-xs text-gray-600 line-clamp-2">' +
-                    (theme.description || "") +
+                    self.normalizeText(theme.description || "") +
                     "</p>" +
                     "\n    " +
                     self.getThemeProgressDisplay(theme.id) +
@@ -1029,11 +1042,14 @@
                 '<div class="flex items-center gap-3">' +
                 '<div class="text-2xl">' + (theme.icon || '') + '</div>' +
                 '<div>' +
-                '<div class="font-semibold text-gray-900">' + theme.name + '</div>' +
+                '<div class="font-semibold text-gray-900">' +
+                self.normalizeText(theme.name) +
+                '</div>' +
                 statusHTML +
                 '</div>' +
                 '</div>' +
                 '<div class="text-right">';
+
 
             if (isFree) {
                 rows += '<div class="text-sm font-bold text-green-600">FREE</div>';
@@ -1145,10 +1161,10 @@
             (theme.icon || "") +
             "</div>" +
             '\n      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">' +
-            theme.name +
+            this.normalizeText(theme.name) +
             "</h1>" +
             '\n      <p class="text-lg text-gray-700">' +
-            (theme.description || "") +
+            this.normalizeText(theme.description || "") +
             "</p>" +
             "\n    </div>" +
             '\n    <div id="quizzes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="Quizzes in this theme">' +
@@ -1191,10 +1207,10 @@
                         (!isUnlocked ? '\n    <span class="text-gray-400 text-sm">Locked</span>' : "") +
                         "\n  </div>" +
                         '\n  <h3 class="font-bold text-lg mb-2">' +
-                        quiz.name +
+                        self.normalizeText(quiz.name) +
                         "</h3>" +
                         '\n  <p class="text-gray-600 text-sm">' +
-                        (quiz.description || "") +
+                        self.normalizeText(quiz.description || "") +
                         "</p>" +
                         "\n</div>"
                     );
