@@ -2,26 +2,28 @@
 
 (function (global) {
   function ResourceManagerClass() {
-    this.cache = {
-      metadata: null,
-      metadataTimestamp: 0,
-      quizzes: new Map(),
-      maxQuizzes: 50
-    };
-    // après loadConfiguration()
-    this.cache.maxQuizzes = Number(this.config.maxCacheSize) || this.cache.maxQuizzes;
-
-
     const hostname = global.location.hostname;
     this.isDevelopment = hostname === "localhost" || hostname === "127.0.0.1";
     this.isGitHubPages = hostname.includes("github.io");
 
     this.logger = this.getLogger();
     this.config = this.loadConfiguration();
+
+    this.cache = {
+      metadata: null,
+      metadataTimestamp: 0,
+      quizzes: new Map(),
+      maxQuizzes: 50
+    };
+
+    // maintenant this.config existe
+    this.cache.maxQuizzes = Number(this.config?.maxCacheSize) || this.cache.maxQuizzes;
+
     this.initializeMappings();
 
     this.logger.log("ResourceManager v3.0: " + this.getEnvironment());
   }
+
 
   ResourceManagerClass.prototype.initializeMappings = function () {
     this.themeKeys = {
@@ -107,10 +109,6 @@
 
   ResourceManagerClass.prototype.loadConfiguration = function () {
     const defaults = {
-      // Tous les JSON sont à la racine :
-      //   ./metadata.json
-      //   ./colors_quiz_1.json
-      //   ./numbers_quiz_2.json
       baseDataPath: "./",
       cacheEnabled: !this.isDevelopment,
       maxCacheSize: 50,
@@ -139,21 +137,18 @@
         config.timeouts = defaults.timeouts;
       }
 
-      Object.keys(config.timeouts).forEach(
-        function (key) {
-          const timeout = config.timeouts[key];
-          if (
-            typeof timeout !== "number" ||
-            timeout < 1000 ||
-            timeout > 60000
-          ) {
-            (this.logger || console).warn(
-              "Invalid timeout " + key + ": " + timeout + ", using default"
-            );
-            config.timeouts[key] = defaults.timeouts[key] || 8000;
-          }
-        }.bind(this)
-      );
+      // logger safe (au cas où l'ordre d'init change un jour)
+      const warn = (this.logger && typeof this.logger.warn === "function")
+        ? this.logger.warn.bind(this.logger)
+        : console.warn.bind(console);
+
+      Object.keys(config.timeouts).forEach(function (key) {
+        const timeout = config.timeouts[key];
+        if (typeof timeout !== "number" || timeout < 1000 || timeout > 60000) {
+          warn("Invalid timeout " + key + ": " + timeout + ", using default");
+          config.timeouts[key] = defaults.timeouts[key] || 8000;
+        }
+      });
 
       return config;
     } catch (error) {
@@ -161,6 +156,7 @@
       return defaults;
     }
   };
+
 
   ResourceManagerClass.prototype.accessQuizCache = function (cacheKey) {
     if (this.cache.quizzes.has(cacheKey)) {
