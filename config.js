@@ -14,7 +14,7 @@ window.TYF_CONFIG = {
     ga4Id: "G-MSVVBG559E",
 
     // Stripe Checkout - achat tous thèmes
-    stripePaymentUrl: "https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02",
+    stripePaymentUrl: "https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03",
 
     // Mode debug uniquement en local
     debug: {
