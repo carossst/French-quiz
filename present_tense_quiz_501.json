@@ -1,0 +1,119 @@
+{
+  "id": 501,
+  "themeId": 5,
+  "name": "Writing and Reading Present Tense – Quiz 1",
+  "description": "Practice Present Tense conjugation through writing and reading exercises.",
+  "version": "1.0.0",
+  "questions": [
+    {
+      "question": "How do you say \"I'm watching a movie\"?",
+      "options": [
+        "A. Je regarde un film.",
+        "B. Je regardes un film.",
+        "C. Je regardé un film.",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Je regarde un film.",
+      "explanation": "The verb 'regarder' (to watch) in the present tense with 'je' takes the form 'regarde' without an 's'."
+    },
+    {
+      "question": "How do you say \"She doesn't like the draft coming from the window\"?",
+      "options": [
+        "A. Elles n'aiment pas les courants d'air.",
+        "B. Elles n'aimes pas les courants d'air.",
+        "C. Elle n'aime pas les courants d'air.",
+        "D. Elle m'aime pas les courants d'air."
+      ],
+      "correctAnswer": "C. Elle n'aime pas les courants d'air.",
+      "explanation": "For 'elle' (she), the verb 'aimer' becomes 'aime'. The negative form uses 'ne...pas' around the verb."
+    },
+    {
+      "question": "How do you say \"It's time to eat\"?",
+      "options": [
+        "A. Il est l'heure de manger.",
+        "B. Il est l'heure de mangé.",
+        "C. Il est l'heure manger.",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. Il est l'heure de manger.",
+      "explanation": "The infinitive form 'manger' is used after 'de' in this expression."
+    },
+    {
+      "question": "How do you say \"We are leaving right now\"?",
+      "options": [
+        "A. On part deux suite.",
+        "B. On parte tout suite.",
+        "C. On part tout de suite.",
+        "D. On partent tout de suite."
+      ],
+      "correctAnswer": "C. On part tout de suite.",
+      "explanation": "'On' (we) takes the same conjugation as 'il/elle'. 'Tout de suite' means 'right now'."
+    },
+    {
+      "question": "How do you say \"She's been working here since January\"?",
+      "options": [
+        "A. Elles travaillent ici depuis janvier.",
+        "B. Elle travailles ici depuis janvier.",
+        "C. Elle travaille ici depuis janvier.",
+        "D. Elle travaillé ici depuis janvier."
+      ],
+      "correctAnswer": "C. Elle travaille ici depuis janvier.",
+      "explanation": "In French, the present tense is used with 'depuis' (since) to express an action that started in the past and continues in the present."
+    },
+    {
+      "question": "How do you say \"The cat is jumping everywhere\"?",
+      "options": [
+        "A. Le chat courre partout.",
+        "B. Le chat est en train de courir partout.",
+        "C. Le chat n'arrête pas de courir partout.",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. Le chat est en train de courir partout.",
+      "explanation": "'Est en train de' + infinitive expresses an action happening right now, equivalent to the English present continuous."
+    },
+    {
+      "question": "How do you say \"He's reading in bed\"?",
+      "options": [
+        "A. Il litt dans son lit.",
+        "B. Il lis dans son lit.",
+        "C. Il lit dans son lit.",
+        "D. Ils lisent dans son lit."
+      ],
+      "correctAnswer": "C. Il lit dans son lit.",
+      "explanation": "The verb 'lire' (to read) is irregular. With 'il', it becomes 'lit' with only one 't'."
+    },
+    {
+      "question": "How do you say \"We are happy\"?",
+      "options": [
+        "A. Nous sont heureuses.",
+        "B. Nous somme heureuses.",
+        "C. Nous ont heureuses.",
+        "D. Nous sommes heureuses."
+      ],
+      "correctAnswer": "D. Nous sommes heureuses.",
+      "explanation": "The verb 'être' (to be) with 'nous' is 'sommes'."
+    },
+    {
+      "question": "How do you say \"They are small\"?",
+      "options": [
+        "A. Ils sont petits.",
+        "B. On est petit.",
+        "C. Ils ont petits.",
+        "D. Ils soient petits."
+      ],
+      "correctAnswer": "A. Ils sont petits.",
+      "explanation": "'Être' (to be) with 'ils' becomes 'sont'. The adjective 'petits' agrees in gender and number."
+    },
+    {
+      "question": "How do you say \"You pushed me just now\"?",
+      "options": [
+        "A. Tu vients de me bousculer.",
+        "B. Tu viens de me bousculer.",
+        "C. Tu viennes de me bousculer.",
+        "D. Tu vins de me bousculer."
+      ],
+      "correctAnswer": "B. Tu viens de me bousculer.",
+      "explanation": "'Venir de' + infinitive in the present tense expresses the recent past (just did something)."
+    }
+  ]
+}

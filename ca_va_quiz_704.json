@@ -1,0 +1,129 @@
+{
+    "id": 704,
+    "themeId": 7,
+    "name": "Listening Conversation Ça Va – Quiz 4",
+    "description": "Practice listening comprehension in conversation scenarios using Ça Va vocabulary.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bonjour Madame, ravie de te rencontrer.",
+                "B. Bonjour Madame, ravie de vous rencontrer.",
+                "C. Bonjour Madame, ravissant de vous rencontrer.",
+                "D. Bonjour Monsieur, ravie de vous rencontrer."
+            ],
+            "correctAnswer": "B. Bonjour Madame, ravie de vous rencontrer.",
+            "audio": "TYF_Ca_va_4_1.mp3",
+            "explanation": "Good morning Madam, delighted to meet you. Always start to vouvoyer your in-laws and wait for them to tell you otherwise. Depending on the social and cultural background of your in-laws, they might never offer this to you and it's ok."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bonjour, ravie de vous rencontrer. Mon fils m'a parlé de toi.",
+                "B. Bonjour, ravie de vous rencontrer. Ma fils beaucoup parlé de vous.",
+                "C. Bonjour, ravie de vous rencontrer. Ma fille m'a beaucoup parlé de vous.",
+                "D. Bonjour, ravie de vous rencontrer. Mon fils m'a beaucoup parlé de vous."
+            ],
+            "correctAnswer": "D. Bonjour, ravie de vous rencontrer. Mon fils m'a beaucoup parlé de vous.",
+            "audio": "TYF_Ca_va_4_2.mp3",
+            "explanation": "Hello, nice to meet you. My son has told me a lot about you. It's customary to exchange polite sentences like these at the beginning of a formal conversation."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. J'espère pas en mal. Merci pour l'invitation à dîner.",
+                "B. J'espère en bien. Merci pour le dîner en tout cas.",
+                "C. J'espère en bien. Merci pour l'invitation à dîner en tout cas.",
+                "D. J'espère que c'était en bien. Je voulais vous dire merci pour l'invitation à dîner en tout cas."
+            ],
+            "correctAnswer": "C. J'espère en bien. Merci pour l'invitation à dîner en tout cas.",
+            "audio": "TYF_Ca_va_4_3.mp3",
+            "explanation": "I hope that he said nice things about me. Thank you for the invitation to dinner."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Mais ce n'est pas normal. Je suis votre belle-mère. Cela me fait plaisir de vous inviter à dîner.",
+                "B. Mais c'est normal. Je suis votre belle-mère. Cela me fait plaisir de vous inviter à dîner.",
+                "C. Mais c'est normal. Je suis votre mère. Cela me fait plaisir de vous inviter à dîner.",
+                "D. Mais c'est normal. Je suis votre belle-mère. Avec plaisir."
+            ],
+            "correctAnswer": "B. Mais c'est normal. Je suis votre belle-mère. Cela me fait plaisir de vous inviter à dîner.",
+            "audio": "TYF_Ca_va_4_4.mp3",
+            "explanation": "But that's normal. I'm your mother-in-law. It's a pleasure for me to invite you to dinner. Belle-mère is like beau-père. It is the translation of in-laws. It's the same word for step-mother and step-dad. Only the context can help make the difference. In our case, it's the mother of her romantic partner."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Tenez. Voilà les fleurs pour remercier de votre hospitalité.",
+                "B. Tenez. Des fleurs pour vous remercier de votre hospitalité.",
+                "C. Tiens. Voilà des fleurs pour te remercier de ton hospitalité.",
+                "D. Tenez. Voilà des fleurs pour vous remercier de votre hospitalité."
+            ],
+            "correctAnswer": "D. Tenez. Voilà des fleurs pour vous remercier de votre hospitalité.",
+            "audio": "TYF_Ca_va_4_5.mp3",
+            "explanation": "Here are some flowers to thank you for your hospitality. It's very much expected to arrive at somebody's place with either something to eat, to drink or flowers. It's true for friends, family or any invitation at somebody's home."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Merci mille fois. Ce bouquet de tulipes est très beau. Je vais le mettre dans un vase.",
+                "B. Non merci. Ce bouquet de tulipes n'est pas très beau. Je vais quand même le mettre dans un vase.",
+                "C. Merci mille fois. Ce bouquet de tulipes est beau. Je vais le mettre dans un vase.",
+                "D. Merci. Et parfois ce bouquet de tulipes est joli. Je vais le mettre dans un vase."
+            ],
+            "correctAnswer": "A. Merci mille fois. Ce bouquet de tulipes est très beau. Je vais le mettre dans un vase.",
+            "audio": "TYF_Ca_va_4_6.mp3",
+            "explanation": "Thank you so much. Those tulips are very beautiful. I'm going to put them in a vase. French people pay attention to the specific flower type and its symbolic meaning when choosing a gift. Always ask the florist about the meaning."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Je peux vous aider ?",
+                "B. Je peux t'aider ?",
+                "C. Je peux vouzaider ?",
+                "D. Je peux vous aider si vous voulez ?"
+            ],
+            "correctAnswer": "A. Je peux vous aider ?",
+            "audio": "TYF_Ca_va_4_7.mp3",
+            "explanation": "Can I help you? It's customary to offer to help when you are at somebody's house."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Non seryaux. Merci beaucoup.",
+                "B. Non ça ira. Merci beaucoup.",
+                "C. Non ça rira. Merci beaucoup.",
+                "D. Oui c'est gentil. Merci beaucoup."
+            ],
+            "correctAnswer": "B. Non ça ira. Merci beaucoup.",
+            "audio": "TYF_Ca_va_4_8.mp3",
+            "explanation": "No, I'll be fine. Thank you so much."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Votre salle pour manger est lumineuse.",
+                "B. Votre salle à manger est très lumineuse.",
+                "C. Votre salle à manger, c'est très lumineuse.",
+                "D. Votre salle à manger a beaucoup de lumière."
+            ],
+            "correctAnswer": "B. Votre salle à manger est très lumineuse.",
+            "audio": "TYF_Ca_va_4_9.mp3",
+            "explanation": "Your dining room is very bright. It's polite to find something positive and nice to say about the home you are invited into, especially your in-laws'."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Merci. Installons-nous. L'apéritif nous attend.",
+                "B. Merci. Installons-nous si vous le voulez bien.",
+                "C. Merci. Installez-vous. Le repas nous attend.",
+                "D. Merci. Installons-nous. L'apéritif attend les invités."
+            ],
+            "correctAnswer": "A. Merci. Installons-nous. L'apéritif nous attend.",
+            "audio": "TYF_Ca_va_4_10.mp3",
+            "explanation": "Thank you. Let's settle in, if you don't mind. Appetizers await us. French meals are typically multi-course affairs and it usually starts with an apéritif, either at the table or in a more casual setting. The apéritif or apéro is the equivalent of pre-dinner drinks/ Appetizers or it can be the whole meal if it's an apéro dinatoire."
+        }
+    ]
+}

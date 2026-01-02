@@ -1,0 +1,119 @@
+{
+    "id": 801,
+    "themeId": 8,
+    "name": "Writing and Reading metro – Quiz 1",
+    "description": "Practice vocabulary related to public transportation and the metro through writing and reading exercises.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "How do you say 'public transportation'?",
+            "options": [
+                "A. Transport avec les copains",
+                "B. Transports en commun",
+                "C. Transport commun",
+                "D. Transports communs"
+            ],
+            "correctAnswer": "B. Transports en commun",
+            "explanation": "About 70% of French people living in cities of more than 50 000 inhabitants use public transportation (bus, subway, tramway, train…)."
+        },
+        {
+            "question": "How do you say 'metro line'?",
+            "options": [
+                "A. Lignes de métro",
+                "B. Ligne de métro",
+                "C. Ligne de métros",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. Ligne de métro",
+            "explanation": "Métro is short for "métropolitain" that is itself short for « chemin de fer métropolitain » which means city railroad."
+        },
+        {
+            "question": "How do you say 'subway map'?",
+            "options": [
+                "A. Plan de métro",
+                "B. Carte du métro",
+                "C. Plane de métro",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Plan de métro",
+            "explanation": "The first Parisian subway map was created in 1900 with the opening of Line 1, which linked Porte Maillot to Porte de Vincennes."
+        },
+        {
+            "question": "How do you say 'A ticket please'? ",
+            "options": [
+                "A. Un ticket s'il vous plait ?",
+                "B. Un ticket s'il te plait ?",
+                "C. Un ticket merci ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Un ticket s'il vous plait ?",
+            "explanation": "You need a ticket to get into the subway and most times to exit as well. It's best to keep it with you until you exit."
+        },
+        {
+            "question": "How do you say 'approximately 4 million passengers'? ",
+            "options": [
+                "A. Près de 4 millions de passagers",
+                "B. Environ 4 millions de passagers",
+                "C. Approximativement 4 millions de passagers",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "Approximately 4 million passengers use the Paris Metro every day."
+        },
+        {
+            "question": "How do you say 'metro line 6 connects Charles de Gaulle-Étoile to Nation'? ",
+            "options": [
+                "A. La ligne de métro 6 relie Charles de Gaulle-Étoile à Nation.",
+                "B. La ligne 6 relie Charles de Gaulle-Étoile à Nation.",
+                "C. La ligne de métro 6 circule entre Charles de Gaulle-Étoile et Nation.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "Lines are primarily numbered 1 to 16 (with a few exceptions like 3bis and 7bis). Higher numbers generally correspond to lines built later, often serving outer suburbs."
+        },
+        {
+            "question": "How do you say 'a metro every 2 to 5 minutes'? ",
+            "options": [
+                "A. Une métro toutes les 2 à 5 minutes",
+                "B. Une station tous les 2 à 5 minutes",
+                "C. Un métro toutes les 2 à 5 minutes",
+                "D. Un métro entres 2 à 5 minutes"
+            ],
+            "correctAnswer": "C. Un métro toutes les 2 à 5 minutes",
+            "explanation": "In Paris, A metro is expected every 2 to 5 minutes."
+        },
+        {
+            "question": "How do you say 'The first metro is at 5:30 AM'? ",
+            "options": [
+                "A. Le premier métro est à 5h30.",
+                "B. Le premier métro est à cinq heures trente.",
+                "C. Le premier métro est à cinq heures et demie du matin.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "It's more common to say du matin after 5h30 but people will understand nonetheless since you are talking about the first metro."
+        },
+        {
+            "question": "How do you say 'What time is the last metro leaving'?",
+            "options": [
+                "A. À quelle heure est le dernier métro ?",
+                "B. À telle heure est le dernier métro ?",
+                "C. À comment heure est le dernier métro ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. À quelle heure est le dernier métro ?",
+            "explanation": "In Paris, the last metro of the day is scheduled to depart around 12:30 AM to 12:40 AM from Thursday to Sunday. On Fridays, Saturdays, and eves of holidays, it is between 1:30 AM and 1:40 AM approximately."
+        },
+        {
+            "question": "How do you say 'how to get to the Louvre Museum please'? ",
+            "options": [
+                "A. Comment puis-je me rendre au Louvre s'il vous plait ?",
+                "B. Comment se rendre au Louvre s'il vous plait ?",
+                "C. Comment aller au Louvre s'il vous plait ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "There are three stations that serve the Louvre Museum in Paris, the closest being Palais Royal-Musée du louvre"
+        }
+    ]
+}

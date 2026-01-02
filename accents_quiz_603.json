@@ -1,0 +1,129 @@
+{
+    "id": 603,
+    "themeId": 6,
+    "name": "Listening Accents – Quiz 3",
+    "description": "Practice listening comprehension focusing on accents vocabulary and phrases.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Soixante-quinze",
+                "B. Soixante-cinq",
+                "C. Soixante-seize",
+                "D. Soixante-sept"
+            ],
+            "correctAnswer": "C. Soixante-seize",
+            "audio": "TYF_Accents_3_1.mp3",
+            "explanation": "76"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Le marcher",
+                "B. Le marché",
+                "C. Le marchè",
+                "D. Le marchê"
+            ],
+            "correctAnswer": "B. Le marché",
+            "audio": "TYF_Accents_3_2.mp3",
+            "explanation": "The market"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Il est allè",
+                "B. Il est aller",
+                "C. Il est allé",
+                "D. Il est alle"
+            ],
+            "correctAnswer": "C. Il est allé",
+            "audio": "TYF_Accents_3_3.mp3",
+            "explanation": "He went"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. À demain",
+                "B. A demain",
+                "C. À demein",
+                "D. A demein"
+            ],
+            "correctAnswer": "A. À demain",
+            "audio": "TYF_Accents_3_4.mp3",
+            "explanation": "See you tomorrow"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. J'ai manger",
+                "B. J'ai mangè",
+                "C. J'ai mange",
+                "D. J'ai mangé"
+            ],
+            "correctAnswer": "D. J'ai mangé",
+            "audio": "TYF_Accents_3_5.mp3",
+            "explanation": "I ate"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Le thèâtre",
+                "B. Le theatreu",
+                "C. Le théâtre",
+                "D. Le theater"
+            ],
+            "correctAnswer": "C. Le théâtre",
+            "audio": "TYF_Accents_3_6.mp3",
+            "explanation": "The theatre"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Une fete",
+                "B. Une fête",
+                "C. Une fète",
+                "D. Une feteu"
+            ],
+            "correctAnswer": "B. Une fête",
+            "audio": "TYF_Accents_3_7.mp3",
+            "explanation": "A party"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Peut-ètre",
+                "B. Peut-etre",
+                "C. Peut-être",
+                "D. Peut-étre"
+            ],
+            "correctAnswer": "C. Peut-être",
+            "audio": "TYF_Accents_3_8.mp3",
+            "explanation": "Maybe"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Très bien",
+                "B. Trés bien",
+                "C. Trè bien",
+                "D. Tres bien"
+            ],
+            "correctAnswer": "A. Très bien",
+            "audio": "TYF_Accents_3_9.mp3",
+            "explanation": "Very good"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Dèjà",
+                "B. Dejà",
+                "C. Déja",
+                "D. Déjà"
+            ],
+            "correctAnswer": "D. Déjà",
+            "audio": "TYF_Accents_3_10.mp3",
+            "explanation": "Already"
+        }
+    ]
+}

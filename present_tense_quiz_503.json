@@ -1,0 +1,129 @@
+{
+  "id": 503,
+  "themeId": 5,
+  "name": "Listening Present Tense – Quiz 3",
+  "description": "Improve your listening skills with Present Tense phrases and expressions.",
+  "version": "1.0.0",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q01.mp3",
+      "options": [
+        "A. On ne change pas une équipe qui gagne.",
+        "B. On ne changera pas une équipe qui gagne.",
+        "C. Vous ne changez pas une équipe qui gagne.",
+        "D. On change une équipe qui gagne."
+      ],
+      "correctAnswer": "A. On ne change pas une équipe qui gagne.",
+      "explanation": "Don't change a winning team. This French saying means if something is working well, leave it as is."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q02.mp3",
+      "options": [
+        "A. Fais ce que je disais, ne fais pas ce que je fais.",
+        "B. Fais pas ce que je te dis, fais ce que je fais.",
+        "C. Fais ce que je dis, ne fais pas ce que je fais.",
+        "D. Fais ce que je disais, pas ce que je faisais."
+      ],
+      "correctAnswer": "C. Fais ce que je dis, ne fais pas ce que je fais.",
+      "explanation": "Do as I say, not as I do. This expression acknowledges the gap between advice and practice."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q03.mp3",
+      "options": [
+        "A. Il faut jeter le bébé avec l'eau du bain.",
+        "B. On ne doit pas jeter le bébé avec l'eau de la baignoire.",
+        "C. Il ne faudra jamais jeter le bébé avec l'eau du bain.",
+        "D. Il ne faut pas jeter le bébé avec l'eau du bain."
+      ],
+      "correctAnswer": "D. Il ne faut pas jeter le bébé avec l'eau du bain.",
+      "explanation": "One shouldn't throw out the baby with the bathwater. This warns not to get rid of something valuable while eliminating something bad. During the Middle Ages, families bathed in sequence, and by the time the baby's turn came, the water was so dirty one could forget the baby was there when emptying the bath."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q04.mp3",
+      "options": [
+        "A. Comme l'on faisait son lit, on se couchait.",
+        "B. Comme ils font leur lit, ils se couchent.",
+        "C. Tant qu'on n'aura pas fait son lit, on ne se couchera pas.",
+        "D. Comme on fait son lit, on se couche."
+      ],
+      "correctAnswer": "D. Comme on fait son lit, on se couche.",
+      "explanation": "As you make your bed, so you shall lie in it. We are responsible for the consequences of our actions. If we make our bed poorly, we'll have an uncomfortable night's sleep. Similarly, if we make poor choices in life, we must face the consequences."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q05.mp3",
+      "options": [
+        "A. Il n'y a que les imbéciles qui ne changent pas d'avis.",
+        "B. Il n'y a que les imbéciles qui ne changeront pas d'avis.",
+        "C. Il n'y a que les imbéciles qui ne changeons pas d'avis.",
+        "D. Il n'y a que les imbéciles qui ne changez pas d'avis."
+      ],
+      "correctAnswer": "A. Il n'y a que les imbéciles qui ne changent pas d'avis.",
+      "explanation": "Only fools never change their mind. This saying encourages flexibility and growth."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q06.mp3",
+      "options": [
+        "A. Donner sera donner ; reprendre sera voler.",
+        "B. Donner, c'est pas donner ; c'est voler.",
+        "C. Donner, c'est donnera ; reprendre, c'est volera",
+        "D. Donner, c'est donner ; reprendre, c'est voler."
+      ],
+      "correctAnswer": "D. Donner, c'est donner ; reprendre, c'est voler.",
+      "explanation": "Once given, it is given; to take back is to steal. This emphasizes that gifts should be given freely without expectation of return."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q07.mp3",
+      "options": [
+        "A. Mieux vaut prévenir que guérir.",
+        "B. Mieux vaudrait prévenir que guérir.",
+        "C. Mieux eut vallu prévenir que guérir.",
+        "D. Mieux faudra prévenir que guérir."
+      ],
+      "correctAnswer": "A. Mieux vaut prévenir que guérir.",
+      "explanation": "Prevention is better than a cure. It emphasizes the importance of taking proactive measures to avoid problems rather than dealing with them after they occur."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q08.mp3",
+      "options": [
+        "A. Entre l'arbre et l'écorce, il faut qu'on mette le doigt.",
+        "B. Entre l'arbre et l'écorce, il ne faudra pas mettre le doigt.",
+        "C. Entre l'arbre et l'écorce, il ne faut pas mettre le doigt.",
+        "D. Entre l'arbre et l'écorce, il ne fallait pas mettre les doigts."
+      ],
+      "correctAnswer": "C. Entre l'arbre et l'écorce, il ne faut pas mettre le doigt.",
+      "explanation": "Don't put your finger between the tree and the bark. It's best to stay out of disputes between others, as there is a risk of getting hurt or being blamed for something that is not your fault."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q09.mp3",
+      "options": [
+        "A. C'est dans le besoin qu'on reconnait ses vrais amis.",
+        "B. C'est dans le besoin qu'on reconnaitra ses vrais amis.",
+        "C. C'était dans le besoin qu'on a reconnu ses vrais amis.",
+        "D. C'est dans le besoin qu'on reconnaît ses vrais amis."
+      ],
+      "correctAnswer": "D. C'est dans le besoin qu'on reconnaît ses vrais amis.",
+      "explanation": "A friend in need is a friend indeed. True friends are those who are willing to lend a helping hand, offer emotional support, and stand by you through thick and thin."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/503_q10.mp3",
+      "options": [
+        "A. Les paroles s'envoleront, les écrits resteront.",
+        "B. Les paroles s'envolont, les écrits restont.",
+        "C. Les paroles se sont envolées, les écrits ça reste pas.",
+        "D. Les paroles s'envolent, les écrits restent."
+      ],
+      "correctAnswer": "D. Les paroles s'envolent, les écrits restent.",
+      "explanation": "Spoken words fly away, written words remain. This highlights the permanence of written communication compared to spoken words."
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+    "id": 604,
+    "themeId": 6,
+    "name": "Listening Conversation Accents – Quiz 4",
+    "description": "Practice listening in realistic accents dialogues.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Salut ! Tu veux aller au cinéma ce soir ?",
+                "B. Salut ! Tu veux aller au cinema ce soir ?",
+                "C. Salut ! Tu veux allè au cinéma ce soir ?",
+                "D. Salut ! Tu veux aller au cinèma ce soir ?"
+            ],
+            "correctAnswer": "A. Salut ! Tu veux aller au cinéma ce soir ?",
+            "audio": "TYF_Accents_4_1.mp3",
+            "explanation": "Hi! Do you want to go to the cinema tonight?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui, bonne idée ! Quel film tu propose ?",
+                "B. Oui, bonne idèe ! Quel film tu proposes ?",
+                "C. Oui, bonne idée ! Quel film tu proposes ?",
+                "D. Oui, bonne idee ! Quel film tu proposes ?"
+            ],
+            "correctAnswer": "C. Oui, bonne idée ! Quel film tu proposes ?",
+            "audio": "TYF_Accents_4_2.mp3",
+            "explanation": "Yes, good idea! What film do you suggest?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. J'ai entendu que le nouveau film français est très bien.",
+                "B. J'ai entendu que le nouveau film francais est trés bien.",
+                "C. J'ai entendu que le nouveau film français est trés bien.",
+                "D. J'ai entendu que le nouveau film français è très bien."
+            ],
+            "correctAnswer": "A. J'ai entendu que le nouveau film français est très bien.",
+            "audio": "TYF_Accents_4_3.mp3",
+            "explanation": "I heard that the new French film is very good."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Parfait ! On se retrouve à quelle heure ?",
+                "B. Parfait ! On se retrouve a quelle heure ?",
+                "C. Parfait ! On se retrouve à quel heure ?",
+                "D. Parfait ! On se retrouveu à quelle heure ?"
+            ],
+            "correctAnswer": "A. Parfait ! On se retrouve à quelle heure ?",
+            "audio": "TYF_Accents_4_4.mp3",
+            "explanation": "Perfect! What time shall we meet?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. La séance commence à 20h. On peut se voir à 19h30 devant le cinéma ?",
+                "B. La seance commence à 20h. On peut se voir à 19h30 devant le cinéma ?",
+                "C. La séance commence a 20h. On peut se voir a 19h30 devant le cinéma ?",
+                "D. La séance commence à 20h. On peut se voir à 19h30 devant le cinema ?"
+            ],
+            "correctAnswer": "A. La séance commence à 20h. On peut se voir à 19h30 devant le cinéma ?",
+            "audio": "TYF_Accents_4_5.mp3",
+            "explanation": "The showing starts at 8 PM. Can we meet at 7:30 PM in front of the cinema?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. C'est parfait ! À ce soir alors !",
+                "B. C'est parfait ! A ce soir alors !",
+                "C. C'est parfait ! À ceu soir alors !",
+                "D. C'est parfait ! À ce soire alors !"
+            ],
+            "correctAnswer": "A. C'est parfait ! À ce soir alors !",
+            "audio": "TYF_Accents_4_6.mp3",
+            "explanation": "That's perfect! See you tonight then!"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Tu as dèjà regardè la bande-annonce ?",
+                "B. Tu as déja regardé la bande-annonce ?",
+                "C. Tu as déjà regardè la bande-annonce ?",
+                "D. Tu as déjà regardé la bande-annonce ?"
+            ],
+            "correctAnswer": "D. Tu as déjà regardé la bande-annonce ?",
+            "audio": "TYF_Accents_4_7.mp3",
+            "explanation": "Have you already watched the trailer?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui, elle à l'air géniale ! J'ai hâte de le voir.",
+                "B. Oui, elle a l'air géniale ! J'ai hâteu de le voir.",
+                "C. Oui, elle a l'air geniale ! J'ai hâte de le voir.",
+                "D. Oui, elle a l'air géniale ! J'ai hâte de le voir."
+            ],
+            "correctAnswer": "D. Oui, elle a l'air géniale ! J'ai hâte de le voir.",
+            "audio": "TYF_Accents_4_8.mp3",
+            "explanation": "Yes, it looks brilliant! I can't wait to see it."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Après le film, on pourrait aller prendre un verre ?",
+                "B. Aprés le film, on pourrait aller prendre un verre ?",
+                "C. Après le film, on pourrait allè prendre un verre ?",
+                "D. Après le film, on pourrait aller prendre un verreu ?"
+            ],
+            "correctAnswer": "A. Après le film, on pourrait aller prendre un verre ?",
+            "audio": "TYF_Accents_4_9.mp3",
+            "explanation": "After the film, we could go for a drink?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Excellente idèe ! Je connais un café sympa près du cinéma.",
+                "B. Excellente idée ! Je connais un café sympa prés du cinéma.",
+                "C. Excellente idee ! Je connais un café sympa près du cinéma.",
+                "D. Excellente idée ! Je connais un café sympa près du cinéma."
+            ],
+            "correctAnswer": "D. Excellente idée ! Je connais un café sympa près du cinéma.",
+            "audio": "TYF_Accents_4_10.mp3",
+            "explanation": "Excellent idea! I know a nice café near the cinema."
+        }
+    ]
+}

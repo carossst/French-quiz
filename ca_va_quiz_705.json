@@ -1,0 +1,124 @@
+{
+    "id": 705,
+    "themeId": 7,
+    "name": "Writing and Reading & Listening Ça Va – Quiz 5",
+    "description": "Combine writing/reading and listening skills focusing on basic French greetings and introductions.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Bonjour, c'est mon premier jour à l'université. ___ (fill the blank)",
+            "options": [
+                "A. Je te pose la question ?",
+                "B. Tu peux vous poser une question ?",
+                "C. Je peux te poser une question ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. Je peux te poser une question ?",
+            "explanation": "Bonjour, c'est mon premier jour à l'université. Je peux te poser une question ? (Hello, it's my first day at university. Can I ask you a question?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Désolée. Pas le temps. J'y vais.",
+                "B. Désolée. J'ai pas le temps. J'y vais.",
+                "C. Désolée. Je n'ai pas le temps. Je dois y aller.",
+                "D. Désolée. J'ai tout le temps. Vous pouvez y aller."
+            ],
+            "correctAnswer": "C. Désolée. Je n'ai pas le temps. Je dois y aller.",
+            "audio": "TYF_Ca_va_5_2.mp3",
+            "explanation": "I'm sorry. I don't have time. I don't have time for this. I've got to go."
+        },
+        {
+            "question": "Ok. ___ Bonne journée ! (fill the blank)",
+            "options": [
+                "A. Pas de problème.",
+                "B. Pas problèmes.",
+                "C. C'est problème.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Pas de problème.",
+            "explanation": "Ok. Pas de problème. Bonne journée ! (Ok. No problem. Have a nice day!) On écrit pas de problème, au singulier, quand il n'y a aucune difficulté précise pouvant se présenter."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bonjour, excusez-moi. Je cherche l'amphithéâtre Descartes.",
+                "B. Bonjour, excuse-moi. Je cherche le théâtre Descartes.",
+                "C. Bonjour, excusez-moi. Je suis à la recherche de l'amphi Descartes.",
+                "D. Bonjour, excuse-moi. Je cherche l'amphithéâtre Descartes."
+            ],
+            "correctAnswer": "A. Bonjour, excusez-moi. Je cherche l'amphithéâtre Descartes.",
+            "audio": "TYF_Ca_va_5_4.mp3",
+            "explanation": "Hello, excuse me. I'm looking for the Descartes amphitheatre."
+        },
+        {
+            "question": "Vous cherchez quoi ? ___ (fill the blank)",
+            "options": [
+                "A. Je n'ai pas compris.",
+                "B. Je ne te comprends pas.",
+                "C. Je ne te suis pas. Tu as compris ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Je n'ai pas compris.",
+            "explanation": "Vous cherchez quoi ? Je n'ai pas compris. (What are you looking for? I don't get it.)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Euh. Je cherche ma salle de cours. Ça s'appelle l'amphithéâtre Descartes.",
+                "B. Euh. Je vais chercher où est ma salle de cours. Ça s'appelle l'amphithéâtre Descartes.",
+                "C. Euh. Je cherche ma salle. C'est l'amphithéâtre Descartes.",
+                "D. Euh. Je cherche la salle de cours. Elle s'appelle l'amphithéâtre Descartes."
+            ],
+            "correctAnswer": "A. Euh. Je cherche ma salle de cours. Ça s'appelle l'amphithéâtre Descartes.",
+            "audio": "TYF_Ca_va_5_6.mp3",
+            "explanation": "I'm looking for my classroom. It's called the Descartes amphitheatre."
+        },
+        {
+            "question": "Vous avez un accent. ___ (fill the blank)",
+            "options": [
+                "A. Vous venez d'un autre pays ?",
+                "B. Vous êtes de quelle origine ?",
+                "C. Vous venez d'où ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "Vous avez un accent. Vous venez d'un autre pays ? Vous êtes de quelle origine ? Vous venez d'où ? (You have an accent. Where are you from?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Je suis de New York. Je suis là pour six mois.",
+                "B. Je viens de New York pour six mois.",
+                "C. Je viens de New York. Je suis là pour six mois.",
+                "D. Je viens de New York. Je suis là pour dix mois."
+            ],
+            "correctAnswer": "C. Je viens de New York. Je suis là pour six mois.",
+            "audio": "TYF_Ca_va_5_8.mp3",
+            "explanation": "I'm from New York. I'm here for six months."
+        },
+        {
+            "question": "Et je crois que je suis en retard. ___ (fill the blank) ?",
+            "options": [
+                "A. C'est où l'amphithéâtre Descartes s'il vous plait ?",
+                "B. Où est l'amphithéâtre Descartes s'il vous plait ?",
+                "C. Où se trouve l'amphithéâtre Descartes s'il vous plait ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "Et je crois que je suis en retard. C'est où l'amphithéâtre Descartes s'il vous plait ? Où est l'amphithéâtre Descartes s'il vous plait ? Où se trouve l'amphithéâtre Descartes s'il vous plait ? (And I think I'm late. Where is the Descartes amphitheatre, please?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. L'amphithéâtre Descartes. Tout droit puis à droite et deuxième à droite. Bon cours ! A bientôt.",
+                "B. L'amphithéâtre Descartes. C'est tout droit puis à gauche et deuxième à droite. Bon cours ! A bientôt.",
+                "C. L'amphithéâtre Descartes. C'est tout droit, à gauche et deuxième à gauche. Bon cours ! A bientôt.",
+                "D. L'amphithéâtre Descartes. C'est tout droit puis à gauche et troisième à droite. Bon cours ! A bientôt."
+            ],
+            "correctAnswer": "B. L'amphithéâtre Descartes. C'est tout droit puis à gauche et deuxième à droite. Bon cours ! A bientôt.",
+            "audio": "TYF_Ca_va_5_10.mp3",
+            "explanation": "Descartes amphitheatre. It's straight ahead, then left and second right. Have a good class! See you soon."
+        }
+    ]
+}

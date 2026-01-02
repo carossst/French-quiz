@@ -1,0 +1,124 @@
+{
+  "id": 505,
+  "themeId": 5,
+  "name": "Writing and Reading & Listening Present Tense – Quiz 5",
+  "description": "Mix of writing, reading and listening skills for Present Tense situations.",
+  "version": "1.0.0",
+  "questions": [
+    {
+      "question": "Ah, on y est enfin ! Le château de Chenonceau ___ dans toute sa splendeur ! (fill the blank)",
+      "options": [
+        "A. se dévoile",
+        "B. nous apparaît",
+        "C. est là",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Ah, here we are finally! The Château de Chenonceau reveals itself in all its glory! All three options are grammatically correct present tense forms that work in this context."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/505_q02.mp3",
+      "options": [
+        "A. Magnifique ! Allez regardez le pont qui traverse la rivière. C'est comme un tableau.",
+        "B. Magnifique ! Regarde le pont qui traverse la rivière. C'est comme un tableau.",
+        "C. Magnifique ! Regardez ce pont qui ne traverse pas la rivière. C'est un tableau.",
+        "D. Magnifique ! Regarde le pont qui traverse la rivière. Ce serait un peu comme un tableau."
+      ],
+      "correctAnswer": "B. Magnifique ! Regarde le pont qui traverse la rivière. C'est comme un tableau.",
+      "explanation": "Magnificent! Look at that bridge crossing the river, it looks like a painting. 'Regarde' is the imperative form for 'tu'."
+    },
+    {
+      "question": "J'ai ___. On raconte que les bouquets de fleurs sont à couper le souffle. (fill the blank)",
+      "options": [
+        "A. hâtes de découvrir l'intérieur",
+        "B. hâtons de découvrir l'intérieur",
+        "C. hâte de découvrir l'intérieur",
+        "D. All of the above"
+      ],
+      "correctAnswer": "C. hâte de découvrir l'intérieur",
+      "explanation": "I can't wait to explore the interior. People say that the flower arrangements are breathtaking. 'Avoir hâte' is an expression meaning 'to be eager/can't wait' and 'hâte' is always singular."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/505_q04.mp3",
+      "options": [
+        "A. Dis-moi, as-tu choisi un audioguide pour la visite ?",
+        "B. Dis-moi, vas-tu choisir un audioguide pour la visite ?",
+        "C. Dis-moi, auras-tu choisi un audioguide bientôt pour la visite ?",
+        "D. Dis-moi, qu'as-tu choisi comme audioguide pour la visite ?"
+      ],
+      "correctAnswer": "A. Dis-moi, as-tu choisi un audioguide pour la visite ?",
+      "explanation": "Tell me, have you chosen an audio guide for the tour? Although this uses the passé composé (present perfect), it's asking about a present state resulting from a past action."
+    },
+    {
+      "question": "Oui, j'en ai un en français. Et toi, ___ en toute liberté ? (fill the blank)",
+      "options": [
+        "A. tu préfères visitez",
+        "B. tu préfères visiter",
+        "C. tu préfères visité",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. tu préfères visiter",
+      "explanation": "Yes, I have one in French. And you, do you prefer to visit freely? 'Préférer' is followed by the infinitive 'visiter'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/505_q06.mp3",
+      "options": [
+        "A. En fait, j'hésite encore. J'aime bien avoir des explications mais j'ai aussi envie de me balader tranquillement.",
+        "B. En fait, j'hésitais encore. J'aimerais bien avoir des explications mais j'ai aussi envie de me balader tranquillement.",
+        "C. En fait, on hésite encore. J'ai bien aimé avoir des explications mais j'ai aussi envie de me balader tranquillement.",
+        "D. En fait, je pense ne pas en prendre. J'aime bien avoir des explications mais j'ai aussi envie de me balader tranquillement."
+      ],
+      "correctAnswer": "A. En fait, j'hésite encore. J'aime bien avoir des explications mais j'ai aussi envie de me balader tranquillement.",
+      "explanation": "Actually, I'm still undecided. I enjoy having explanations, but I also want to wander around at my own pace. All verbs are in the present tense expressing current feelings."
+    },
+    {
+      "question": "Tiens, il y a une exposition temporaire sur la vie quotidienne à la Renaissance au deuxième étage. ___ (fill the blank)",
+      "options": [
+        "A. Tu veux y aller ?",
+        "B. Veux-tu y aller ?",
+        "C. Souhaites-tu y aller ?",
+        "D. All of the above"
+      ],
+      "correctAnswer": "D. All of the above",
+      "explanation": "Hey, there's a temporary exhibit on daily life in the Renaissance on the second floor. Do you want to go? All three options are valid present tense questions asking the same thing."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/505_q08.mp3",
+      "options": [
+        "A. Avec plaisir ! J'adorerais apprendre plus sur cette période.",
+        "B. Avec plaisir ! J'ai adoré en apprendre plus sur cette période.",
+        "C. Avec plaisir ! J'adore en apprendre plus sur cette période.",
+        "D. Non merci. Je n'adore pas en apprendre sur cette période."
+      ],
+      "correctAnswer": "C. Avec plaisir ! J'adore en apprendre plus sur cette période.",
+      "explanation": "With pleasure! I love learning more about this period. 'J'adore' is the present tense expressing a current preference."
+    },
+    {
+      "question": "Ok. On prend les billets et ___ (fill the blank)",
+      "options": [
+        "A. on y va ?",
+        "B. on arrivent ?",
+        "C. il se lance ?",
+        "D. All of the above"
+      ],
+      "correctAnswer": "A. on y va ?",
+      "explanation": "Shall we get our tickets and head in? 'On y va' (shall we go there) is the correct present tense expression with 'on'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/505_q10.mp3",
+      "options": [
+        "A. On t'attendra plus. Allez, c'est parti !",
+        "B. On n'attend plus. Allez, c'est parti !",
+        "C. On ne s'attend plus. C'était sympa.",
+        "D. On n'attendait plus. Allez, c'est parti !"
+      ],
+      "correctAnswer": "B. On n'attend plus. Allez, c'est parti !",
+      "explanation": "No more waiting. Let's go! 'On n'attend plus' uses the present tense negative form."
+    }
+  ]
+}

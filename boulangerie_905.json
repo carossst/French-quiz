@@ -1,0 +1,124 @@
+{
+    "id": 905,
+    "themeId": 9,
+    "name": "Writing and Reading & Listening boulangerie – Quiz 5",
+    "description": "Combine writing/reading and listening skills focusing on boulangerie conversation.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Bonsoir, ___ vegan ? (fill the blank)",
+            "options": [
+                "A. votre baguette est",
+                "B. votre baguette a",
+                "C. votre baguette était",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. votre baguette est",
+            "explanation": "Bonsoir, votre baguette est vegan ? (Good evening, is your baguette vegan?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui, tous les pains sont végétaliens.",
+                "B. Oui, tous notre pains sont végétaliens.",
+                "C. Oui, tous nos pains ne sont pas végétaliens.",
+                "D. Oui, tous nos pains sont végétaliens."
+            ],
+            "correctAnswer": "D. Oui, tous nos pains sont végétaliens.",
+            "audio": "TYF_Boulangerie_5_2.mp3",
+            "explanation": "Yes all our breads are vegan."
+        },
+        {
+            "question": "Parfait. Et ___ (fill the blank)",
+            "options": [
+                "A. vos croissants non plus?",
+                "B. vos croissants aussi ?",
+                "C. les coissants aussi ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. vos croissants aussi ?",
+            "explanation": "Parfait. Et vos croissants aussi ? (Perfect. And your croissants too?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Il y a du beurre, des œufs et du lait. Mais on a un très bon financier vegan et sans gluten.",
+                "B. Ah non. Il y a du beurre, des œufs et du lait dans nos croissants. Mais on a un très bon financier vegan et sans gluten.",
+                "C. Ah non. Il y a beurre, œufs et lait. Mais on a un très bon financier vegan et sans gluten.",
+                "D. Ah non. Il y a du beurre, deux œufs et du lait. Mais on a un très bonne financier vegan et sans gluten."
+            ],
+            "correctAnswer": "B. Ah non. Il y a du beurre, des œufs et du lait dans nos croissants. Mais on a un très bon financier vegan et sans gluten.",
+            "audio": "TYF_Boulangerie_5_4.mp3",
+            "explanation": "No, you don't. There's butter, eggs and milk. But we have a very good vegan and gluten-free financier.) \nA financier is a small French almond cake that is usually not vegan."
+        },
+        {
+            "question": "Et ce financier, ___ (fill the blank)",
+            "options": [
+                "A. vous le réalisez sur place ?",
+                "B. vous le réaliser sur place ?",
+                "C. vous le pratiquez sur place ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. vous le réalisez sur place ?",
+            "explanation": "Et ce financier, vous le réalisez sur place ? (And this financier, do you make it in the bakery?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui bien sûr. Toutes nos viennoiseries et pâtisseries sont réalisées sur place.",
+                "B. Oui. Les viennoiseries et pâtisseries sont réalisées ici.",
+                "C. Oui bien sûr. Toutes nos viennoiseries et toutes nos pâtisseries ne sont pas réalisées ici.",
+                "D. Oui bien sûr. Toutes nos viennoiseries et pâtisseries ont été réalisées ici."
+            ],
+            "correctAnswer": "A. Oui bien sûr. Toutes nos viennoiseries et pâtisseries sont réalisées sur place.",
+            "audio": "TYF_Boulangerie_5_6.mp3",
+            "explanation": "Of course we do. All our viennoiseries and pastries are made on site."
+        },
+        {
+            "question": "Excellent. Et quelle est la pâtisserie ___ (fill the blank)",
+            "options": [
+                "A. vous vendez le plus ?",
+                "B. que vous vendez la plus ?",
+                "C. que vous vendez le plus ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. que vous vendez le plus ?",
+            "explanation": "Excellent. Et quelle est la pâtisserie que vous vendez le plus ? (Excellent. And what's your best-selling pastry?)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Notre pâtisserie la plus populaire, c'est la tarte au citron.",
+                "B. Notre pâtisserie populaire, c'est la tarte au citron vegan et gluten-free.",
+                "C. Notre pâtisserie le plus populaire, c'est l'éclair chocolat.",
+                "D. Notre pâtisserie la plus populaire, c'est la tarte au citron vegan et gluten-free."
+            ],
+            "correctAnswer": "D. Notre pâtisserie la plus populaire, c'est la tarte au citron vegan et gluten-free.",
+            "audio": "TYF_Boulangerie_5_8.mp3",
+            "explanation": "Our most popular pastry is the vegan and gluten-free lemon tart."
+        },
+        {
+            "question": "Génial. Merci pour les explications. ___ (fill the blank)",
+            "options": [
+                "A. Des financiers et des tartes au citron s'il te plait.",
+                "B. Deux financiers et deux tartes au citron s'il vous plait.",
+                "C. Un financier et deux tartes s'il vous plait.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. Deux financiers et deux tartes au citron s'il vous plait.",
+            "explanation": "Génial. Merci pour les explications. Deux financiers et deux tartes au citron s'il vous plait. (Great. Thanks for the explanations. Two financiers and two lemon tarts please.)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Avec plaisir. Je vous prépare tout ça.",
+                "B. Mon plaisir. Je prépare tout ça.",
+                "C. Avec plaisir. Je prépare tout.",
+                "D. Avec plaisir. Je les prépare."
+            ],
+            "correctAnswer": "A. Avec plaisir. Je vous prépare tout ça.",
+            "audio": "TYF_Boulangerie_5_10.mp3",
+            "explanation": "My pleasure. I'll prepare everything for you."
+        }
+    ]
+}

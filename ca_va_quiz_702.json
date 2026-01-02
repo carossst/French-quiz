@@ -1,0 +1,114 @@
+{
+    "id": 702,
+    "themeId": 7,
+    "name": "Writing and Reading Conversation Ça Va – Quiz 2",
+    "description": "Practice basic French greetings and introductions in conversation scenarios (reading/writing).",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Translate into French 'Hello, excuse me, is this seat taken?' (formal)",
+            "options": [
+                "A. Bonjour, excuse-moi, la place est prise ?",
+                "B. Bonjour, excusez-moi, la place est prise ?",
+                "C. Bonjour, excusez-moi, qu'est-ce que la place est prise ?",
+                "D. Bonjour, excusez-moi, la place prise ?"
+            ],
+            "correctAnswer": "B. Bonjour, excusez-moi, la place est prise ?"
+        },
+        {
+            "question": "Translate into French 'No. Go ahead.'",
+            "options": [
+                "A. Non. Allez-y.",
+                "B. Oui. N'y allez pas.",
+                "C. Non. C'est pris.",
+                "D. Non. Tu rêves."
+            ],
+            "correctAnswer": "A. Non. Allez-y.",
+            "explanation": "When someone says vous, it's polite to say vous as well."
+        },
+        {
+            "question": "Translate into French 'Thank you. Can I ask you a question or are you too busy?' (to a woman)",
+            "options": [
+                "A. Merci. Je peux vous poser une question ou vous êtes trop occupée ?",
+                "B. Merci. Je peux vous poser une question ou vous êtes trop occupé ?",
+                "C. Merci. Je peux poser la question ou vous êtes trop occupés ?",
+                "D. Merci. Je pose une question ou vous êtes trop occupées ?"
+            ],
+            "correctAnswer": "A. Merci. Je peux vous poser une question ou vous êtes trop occupée ?"
+        },
+        {
+            "question": "Translate into French 'No, it's fine. Tell me?'",
+            "options": [
+                "A. Non, ça va pas. Dites-moi ?",
+                "B. Non, ça va. Dites-moi ?",
+                "C. Non, ça va pas du tout. Dites-moi ?",
+                "D. Non, ça va. Dis-moi ?"
+            ],
+            "correctAnswer": "B. Non, ça va. Dites-moi ?",
+            "explanation": "At this point of the conversation, it's best to keep on using the informal vous. Wait for the other person to switch to tu or ask you if you want to say tu and voilà !"
+        },
+        {
+            "question": "Translate into French 'This is my first time here. Is their coffee good?'",
+            "options": [
+                "A. C'est la première fois que je viens ici. Leur café est bon ?",
+                "B. C'est la première fois que je viens ici. Est-ce que leur café est bon ?",
+                "C. C'est la première fois que je viens ici. Leur café est-il bon ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above"
+        },
+        {
+            "question": "Translate into French 'Not great, but the atmosphere is relaxed.'",
+            "options": [
+                "A. Pas bon mais l'ambiance est décontractée ici.",
+                "B. Pas super bon mais l'ambiance est décontractée ici.",
+                "C. Pas super et l'ambiance est pas décontractée.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. Pas super bon mais l'ambiance est décontractée ici."
+        },
+        {
+            "question": "Translate into French 'Yes, very relaxed. I've been here 5 minutes and the waiter hasn't come to see me yet.'",
+            "options": [
+                "A. Oui très décontracté. Cela fait 5 minutes et le serveur n'est pas venu me voir.",
+                "B. Oui très décontractée. Cela fait 5 minutes je suis là et le serveur n'est pas venu.",
+                "C. Oui très décontracté. Cela fait 5 minutes que je suis la et le serveur n'est pas me voir.",
+                "D. Oui très décontractée. Cela fait 5 minutes que je suis là et le serveur n'est pas encore venu me voir."
+            ],
+            "correctAnswer": "D. Oui très décontractée. Cela fait 5 minutes que je suis là et le serveur n'est pas encore venu me voir.",
+            "explanation": "Some French waiters can wait to be flagged down by the customer rather than frequently checking in. This can be seen as slowness by those used to more attentive service, and sometimes, it can be slow and rude (even by French standards)."
+        },
+        {
+            "question": "Translate into French 'Ha ha. That's often the case here. It helps to wave at him.'",
+            "options": [
+                "A. Ah ah. C'est le cas ici. Ça aide de lui faire signe.",
+                "B. Ah ah. C'est souvent le cas ici. Ça aide de lui faire signe.",
+                "C. Ah ah. C'est souvent le cas ici. Ça lui aide de faire signe.",
+                "D. Ah ah. C'est souvent le cas ici. Ça aide de lui signer."
+            ],
+            "correctAnswer": "B. Ah ah. C'est souvent le cas ici. Ça aide de lui faire signe.",
+            "explanation": "Depending on the context, it can consist in making eye-contact and/or a small node. Waiving your hand can be useful as well. Adding a polite 's'il vous plait' can help if the waiter is close (it's best to not shout). Snapping your fingers is a big no-no in France and will be seen as disrespectful."
+        },
+        {
+            "question": "Translate into French 'I'll give it a try. Thanks for the info. My name's Carole, what's yours?'",
+            "options": [
+                "A. Je vais l'essayer. Merci pour l'info. Je m'appelle Carole et vous ?",
+                "B. Je vais essayer. Merci l'info. J'appelle Carole et vous ?",
+                "C. Je vais essayer. Merci pour l'info. Je me appelle Carole et vous ?",
+                "D. Je vais essayer. Merci pour l'info. Je m'appelle Carole et vous ?"
+            ],
+            "correctAnswer": "D. Je vais essayer. Merci pour l'info. Je m'appelle Carole et vous ?"
+        },
+        {
+            "question": "Translate into French 'Malika. You can say 'tu' if you want'.",
+            "options": [
+                "A. Malika. On peut se tutoyer si tu veux.",
+                "B. Malika. On peut se dire 'tu' si tu veux.",
+                "C. Malika. On peut se tutoyer si vous voulez.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "It's usually a very good sign when a French person asks you to tutoyer them. It's best to do it because it will be perceived as rude to go on vouvoyer."
+        }
+    ]
+}

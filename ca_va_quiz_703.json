@@ -1,0 +1,129 @@
+{
+    "id": 703,
+    "themeId": 7,
+    "name": "Listening Ça Va – Quiz 3",
+    "description": "Practice listening comprehension focusing on Ça Va vocabulary and phrases.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Salut, comment ça va ?",
+                "B. Salut, ça va ?",
+                "C. Salut, coment ça va ?",
+                "D. Salut, comment ca va ?"
+            ],
+            "correctAnswer": "A. Salut, comment ça va ?",
+            "audio": "TYF_Ca_va_3_1.mp3",
+            "explanation": "Hi, how are you?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Je me pelle Carole.",
+                "B. Je m'appelle Carole.",
+                "C. Je vous appelle Carole.",
+                "D. Je m'appelle Claire."
+            ],
+            "correctAnswer": "B. Je m'appelle Carole.",
+            "audio": "TYF_Ca_va_3_2.mp3",
+            "explanation": "My name is Carole."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Je suis français. Je suis de Paris.",
+                "B. Je suis française. Je ne suis pas Paris.",
+                "C. Je suis française. Je ne suis pas née à Paris.",
+                "D. Je suis française. Je suis née à Paris."
+            ],
+            "correctAnswer": "D. Je suis française. Je suis née à Paris.",
+            "audio": "TYF_Ca_va_3_3.mp3",
+            "explanation": "I'm French. I was born in Paris."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Tu venez d'où ?",
+                "B. Tu vas où ?",
+                "C. Tu viens d'où ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. Tu viens d'où ?",
+            "audio": "TYF_Ca_va_3_4.mp3",
+            "explanation": "Where are you from?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Tu es étudié où ?",
+                "B. Tu as atudié où ?",
+                "C. Tu étudiés où ?",
+                "D. Tu as étudié où ?"
+            ],
+            "correctAnswer": "D. Tu as étudié où ?",
+            "audio": "TYF_Ca_va_3_5.mp3",
+            "explanation": "Where did you study?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Je fais l'étudiante à Paris. Je suis diplômée de Sciences Po et d'HEC.",
+                "B. Je fais mes études à Paris. Je suis diplômée de Sciences Po et d'HEC.",
+                "C. J'ai fait mes études à Paris. Je sois diplôma de Sciences Po et d'HEC.",
+                "D. J'ai fait mes études à Paris. Je suis diplômée de Sciences Po et d'HEC."
+            ],
+            "correctAnswer": "D. J'ai fait mes études à Paris. Je suis diplômée de Sciences Po et d'HEC.",
+            "audio": "TYF_Ca_va_3_6.mp3",
+            "explanation": "I studied in Paris. I am a graduate of Sciences Po and HEC."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Tu viens souvent ici ?",
+                "B. Tu viennes souvent ici ?",
+                "C. Tu viens toujours ici ?",
+                "D. Tu viens souvent par ici ?"
+            ],
+            "correctAnswer": "A. Tu viens souvent ici ?",
+            "audio": "TYF_Ca_va_3_7.mp3",
+            "explanation": "Do you come here often?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Vous avez travaillé où ?",
+                "B. Vous ne travaillez pas ?",
+                "C. Vous travaillez où ?",
+                "D. Tu travailles où ?"
+            ],
+            "correctAnswer": "C. Vous travaillez où ?",
+            "audio": "TYF_Ca_va_3_8.mp3",
+            "explanation": "Where do you work?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Vous faites quoi comme travail ?",
+                "B. Vous faites quel travail ?",
+                "C. Vous travaillez avec qui ?",
+                "D. Vous faites quoi dans les travaux ?"
+            ],
+            "correctAnswer": "A. Vous faites quoi comme travail ?",
+            "audio": "TYF_Ca_va_3_9.mp3",
+            "explanation": "What kind of work do you do?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Tu pars en vacances ?",
+                "B. Tu vas où pour les vacances ?",
+                "C. Tu vas où en vacances ?",
+                "D. Tu vas où pendant tes vacances ?"
+            ],
+            "correctAnswer": "C. Tu vas où en vacances ?",
+            "audio": "TYF_Ca_va_3_10.mp3",
+            "explanation": "Where are you going on vacation?"
+        }
+    ]
+}

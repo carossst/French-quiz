@@ -1,0 +1,119 @@
+{
+  "id": 502,
+  "themeId": 5,
+  "name": "Writing and Reading Conversation Present Tense – Quiz 2",
+  "description": "Use Present Tense vocabulary in everyday conversation contexts.",
+  "version": "1.0.0",
+  "questions": [
+    {
+      "question": "Translate into French \"Tidy up your room, please. It's a mess.\"",
+      "options": [
+        "A. Range ta chambre s'il te plait. C'et le capharnaüm.",
+        "B. Range ta chambre s'il te plait. C'ait le capharnaüm.",
+        "C. Range ta chambre s'il te plait. C'est le capharnaüm.",
+        "D. Range ta chambre s'il te plait. Ce n'est le capharnaüm."
+      ],
+      "correctAnswer": "C. Range ta chambre s'il te plait. C'est le capharnaüm.",
+      "explanation": "'C'est' (it is) is the contraction of 'ce' + 'est'. 'Capharnaüm' means a chaotic mess."
+    },
+    {
+      "question": "Translate into French \"I'm trying, but it's too hard to put all this away.\"",
+      "options": [
+        "A. J'essaye mais c'est trop dur de ranger tout ça.",
+        "B. J'essayes mais c'est trop dur de ranger tout ça.",
+        "C. J'essaient mais c'est trop dur de ranger tout ça.",
+        "D. J'essayez mais c'est trop dur de ranger tout ça."
+      ],
+      "correctAnswer": "A. J'essaye mais c'est trop dur de ranger tout ça.",
+      "explanation": "'Essayer' (to try) with 'je' becomes 'j'essaye'. The infinitive 'ranger' follows 'de'."
+    },
+    {
+      "question": "Translate into French \"Let's start with the easiest thing: you can throw away your trash\"",
+      "options": [
+        "A. On commence par le plus facile : tu peux jeter tes détritus.",
+        "B. On commencent par le plus facile : tu peus jeter tes détritus.",
+        "C. On commence par le plus facile : tu peus jeter tes détritus.",
+        "D. On commencent par le plus facile : tu peux jeter tes détritus."
+      ],
+      "correctAnswer": "A. On commence par le plus facile : tu peux jeter tes détritus.",
+      "explanation": "'On' takes the third person singular form: 'commence'. 'Pouvoir' with 'tu' is 'peux'."
+    },
+    {
+      "question": "Translate into French \"Alright, I'm throwing it away now.\"",
+      "options": [
+        "A. D'accord. Je les jettent maintenant.",
+        "B. D'accord. Je les jette maintenant.",
+        "C. D'accord. Je les jets maintenant.",
+        "D. D'accord. Je les jetter maintenant."
+      ],
+      "correctAnswer": "B. D'accord. Je les jette maintenant.",
+      "explanation": "'Jeter' (to throw) with 'je' becomes 'jette'. 'Les' refers to the trash (plural)."
+    },
+    {
+      "question": "Translate into French \"I'll help you. I'm not leaving you alone right now.\"",
+      "options": [
+        "A. Je te vais aider. Je ne te laisse pas seul pour le moment.",
+        "B. Je vais te aider. Je ne te laisse pas seul pour le moment.",
+        "C. Je vais t'aider. Je ne te laisse pas seul pour le moment.",
+        "D. Je vaie t'aider. Je ne te laisse pas seul pour le moment."
+      ],
+      "correctAnswer": "C. Je vais t'aider. Je ne te laisse pas seul pour le moment.",
+      "explanation": "'Je vais' + infinitive expresses the near future. 'Te' becomes 't'' before a vowel."
+    },
+    {
+      "question": "Translate into French \"Thank you. There you go! I'm done! What should I do now?\"",
+      "options": [
+        "A. Merci. Voilà ! J'ai fini ! Je quoi fais maintenant ?",
+        "B. Merci. Voilà ! J'ai fini ! Je fais quoi maintenant ?",
+        "C. Merci. Voilà ! J'ai fini ! Je maintenant fais quoi ?",
+        "D. Merci. Voilà ! J'ai fini ! Je le fais quoi maintenant ?"
+      ],
+      "correctAnswer": "B. Merci. Voilà ! J'ai fini ! Je fais quoi maintenant ?",
+      "explanation": "In French, the question word 'quoi' (what) typically comes after the verb in informal speech."
+    },
+    {
+      "question": "Translate into French \"What do you think?\"",
+      "options": [
+        "A. Qu'en te penses-tu ?",
+        "B. Qu'en toi penses-tu ?",
+        "C. Qu'en le penses-tu ?",
+        "D. Qu'en penses-tu ?"
+      ],
+      "correctAnswer": "D. Qu'en penses-tu ?",
+      "explanation": "'Qu'en penses-tu ?' literally means 'What do you think of it?' with the pronoun 'en' representing 'of it'."
+    },
+    {
+      "question": "Translate into French \"Can I fold my clothes, put them away in the closet, and then go play?\"",
+      "options": [
+        "A. Je peus plier mes affaires, les ranger dans l'armoire et ensuite je peux aller jouer ?",
+        "B. Je peux plier mes affaires, les ranger dans l'armoire et ensuite je peux aller jouer ?",
+        "C. Je peux plié mes affaires, les ranger dans l'armoire et ensuite je peux aller jouer ?",
+        "D. Je peus plié mes affaires, les ranger dans l'armoire et ensuite je peux aller jouer ?"
+      ],
+      "correctAnswer": "B. Je peux plier mes affaires, les ranger dans l'armoire et ensuite je peux aller jouer ?",
+      "explanation": "'Pouvoir' with 'je' is 'peux'. All verbs after 'peux' stay in the infinitive form."
+    },
+    {
+      "question": "Translate into French \"Alright, bundle up because it's cold.\"",
+      "options": [
+        "A. D'accord. Tu te couvre bien car il fait froid.",
+        "B. D'accord. Tu le couvres bien car il fait froid.",
+        "C. D'accord. Tu te couvres bien car il fait froid.",
+        "D. D'accord. Tu les couvres bien car il fait froid."
+      ],
+      "correctAnswer": "C. D'accord. Tu te couvres bien car il fait froid.",
+      "explanation": "'Se couvrir' (to bundle up) is a reflexive verb. With 'tu', it becomes 'tu te couvres'."
+    },
+    {
+      "question": "Translate into French \"Yay! I'm going to put on my red pants!\"",
+      "options": [
+        "A. Youpi ! Je mettre mon pantalon rouge !",
+        "B. Youpi ! Je vais mettre mon pantalon rouge !",
+        "C. Youpi ! Je ais mettre mon pantalon rouge !",
+        "D. All of the above"
+      ],
+      "correctAnswer": "B. Youpi ! Je vais mettre mon pantalon rouge !",
+      "explanation": "'Je vais' + infinitive expresses the near future. 'Mettre' (to put on) remains in the infinitive."
+    }
+  ]
+}

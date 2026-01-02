@@ -1,0 +1,129 @@
+{
+  "id": 504,
+  "themeId": 5,
+  "name": "Listening Conversation Present Tense – Quiz 4",
+  "description": "Practice listening in realistic Present Tense dialogues.",
+  "version": "1.0.0",
+  "questions": [
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q01.mp3",
+      "options": [
+        "A. Bonjour, classe! Aujourd'hui, nous parlons des châteaux français.",
+        "B. Bonjour, classe! Aujourd'hui, nous allons parler des châteaux français.",
+        "C. Bonjour, classe! Aujourd'hui, nous allons parlé des châteaux français.",
+        "D. Bonjour, classe! Aujourd'hui, nous allont parler des châteaux français."
+      ],
+      "correctAnswer": "B. Bonjour, classe! Aujourd'hui, nous allons parler des châteaux français.",
+      "explanation": "Good morning, class! Today, we are going to talk about French castles. 'Nous allons' + infinitive expresses the near future."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q02.mp3",
+      "options": [
+        "A. Alors, pourriez-vous me dire à quoi ressemble un château ?",
+        "B. Alors, vous pourrez dire à quoi ressemble un château ?",
+        "C. Alors, vous avez pu me dire à quoi ressemble un château ?",
+        "D. Alors, pouvez-vous me dire à quoi ressemble un château ?"
+      ],
+      "correctAnswer": "D. Alors, pouvez-vous me dire à quoi ressemble un château ?",
+      "explanation": "So, can you tell me what a castle looks like? 'Pouvez-vous' is the present tense of 'pouvoir' with 'vous'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q03.mp3",
+      "options": [
+        "A. Un château typique en France possèdent généralement de hautes tours que l'on appelle donjons.",
+        "B. Un château typique en France a possédé généralement de hautes tours que l'on appelle donjons.",
+        "C. Un château typique en France possède généralement de hautes tours que l'on appelle donjons.",
+        "D. Un château typique en France possèdera de hautes tours que l'on appelle donjons."
+      ],
+      "correctAnswer": "C. Un château typique en France possède généralement de hautes tours que l'on appelle donjons.",
+      "explanation": "A typical castle in France generally has high towers that are called keeps. 'Possède' is the present tense of 'posséder' with a singular subject."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q04.mp3",
+      "options": [
+        "A. On utilise pour surveiller les terres.",
+        "B. On les utilise pour surveiller les terres environnantes.",
+        "C. On les utilisera pour surveiller les terres environnantes.",
+        "D. On les a utilisées pour surveiller les terres environnantes."
+      ],
+      "correctAnswer": "B. On les utilise pour surveiller les terres environnantes.",
+      "explanation": "They are used to watch over the surrounding lands. The pronoun 'les' refers to the towers mentioned previously."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q05.mp3",
+      "options": [
+        "A. Parfait. Et comment les gens accèderont à un château ?",
+        "B. Parfait. Et comment on a accédé à un château ?",
+        "C. Parfait. Et comment les gens accèdent-ils à un château ?",
+        "D. Parfait. Et comment on accède à un château ?"
+      ],
+      "correctAnswer": "D. Parfait. Et comment on accède à un château ?",
+      "explanation": "Perfect. And how do we access a castle? The present tense 'accède' is used with 'on' (we)."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q06.mp3",
+      "options": [
+        "A. En général, tu faus franchir un pont-levis pour entrer dans la cour du château.",
+        "B. En général, il vaut franchir un pont-levis pour entrer dans la cour du château.",
+        "C. En général, ils veulent franchir un pont-levis pour entrer dans la cour du château.",
+        "D. En général, il faut franchir un pont-levis pour entrer dans la cour du château."
+      ],
+      "correctAnswer": "D. En général, il faut franchir un pont-levis pour entrer dans la cour du château.",
+      "explanation": "In general, you have to cross a drawbridge to enter the castle courtyard. 'Il faut' + infinitive means 'it is necessary to' or 'one must'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q07.mp3",
+      "options": [
+        "A. Que font les habitants du château pour se divertir ?",
+        "B. Que vont les habitants du château pour se divertir ?",
+        "C. Que faisaient les habitants du château pour se divertir ?",
+        "D. Que fassent les habitants du château pour se divertir ?"
+      ],
+      "correctAnswer": "A. Que font les habitants du château pour se divertir ?",
+      "explanation": "What do the castle dwellers do for fun? 'Font' is the present tense of 'faire' with 'ils'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q08.mp3",
+      "options": [
+        "A. Il aimait organiser des fêtes et des banquets dans le grand hall.",
+        "B. Ils aiment organiser des fêtes et des banquets dans le grand hall.",
+        "C. Ils s'aimaient organiser des fêtes et des banquets dans le grand hall.",
+        "D. Ils ont aimé organiser des fêtes et des banquets dans le grand hall."
+      ],
+      "correctAnswer": "B. Ils aiment organiser des fêtes et des banquets dans le grand hall.",
+      "explanation": "They like to organize parties and banquets in the great hall. 'Aiment' is the present tense of 'aimer' with 'ils'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q09.mp3",
+      "options": [
+        "A. Il danse, chante et joue de la musique.",
+        "B. Ils dansent, chantent et jouent de la musique.",
+        "C. Elles dansent, chantent et jouent de la musique.",
+        "D. On danse, chante et joue de la musique."
+      ],
+      "correctAnswer": "B. Ils dansent, chantent et jouent de la musique.",
+      "explanation": "They dance, sing, and play music. All three verbs are conjugated in the present tense with 'ils'."
+    },
+    {
+      "question": "Listen to this. What is she saying?",
+      "audioFile": "audio/present_tense/504_q10.mp3",
+      "options": [
+        "A. Maintenant, je vous montre une photo du Château de Chenonceau et vous avez 20 minutes pour la décrire. Bon courage !",
+        "B. Dans 5 minutes, je vous montre une photo du Château de Chenonceau et vous avez 20 minutes pour la décrire. Au travail !",
+        "C. Maintenant, je vais vous montrer une photo du Château de Chenonceau et vous avez 20 minutes pour la décrire. On travaille !",
+        "D. Maintenant, je viens de vous montrer une photo du Château de Chenonceau et vous avez 20 minutes pour la décrire. Bon courage !"
+      ],
+      "correctAnswer": "A. Maintenant, je vous montre une photo du Château de Chenonceau et vous avez 20 minutes pour la décrire. Bon courage !",
+      "explanation": "Now, I'm showing you a photo of Château de Chenonceau and you have 20 minutes to describe it. Good luck! The present tense 'je vous montre' is used to describe an action happening now."
+    }
+  ]
+}

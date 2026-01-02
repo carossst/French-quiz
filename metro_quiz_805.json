@@ -1,0 +1,119 @@
+{
+    "id": 805,
+    "themeId": 8,
+    "name": "Writing and Reading & Listening metro – Quiz 5",
+    "description": "Combine writing/reading and listening skills focusing on metro vocabulary.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "How do you say 'public transportation'?",
+            "options": [
+                "A. Transport avec les copains",
+                "B. Transports en commun",
+                "C. Transport commun",
+                "D. Transports communs"
+            ],
+            "correctAnswer": "B. Transports en commun"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Ligne de métro",
+                "B. Lignes de métro",
+                "C. Ligne de métros",
+                "D. Lignes de métros"
+            ],
+            "correctAnswer": "A. Ligne de métro",
+            "audio": "TYF_Metro_5_2.mp3",
+            "explanation": "metro line"
+        },
+        {
+            "question": "How do you say 'subway map'?",
+            "options": [
+                "A. Plan de métro",
+                "B. Carte du métro",
+                "C. Plane de métro",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Plan de métro"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Un ticket s'il te plait",
+                "B. Un ticket s'il vous plait",
+                "C. Des tickets s'il vous plait",
+                "D. Un billet s'il vous plait"
+            ],
+            "correctAnswer": "B. Un ticket s'il vous plait",
+            "audio": "TYF_Metro_5_4.mp3",
+            "explanation": "A ticket please"
+        },
+        {
+            "question": "How do you say 'approximately 4 million passengers'?",
+            "options": [
+                "A. Près de 4 millions de passagers",
+                "B. Environ 4 millions de passagers",
+                "C. Approximativement 4 millions de passagers",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. La ligne 6 relie Charles de Gaulle-Étoile à Nation.",
+                "B. La ligne de métro 6 relie Charles de Gaulle-Étoile à Nation.",
+                "C. La ligne de métro 6 circule entre Charles de Gaulle-Étoile et Nation.",
+                "D. La ligne 6 circule entre Charles de Gaulle-Étoile et Nation."
+            ],
+            "correctAnswer": "B. La ligne de métro 6 relie Charles de Gaulle-Étoile à Nation.",
+            "audio": "TYF_Metro_5_6.mp3",
+            "explanation": "metro line 6 connects Charles de Gaulle-Étoile to Nation"
+        },
+        {
+            "question": "How do you say 'a metro every 2 to 5 minutes'?",
+            "options": [
+                "A. Une métro toutes les 2 à 5 minutes",
+                "B. Une station tous les 2 à 5 minutes",
+                "C. Un métro toutes les 2 à 5 minutes",
+                "D. Un métro entres 2 à 5 minutes"
+            ],
+            "correctAnswer": "C. Un métro toutes les 2 à 5 minutes"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Le premier métro est à 5h30.",
+                "B. Le premier métro est à cinq heures trente.",
+                "C. Le premier métro est à cinq heures et demie du matin.",
+                "D. Le dernier métro est à 5h30."
+            ],
+            "correctAnswer": "A. Le premier métro est à 5h30.",
+            "audio": "TYF_Metro_5_8.mp3",
+            "explanation": "The first metro is at 5:30 AM"
+        },
+        {
+            "question": "How do you say 'What time is the last metro leaving'?",
+            "options": [
+                "A. À quelle heure est le dernier métro ?",
+                "B. À telle heure est le dernier métro ?",
+                "C. À comment heure est le dernier métro ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. À quelle heure est le dernier métro ?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Comment puis-je me rendre au Louvre s'il vous plait ?",
+                "B. Comment se rendre au Louvre s'il vous plait ?",
+                "C. Comment aller au Louvre s'il vous plait ?",
+                "D. Pour aller au Louvre s'il vous plait ?"
+            ],
+            "correctAnswer": "A. Comment puis-je me rendre au Louvre s'il vous plait ?",
+            "audio": "TYF_Metro_5_10.mp3",
+            "explanation": "how to get to the Louvre Museum please"
+        }
+    ]
+}

@@ -1,0 +1,110 @@
+{
+    "id": 802,
+    "themeId": 8,
+    "name": "Writing and Reading Conversation metro – Quiz 2",
+    "description": "Practice vocabulary related to public transportation and the metro in conversation scenarios (reading/writing).",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Translate into French 'Good evening. Excuse me. May I sit here, please?' (formal)",
+            "options": [
+                "A. Bonsoir. Excusez-moi. Je peux m'asseoir ici s'il vous plait ?",
+                "B. Bonsoir. Excusez-moi. Puis-je m'asseoir ici s'il vous plait ?",
+                "C. Bonsoir. Excusez-moi. Est-ce que je peux m'asseoir ici s'il vous plait ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above"
+        },
+        {
+            "question": "Translate into French 'Yes, of course. Here, I'll take my bag off.'",
+            "options": [
+                "A. Oui bien sûr. Voilà, j'enlève mon sac.",
+                "B. Non pas sûr. Voilà, j'enlève mon sac.",
+                "C. Oui bien sûr. Voilà, j'enlève mon panier en osier.",
+                "D. Oui bien sûr. Voilà, j'enlève ma valise noire."
+            ],
+            "correctAnswer": "A. Oui bien sûr. Voilà, j'enlève mon sac."
+        },
+        {
+            "question": "Translate into French 'Thank you. Can I ask you a question?'",
+            "options": [
+                "A. Merci. Je peux vous poser une question ?",
+                "B. Merci. Je peux lui poser une question ?",
+                "C. Merci. Je peux me reposer une question ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Merci. Je peux vous poser une question ?",
+            "explanation": "When you don't know the person, it is recommended to use the vous."
+        },
+        {
+            "question": "Translate into French 'Yes. How can I help you?'",
+            "options": [
+                "A. Oui. Comment puis-je vous aider ?",
+                "B. Oui. Que puis-je faire pour vous?",
+                "C. Oui. En quoi puis-je vous être utile ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above"
+        },
+        {
+            "question": "Translate into French 'Does this metro go to the Eiffel Tower?'",
+            "options": [
+                "A. Est-ce que ce métro va bien à la Tour Eiffel ?",
+                "B. Ce métro va bien à la Tour Eiffel ?",
+                "C. Est-ce que ce métro dessert la Tour Eiffel ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above"
+        },
+        {
+            "question": "Translate into French 'No, you don't. This is the wrong line. You need to take line 6 and get off at Bir Hakeim station.'",
+            "options": [
+                "A. Ah oui. C'est la bonne ligne. Vous devez récupérer la ligne 6 et descendre à la station Bir Hakeim.",
+                "B. Ah non. Ce n'est pas la bonne ligne. Vous devez récupérer la ligne 6 et descendre à la station Bir Hakeim.",
+                "C. Ah non. Ce n'est pas la bonne ligne. Vous récupérez la ligne 9 et descendre à la station Bir Hakim.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. Ah non. Ce n'est pas la bonne ligne. Vous devez récupérer la ligne 6 et descendre à la station Bir Hakeim."
+        },
+        {
+            "question": "Translate into French 'Shoot. Okay, thanks. I'll get out then.'",
+            "options": [
+                "A. Zut. Ok merci. Je vais sortir alors.",
+                "B. Merci. Je ne vais pas sortir alors.",
+                "C. Zut. Ok merci. Je reste dans le métro alors.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Zut. Ok merci. Je vais sortir alors."
+        },
+        {
+            "question": "Translate into French 'Yes, but wait until we get to Place d'Italie. You have a connection to the 6.'",
+            "options": [
+                "A. Oui attendez qu'on soit en Italie. Vous avez une correspondance pour la 6.",
+                "B. Oui mais attendez qu'on soit à Place d'Italie. Vous avez une correspondance pour la 6.",
+                "C. Oui descendez et prenez un métro vers Place d'Italie. Vous avez une correspondance pour la 6.",
+                "D. Oui mais attendez qu'on arrive à Place d'Italie. Vous aurez une correspondance pour la 6 après cette station."
+            ],
+            "correctAnswer": "B. Oui mais attendez qu'on soit à Place d'Italie. Vous avez une correspondance pour la 6."
+        },
+        {
+            "question": "Translate into French 'Oh, thank you so much. Very kind of you.'",
+            "options": [
+                "A. Ah merci. C'est pas très gentil.",
+                "B. Ah non merci. C'est pas sympa.",
+                "C. Ah merci. Très gentille.",
+                "D. Ah merci beaucoup. C'est très gentil."
+            ],
+            "correctAnswer": "D. Ah merci beaucoup. C'est très gentil."
+        },
+        {
+            "question": "Translate into French 'No problem. Enjoy your visit!'",
+            "options": [
+                "A. Pas de problème. Bon visite !",
+                "B. Pas de problème. Bonne visit !",
+                "C. Pas de problème. Bonne visite !",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. Pas de problème. Bonne visite !"
+        }
+    ]
+}

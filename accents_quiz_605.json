@@ -1,0 +1,120 @@
+{
+    "id": 605,
+    "themeId": 6,
+    "name": "Writing and Reading & Listening Conversation Accents – Quiz 5",
+    "description": "Combine writing/reading and listening skills focusing on accents conversation.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Salut ! Tu as passé un bon week-end ? (fill the blank: choose the correctly written question)",
+            "options": [
+                "A. Salut ! Tu as passe un bon week-end ?",
+                "B. Salut ! Tu as passè un bon week-end ?",
+                "C. Salut ! Tu as passé un bon week-end ?",
+                "D. Salut ! Tu as pasé un bon week-end ?"
+            ],
+            "correctAnswer": "C. Salut ! Tu as passé un bon week-end ?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui, super ! Je suis allé à la plage avec des amis.",
+                "B. Oui, super ! Je suis alle à la plage avec des amis.",
+                "C. Oui, super ! Je suis allè a la plage avec des amis.",
+                "D. Oui, super ! Je suis allé a la plage avec des amis."
+            ],
+            "correctAnswer": "A. Oui, super ! Je suis allé à la plage avec des amis.",
+            "audio": "TYF_Accents_5_2.mp3",
+            "explanation": "Yes, great! I went to the beach with friends."
+        },
+        {
+            "question": "Génial ! Il a fait beau ? (fill the blank: choose the correctly written question)",
+            "options": [
+                "A. Gènial ! Il a fait beau ?",
+                "B. Génial ! Il a fait beau ?",
+                "C. Genial ! Il a fait beau ?",
+                "D. Génialle ! Il a fait beau ?"
+            ],
+            "correctAnswer": "B. Génial ! Il a fait beau ?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui, un temps magnifique ! On a nagé toute la journée.",
+                "B. Oui, un temps magnifiqueu ! On a nagè toute la journée.",
+                "C. Oui, un temps magnifique ! On a nage toute la journée.",
+                "D. Oui, un temps magnifique ! On a nagé toute la journèe."
+            ],
+            "correctAnswer": "A. Oui, un temps magnifique ! On a nagé toute la journée.",
+            "audio": "TYF_Accents_5_4.mp3",
+            "explanation": "Yes, magnificent weather! We swam all day."
+        },
+        {
+            "question": "Tu as dû bien profiter ! Et le soir ? (fill the blank: choose the correctly written question)",
+            "options": [
+                "A. Tu as du bien profiter ! Et le soir ?",
+                "B. Tu as dû bien profiter ! Et le soir ?",
+                "C. Tu as dù bien profiter ! Et le soir ?",
+                "D. Tu as dû bien profitè ! Et le soir ?"
+            ],
+            "correctAnswer": "B. Tu as dû bien profiter ! Et le soir ?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Le soir, on a fait un barbecue près de la mer. C'était génial !",
+                "B. Le soir, on a fait un barbecue prés de la mer. C'était génial !",
+                "C. Le soir, on a fait un barbecue près de la mer. C'etait génial !",
+                "D. Le soir, on a fait un barbecue près de la mer. C'était genial !"
+            ],
+            "correctAnswer": "A. Le soir, on a fait un barbecue près de la mer. C'était génial !",
+            "audio": "TYF_Accents_5_6.mp3",
+            "explanation": "In the evening, we had a barbecue by the sea. It was great!"
+        },
+        {
+            "question": "Ça a l'air parfait ! (fill the blank: choose the correctly written sentence)",
+            "options": [
+                "A. Ca a l'air parfait !",
+                "B. Ça a l'air parfait !",
+                "C. Ça a l'aire parfait !",
+                "D. Cà a l'air parfait !"
+            ],
+            "correctAnswer": "B. Ça a l'air parfait !"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui, c'était vraiment relaxant. Et toi, qu'est-ce que tu as fait ?",
+                "B. Oui, c'etait vraiment relaxant. Et toi, qu'est-ce que tu as fait ?",
+                "C. Oui, c'était vraiment relaxant. Et toi, qu'est-ce que tu a fait ?",
+                "D. Oui, c'était vraiment relaxant. Et toi, qu'est-ceu que tu as fait ?"
+            ],
+            "correctAnswer": "A. Oui, c'était vraiment relaxant. Et toi, qu'est-ce que tu as fait ?",
+            "audio": "TYF_Accents_5_8.mp3",
+            "explanation": "Yes, it was really relaxing. And you, what did you do?"
+        },
+        {
+            "question": "Moi, je suis allée au théâtre samedi. (fill the blank: choose the correctly written sentence)",
+            "options": [
+                "A. Moi, je suis allèe au theatre samedi.",
+                "B. Moi, je suis allée au thèâtre samedi.",
+                "C. Moi, je suis allée au théâtre samedi.",
+                "D. Moi, je suis allé au théâtre samedi."
+            ],
+            "correctAnswer": "C. Moi, je suis allée au théâtre samedi.",
+            "explanation": "Allée (with double 'e') is the feminine past participle of aller when the subject is feminine."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Ah oui ? C'était bien ? Quelle pièce tu as vu ?",
+                "B. Ah oui ? C'etait bien ? Quelle pièce tu as vu ?",
+                "C. Ah oui ? C'était bien ? Quelle piece tu as vu ?",
+                "D. Ah oui ? C'était bien ? Quel pièce tu as vu ?"
+            ],
+            "correctAnswer": "A. Ah oui ? C'était bien ? Quelle pièce tu as vu ?",
+            "audio": "TYF_Accents_5_10.mp3",
+            "explanation": "Oh yes? Was it good? Which play did you see?"
+        }
+    ]
+}

@@ -1,0 +1,129 @@
+{
+    "id": 804,
+    "themeId": 8,
+    "name": "Listening Conversation metro – Quiz 4",
+    "description": "Practice listening comprehension in conversation scenarios using metro vocabulary.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bonsoir. Excusez-moi. Je peux m'asseoir ici s'il vous plait ?",
+                "B. Bonjour. Excusez-moi. Puis-je m'asseoir ici s'il vous plait ?",
+                "C. Bonsoir. Excusez-moi. Puis-je m'asseoir ici s'il vous plait ?",
+                "D. Bonsoir. Pardon. Je peux m'asseoir ici s'il vous plait ?"
+            ],
+            "correctAnswer": "C. Bonsoir. Excusez-moi. Puis-je m'asseoir ici s'il vous plait ?",
+            "audio": "TYF_Metro_4_1.mp3",
+            "explanation": "Good evening. Excuse me. May I sit here, please?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui bien sûr. Voilà, j'enlève mon sac.",
+                "B. Oui bien sûr. Je vais enlever mon sac.",
+                "C. Oui certainement. Voilà, j'enlève mon sac.",
+                "D. Oui évidemment. Voilà, j'enlève mon sac."
+            ],
+            "correctAnswer": "A. Oui bien sûr. Voilà, j'enlève mon sac.",
+            "audio": "TYF_Metro_4_2.mp3",
+            "explanation": "Yes, of course. Here, I'll take my bag off."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Merci. Je peux vous poser une question ?",
+                "B. Merci beaucoup. Je peux vous poser une question ?",
+                "C. Merci. Puis-je vous poser une question ?",
+                "D. Merci. Je peux vous demander quelque chose ?"
+            ],
+            "correctAnswer": "A. Merci. Je peux vous poser une question ?",
+            "audio": "TYF_Metro_4_3.mp3",
+            "explanation": "Thank you. Can I ask you a question?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui. Comment puis-je vous aider ?",
+                "B. Oui. Que puis-je faire pour vous ?",
+                "C. Oui. En quoi puis-je vous être utile ?",
+                "D. Oui bien sûr. Comment puis-je vous aider ?"
+            ],
+            "correctAnswer": "A. Oui. Comment puis-je vous aider ?",
+            "audio": "TYF_Metro_4_4.mp3",
+            "explanation": "Yes. How can I help you?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Est-ce que ce métro va à la Tour Eiffel ?",
+                "B. Ce métro va bien à la Tour Eiffel ?",
+                "C. Est-ce que ce métro va bien à la Tour Eiffel ?",
+                "D. Ce métro dessert la Tour Eiffel ?"
+            ],
+            "correctAnswer": "C. Est-ce que ce métro va bien à la Tour Eiffel ?",
+            "audio": "TYF_Metro_4_5.mp3",
+            "explanation": "Does this metro go to the Eiffel Tower?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Ah oui. C'est la bonne ligne. Vous devez prendre la ligne 6 et descendre à la station Bir Hakeim.",
+                "B. Ah non. Ce n'est pas la bonne ligne. Vous devez prendre la ligne 6 et descendre à la station Bir Hakeim.",
+                "C. Ah non. Ce n'est pas la bonne ligne. Vous devez récupérer la ligne 6 et descendre à la station Bir Hakeim.",
+                "D. Ah non. Mauvaise ligne. Prenez la ligne 6 et descendez à Bir Hakeim."
+            ],
+            "correctAnswer": "C. Ah non. Ce n'est pas la bonne ligne. Vous devez récupérer la ligne 6 et descendre à la station Bir Hakeim.",
+            "audio": "TYF_Metro_4_6.mp3",
+            "explanation": "No, you don't. This is the wrong line. You need to take line 6 and get off at Bir Hakeim station."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Zut. Ok merci. Je vais sortir alors.",
+                "B. Oh là là. D'accord merci. Je vais sortir alors.",
+                "C. Zut. Bon merci. Je descends alors.",
+                "D. Mince. Ok merci. Je vais sortir alors."
+            ],
+            "correctAnswer": "A. Zut. Ok merci. Je vais sortir alors.",
+            "audio": "TYF_Metro_4_7.mp3",
+            "explanation": "Shoot. Okay, thanks. I'll get out then."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Oui attendez qu'on soit à Place d'Italie. Vous avez une correspondance pour la 6.",
+                "B. Oui mais attendez qu'on arrive à Place d'Italie. Vous avez une correspondance pour la 6.",
+                "C. Oui mais attendez qu'on soit à Place d'Italie. Vous avez une correspondance pour la 6.",
+                "D. Oui mais attendez Place d'Italie. Il y a une correspondance pour la 6."
+            ],
+            "correctAnswer": "C. Oui mais attendez qu'on soit à Place d'Italie. Vous avez une correspondance pour la 6.",
+            "audio": "TYF_Metro_4_8.mp3",
+            "explanation": "Yes, but wait until we get to Place d'Italie. You have a connection to the 6."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Ah merci. C'est très gentil.",
+                "B. Ah merci beaucoup. C'est très gentil.",
+                "C. Oh merci beaucoup. Très gentil.",
+                "D. Merci infiniment. C'est très gentil."
+            ],
+            "correctAnswer": "B. Ah merci beaucoup. C'est très gentil.",
+            "audio": "TYF_Metro_4_9.mp3",
+            "explanation": "Oh, thank you so much. Very kind of you."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Pas de problème. Bonne visite !",
+                "B. De rien. Bonne visite !",
+                "C. Pas de souci. Bonne visite !",
+                "D. Y a pas de quoi. Bonne visite !"
+            ],
+            "correctAnswer": "A. Pas de problème. Bonne visite !",
+            "audio": "TYF_Metro_4_10.mp3",
+            "explanation": "No problem. Enjoy your visit!"
+        }
+    ]
+}

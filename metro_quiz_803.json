@@ -1,0 +1,129 @@
+{
+    "id": 803,
+    "themeId": 8,
+    "name": "Listening metro – Quiz 3",
+    "description": "Practice listening comprehension focusing on metro vocabulary and phrases.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Transports en commun",
+                "B. Transport en commun",
+                "C. Transports communs",
+                "D. Transport commun"
+            ],
+            "correctAnswer": "A. Transports en commun",
+            "audio": "TYF_Metro_3_1.mp3",
+            "explanation": "public transportation"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Ligne de métro",
+                "B. Lignes de métro",
+                "C. Ligne de métros",
+                "D. Lignes de métros"
+            ],
+            "correctAnswer": "A. Ligne de métro",
+            "audio": "TYF_Metro_3_2.mp3",
+            "explanation": "metro line"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Plan de métro",
+                "B. Carte du métro",
+                "C. Plan du métro",
+                "D. Carte de métro"
+            ],
+            "correctAnswer": "A. Plan de métro",
+            "audio": "TYF_Metro_3_3.mp3",
+            "explanation": "subway map"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Un ticket s'il te plait",
+                "B. Un ticket s'il vous plait",
+                "C. Des tickets s'il vous plait",
+                "D. Un billet s'il vous plait"
+            ],
+            "correctAnswer": "B. Un ticket s'il vous plait",
+            "audio": "TYF_Metro_3_4.mp3",
+            "explanation": "A ticket please"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Environ 4 millions de passagers",
+                "B. Près de 4 millions de passagers",
+                "C. Approximativement 4 millions de passagers",
+                "D. 4 millions de passagers"
+            ],
+            "correctAnswer": "A. Environ 4 millions de passagers",
+            "audio": "TYF_Metro_3_5.mp3",
+            "explanation": "approximately 4 million passengers"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. La ligne 6 relie Charles de Gaulle-Étoile à Nation.",
+                "B. La ligne de métro 6 relie Charles de Gaulle-Étoile à Nation.",
+                "C. La ligne de métro 6 circule entre Charles de Gaulle-Étoile et Nation.",
+                "D. La ligne 6 circule entre Charles de Gaulle-Étoile et Nation."
+            ],
+            "correctAnswer": "B. La ligne de métro 6 relie Charles de Gaulle-Étoile à Nation.",
+            "audio": "TYF_Metro_3_6.mp3",
+            "explanation": "metro line 6 connects Charles de Gaulle-Étoile to Nation"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Un métro toutes les 2 à 5 minutes",
+                "B. Une métro toutes les 2 à 5 minutes",
+                "C. Un métro tous les 2 à 5 minutes",
+                "D. Des métros toutes les 2 à 5 minutes"
+            ],
+            "correctAnswer": "A. Un métro toutes les 2 à 5 minutes",
+            "audio": "TYF_Metro_3_7.mp3",
+            "explanation": "a metro every 2 to 5 minutes"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Le premier métro est à 5h30.",
+                "B. Le premier métro est à cinq heures trente.",
+                "C. Le premier métro est à cinq heures et demie du matin.",
+                "D. Le dernier métro est à 5h30."
+            ],
+            "correctAnswer": "A. Le premier métro est à 5h30.",
+            "audio": "TYF_Metro_3_8.mp3",
+            "explanation": "The first metro is at 5:30 AM"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. À quelle heure est le dernier métro ?",
+                "B. À quelle heure part le dernier métro ?",
+                "C. Quand part le dernier métro ?",
+                "D. Le dernier métro part à quelle heure ?"
+            ],
+            "correctAnswer": "A. À quelle heure est le dernier métro ?",
+            "audio": "TYF_Metro_3_9.mp3",
+            "explanation": "What time is the last metro leaving?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Comment puis-je me rendre au Louvre s'il vous plait ?",
+                "B. Comment se rendre au Louvre s'il vous plait ?",
+                "C. Comment aller au Louvre s'il vous plait ?",
+                "D. Pour aller au Louvre s'il vous plait ?"
+            ],
+            "correctAnswer": "A. Comment puis-je me rendre au Louvre s'il vous plait ?",
+            "audio": "TYF_Metro_3_10.mp3",
+            "explanation": "how to get to the Louvre Museum please"
+        }
+    ]
+}

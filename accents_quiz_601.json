@@ -1,0 +1,110 @@
+{
+    "id": 601,
+    "themeId": 6,
+    "name": "Writing and Reading Accents – Quiz 1",
+    "description": "Practice French accents in written French (reading/writing).",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "How do you write 'We hope'?",
+            "options": [
+                "A. Nous espérons",
+                "B. Nous esperons",
+                "C. Nous èspèrons",
+                "D. Nous espéron"
+            ],
+            "correctAnswer": "A. Nous espérons"
+        },
+        {
+            "question": "How do you write 'The college'?",
+            "options": [
+                "A. Le college",
+                "B. Le collège",
+                "C. Le collegue",
+                "D. Le collégue"
+            ],
+            "correctAnswer": "B. Le collège"
+        },
+        {
+            "question": "How do you write 'Immediately'?",
+            "options": [
+                "A. Immédiatement",
+                "B. Immediatement",
+                "C. Imediatement",
+                "D. Immèdiatement"
+            ],
+            "correctAnswer": "A. Immédiatement"
+        },
+        {
+            "question": "How do you write 'The student' (female)?",
+            "options": [
+                "A. La étudiante",
+                "B. La ettudiante",
+                "C. La étudiante",
+                "D. L'étudiante"
+            ],
+            "correctAnswer": "D. L'étudiante",
+            "explanation": "Before a vowel, there's an elision, so we write L' instead of La or Le."
+        },
+        {
+            "question": "How do you write 'You are'?",
+            "options": [
+                "A. Tu es",
+                "B. Tu ais",
+                "C. Tu est",
+                "D. Tu aix"
+            ],
+            "correctAnswer": "A. Tu es"
+        },
+        {
+            "question": "How do you write 'A business' (feminine)?",
+            "options": [
+                "A. Une entrepris",
+                "B. Une entreprise",
+                "C. Une aintreprise",
+                "D. Une entrepriseu"
+            ],
+            "correctAnswer": "B. Une entreprise"
+        },
+        {
+            "question": "How do you write 'Near'?",
+            "options": [
+                "A. Pret",
+                "B. Près",
+                "C. Prèt",
+                "D. Pres"
+            ],
+            "correctAnswer": "B. Près"
+        },
+        {
+            "question": "How do you write 'Thank you'?",
+            "options": [
+                "A. Mercie",
+                "B. Mersie",
+                "C. Merci",
+                "D. Mercis"
+            ],
+            "correctAnswer": "C. Merci"
+        },
+        {
+            "question": "How do you write 'Please'?",
+            "options": [
+                "A. Sil vous plait",
+                "B. S'il vous plaît",
+                "C. S'il vous plait",
+                "D. Sil vous plaît"
+            ],
+            "correctAnswer": "B. S'il vous plaît"
+        },
+        {
+            "question": "How do you write 'It is necessary'?",
+            "options": [
+                "A. Il faut",
+                "B. Il fot",
+                "C. Il feau",
+                "D. Il faux"
+            ],
+            "correctAnswer": "A. Il faut"
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+{
+    "id": 602,
+    "themeId": 6,
+    "name": "Writing and Reading Conversation Accents – Quiz 2",
+    "description": "Practice French accents in conversation scenarios (reading/writing).",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Translate into French 'Good morning, class! Today, we will be talking about the French Revolution. I'm starting the lesson. Listen carefully'",
+            "options": [
+                "A. Bonjour, classe ! Aujourd'hui, nous allons parler de la Rèvolution française. Je commence la leçon.",
+                "B. Bonjour, classe ! Aujourd'hui, nous allons parler de la Révolution française. Je commence la leçon. Ecoutez-bien.",
+                "C. Bonjour, classe ! Aujourd'hui, nous allons parler de la Révolution francaise. Ecoutez-bien.",
+                "D. Aujourd'hui, nous allons parler de la Rèvolution fransaise. Je commence la lecon. Ecoute-bien."
+            ],
+            "correctAnswer": "B. Bonjour, classe ! Aujourd'hui, nous allons parler de la Révolution française. Je commence la leçon. Ecoutez-bien."
+        },
+        {
+            "question": "Translate into French 'There are three orders: those who pray (the clergy), those who fight (the nobility), and those who work (the third estate)'",
+            "options": [
+                "A. Il y a trois ordres : ceux qui prient (le clergé), ceux qui combattent (la noblesse) et ceux qui travaillent (le tiers état).",
+                "B. Il y a deux ordres : ceux qui prient (le clergé), ceux qui combattent (la noblesse) et ceux qui travaillent (le tiers état).",
+                "C. Il y a trois ordres : ceux qui prient (le clergè), ceux qui combattent (la noblesse) et ceux qui travaillent (le tiers ètat).",
+                "D. Il y a trois ordres : ceux qui prient (le clërgé), ceux qui combattent (la noblesse) et ceux qui travaillé (le tiers état)."
+            ],
+            "correctAnswer": "A. Il y a trois ordres : ceux qui prient (le clergé), ceux qui combattent (la noblesse) et ceux qui travaillent (le tiers état)."
+        },
+        {
+            "question": "Translate into French 'This society is unequal because it is based on privileges linked to birth.'",
+            "options": [
+                "A. Cette société est inégalitaire car elle repose sur des privilèges liés à la naissance.",
+                "B. Cette société est inègalitaire car elle repose sur des privilèges liés à la naissance.",
+                "C. Cette société est inégalitaire car elle repose sur des priviléges liés à la naissance.",
+                "D. Cette société est inègalitaire car elle repose sur des priviléges liés à la naissance."
+            ],
+            "correctAnswer": "A. Cette société est inégalitaire car elle repose sur des privilèges liés à la naissance."
+        },
+        {
+            "question": "Translate into French 'The clergy and nobility, representing only 2% of the population, enjoy numerous privileges, including tax exemptions.'",
+            "options": [
+                "A. Les ordres du clergè et de la noblesse représentent 2 % de la population et profitent de nombreux privilèges dont une exonération fiscale.",
+                "B. Les ordres du clergé et de la noblesse représentent 2 % de la population et profitent de nombreux privilèges dont une exonération fiscale.",
+                "C. Les ordres du clergè et de la noblesse reprèsentent 2 % de la population et profitent de nombreux privilèges dont une exonèration fiscale.",
+                "D. Les ordres reprèsentent 2 % de la population et profitent de nombreux privilèges dont une exonération fiscale."
+            ],
+            "correctAnswer": "B. Les ordres du clergé et de la noblesse représentent 2 % de la population et profitent de nombreux privilèges dont une exonération fiscale."
+        },
+        {
+            "question": "Translate into French 'The Third Estate comprises 98% of the population and bears the burden of taxation.'",
+            "options": [
+                "A. Le tiers ètat rassemble 98 % de la population et paye des impôts.",
+                "B. Le tiers état rassemble 98 % de la population et paye des impôts.",
+                "C. Le tiers ètat rassemble 98 % de la population et paye des impots.",
+                "D. Le tiers état rassemble 98 % de la population et paye des impots."
+            ],
+            "correctAnswer": "B. Le tiers état rassemble 98 % de la population et paye des impôts."
+        },
+        {
+            "question": "Translate into French 'The Third Estate is made up of peasants, workers, and the middle class.'",
+            "options": [
+                "A. Le tiers état est constituè de paysans, d'ouvriers et de bourgeois.",
+                "B. Le tiers état est constitué de paysans, d'ouvriers et de bourgeois.",
+                "C. Le tiers état est constitué de païsans, d'ouvriers et de bourgeois.",
+                "D. Le tiers état è constitué de paysans, d'ouvriers et de bourgeois."
+            ],
+            "correctAnswer": "B. Le tiers état est constitué de paysans, d'ouvriers et de bourgeois."
+        },
+        {
+            "question": "Translate into French 'The early years of Louis XVI's reign are marked by a difficult economic situation.'",
+            "options": [
+                "A. Le début de resgne de Louis XVI est marqué par une situation économique délicate.",
+                "B. Le début de régne de Louis XVI marqué par une situation èconomique délicate.",
+                "C. Le début de rëgne de Louis XVI est marqué par une situation économique dèlicate.",
+                "D. Le début de règne de Louis XVI est marqué par une situation économique délicate."
+            ],
+            "correctAnswer": "D. Le début de règne de Louis XVI est marqué par une situation économique délicate."
+        },
+        {
+            "question": "Translate into French 'In the 1780s, populations were affected by poor harvests that led to rising bread prices and caused famines.'",
+            "options": [
+                "A. Dans les années 1780, les populations sont touchèes par de mauvaises récoltes qui entrainent une hausse du prix du pain et provoquent des famines.",
+                "B. Dans les années 1780, les populations sont touchées par de mauvaises récoltes qui entraînent une hausse du prix du pain et provoquent des famines.",
+                "C. Dans les années 1780, les populations sont touchèes par de mauvaises récoltes qui entrainent une hausse du prix du pain et provoquent des famines.",
+                "D. Dans les années 1780, les populations sont touchèes par de mauvaises récoltes qui entraînent une hausse du prix du pain et provoquent des famines."
+            ],
+            "correctAnswer": "B. Dans les années 1780, les populations sont touchées par de mauvaises récoltes qui entraînent une hausse du prix du pain et provoquent des famines."
+        },
+        {
+            "question": "Translate into French 'The kingdom was plagued by a significant financial crisis and a heavy debt burden, caused in particular by its involvement in the American Revolutionary War and by high inflation (rising prices).'",
+            "options": [
+                "A. Le royaume est marquè par une crise financiere importante et une trés lourde dette, causée notamment par la participation à la guerre d'indépendance des Etats-Unis contre les Anglais et par une forte inflation (hausse des prix).",
+                "B. Le royaume est marqué par une crise financierre importante et une très lourde dette, causée notamment par la participation à la guerre d'indépendance des Etats-Unis contre les Anglais et par une forte inflation (hausse des prix).",
+                "C. Le royaume est marqué par une crise financiére importante et une trés lourde dette, causée notamment par la participation à la guerre d'indépendance des Etats-Unis contre les Anglais et par une forte inflation (hausse des prix).",
+                "D. Le royaume est marqué par une crise financière importante et une très lourde dette, causée notamment par la participation à la guerre d'indépendance des Etats-Unis contre les Anglais et par une forte inflation (hausse des prix)."
+            ],
+            "correctAnswer": "D. Le royaume est marqué par une crise financière importante et une très lourde dette, causée notamment par la participation à la guerre d'indépendance des Etats-Unis contre les Anglais et par une forte inflation (hausse des prix)."
+        },
+        {
+            "question": "Translate into French 'Louis XVI wants to reform the state's finances, but he met with resistance and conservatism from the privileged orders.'",
+            "options": [
+                "A. Louis XVI souhaite réformer les finances de l'Etat, mais il se heurte à la résistance et au conservatisme des ordres privilégiés.",
+                "B. Louis XVI souhaite reformer les finances de l'Etat, mais il se heurte à la resistance et au conservatisme des ordres privilégiés.",
+                "C. Louis XVI souhaite rèformer les finances de l'Etat, mais il se heurte à la resistance et au conservatisme des ordres privilégies.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Louis XVI souhaite réformer les finances de l'Etat, mais il se heurte à la résistance et au conservatisme des ordres privilégiés."
+        }
+    ]
+}

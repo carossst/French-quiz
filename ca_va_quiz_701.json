@@ -1,0 +1,118 @@
+{
+    "id": 701,
+    "themeId": 7,
+    "name": "Writing and Reading Ça Va – Quiz 1",
+    "description": "Practice basic French greetings and introductions through writing and reading exercises.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "How do you say 'how are you'? (informal)",
+            "options": [
+                "A. Ça va ?",
+                "B. Ça te va ?",
+                "C. Ça vous va ?",
+                "D. Ça le va ?"
+            ],
+            "correctAnswer": "A. Ça va ?",
+            "explanation": "Ça va ? is a greeting and almost never a real question. Briefly respond with ça va or bien to acquaintances, and be more open with friends."
+        },
+        {
+            "question": "How do you say 'excuse-me'? (formal)",
+            "options": [
+                "A. Excusez-me",
+                "B. Excusez-moi",
+                "C. Excuse-moi",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. Excusez-moi",
+            "explanation": "Excusez-moi is a versatile phrase that can be used in a variety of situations to express politeness, to apologize, or to get someone's attention."
+        },
+        {
+            "question": "How do you say 'how are you'? (formal)",
+            "options": [
+                "A. Comment allez-vous ?",
+                "B. Comment vas-tu ?",
+                "C. Comment allez-votre ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Comment allez-vous ?",
+            "explanation": "It is a formal way to ask 'how are you?' It's typically used in situations where you do not know the person well or are meeting them for the first time."
+        },
+        {
+            "question": "How do you say 'my name is'? (informal)",
+            "options": [
+                "A. Je m'appelle",
+                "B. Moi, c'est",
+                "C. Mon prénom, c'est",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "When it's informal, your first name is enough. When it's formal, your full name with first name and last name is better. French people don't say their middle names in this context."
+        },
+        {
+            "question": "How do you say 'I'm American'? (feminine)",
+            "options": [
+                "A. Je suis américain.",
+                "B. Je suis amèricane.",
+                "C. Je suis Américaine.",
+                "D. Je suis américaine."
+            ],
+            "correctAnswer": "D. Je suis américaine.",
+            "explanation": "When it's an adjective about your nationality or the language, you don't capitalize. Only capitalize when you talk about the country or the nationality as a name."
+        },
+        {
+            "question": "How do you say 'I'm doing well'? ",
+            "options": [
+                "A. Ça va.",
+                "B. Ça va pas bien.",
+                "C. Je vais bien.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above"
+        },
+        {
+            "question": "How do you say 'nice to meet you'? (informal)",
+            "options": [
+                "A. Sympa de vous rencontrer",
+                "B. C'était bien de te rencontrer",
+                "C. C'était sympa de te rencontrer.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. C'était sympa de te rencontrer.",
+            "explanation": "It is grammatically correct but it usually does not sound very natural in French. Plus it needs to occur after a first real conversation. Otherwise, it might sound fake to French people."
+        },
+        {
+            "question": "How do you say 'I'm practising my French'?(informal)",
+            "options": [
+                "A. Je pratique mon français.",
+                "B. Je m'entraîne à parler français.",
+                "C. Je m'exerce à parler français.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "D. All of the above",
+            "explanation": "Practice means pratiquer but it's more used for playing sport rather than speaking a foreign language. If you say Je pratique mon français, people will understand but it won't sound very natural. It's better to say : je m'exerce à parler français or je m'entraîne à parler français."
+        },
+        {
+            "question": "How do you gesture 'hello'? (informal and casual)",
+            "options": [
+                "A. Hug the personne",
+                "B. Kiss on the cheeks",
+                "C. Shake hands",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. Kiss on the cheeks",
+            "explanation": "French people hardly ever hug each other. The equivalent is to kiss on the cheeks lightly. Two kisses, one on each cheek, is the standard in Paris. The more south you go, the more kisses you do (maximum 4)."
+        },
+        {
+            "question": "How do you say 'I miss my family'?",
+            "options": [
+                "A. Ma famille te manque.",
+                "B. Ma famille me manque.",
+                "C. Ma famille moi manque.",
+                "D. Je manque ma famille."
+            ],
+            "correctAnswer": "B. Ma famille me manque.",
+            "explanation": "'I miss' is never translated by Je manque. You always have this reflexive verb construction with me manquer (literally translates to 'to be missing to me'). Another example : I miss my friends/Mes amis me manquent."
+        }
+    ]
+}
