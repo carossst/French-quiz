@@ -148,7 +148,7 @@ UIFeatures.prototype.addChestIconToHeader = function () {
     if (!wrapper) return;
 
     const updateState = () => {
-        const available = this.storageManager.isDailyRewardAvailable
+        const available = (typeof this.storageManager.isDailyRewardAvailable === "function")
             ? !!this.storageManager.isDailyRewardAvailable()
             : true;
 
@@ -167,7 +167,13 @@ UIFeatures.prototype.addChestIconToHeader = function () {
     const activate = (event) => {
         if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") return;
 
-        if (this.storageManager.isDailyRewardAvailable && !this.storageManager.isDailyRewardAvailable()) {
+        // Prevent page scroll on Space
+        if (event.type === "keydown" && event.key === " ") {
+            event.preventDefault();
+        }
+
+        if (typeof this.storageManager.isDailyRewardAvailable === "function" &&
+            !this.storageManager.isDailyRewardAvailable()) {
             updateState();
             return;
         }
@@ -175,19 +181,16 @@ UIFeatures.prototype.addChestIconToHeader = function () {
         if (typeof this.storageManager.collectDailyReward !== "function") return;
 
         const result = this.storageManager.collectDailyReward();
-        if (result && typeof result.then === "function") {
-            result.then(handleResult).catch(() => { });
-        } else {
-            handleResult(result);
-        }
 
         if (result && result.success) {
-            const amount = Number(result.fpEarned ?? result.pointsEarned ?? result.earned ?? 0);
+            const amount = Number(result.fpEarned ?? 0);
             if (amount > 0) this.showDailyRewardAnimation(amount);
             this.updateXPHeader();
         }
+
         updateState();
     };
+
 
     wrapper.setAttribute("role", "button");
     wrapper.setAttribute("tabindex", "0");
@@ -198,6 +201,7 @@ UIFeatures.prototype.addChestIconToHeader = function () {
 
     updateState();
 };
+
 
 UIFeatures.prototype.updateXPHeader = function () {
     const fp = Number(this.storageManager.getFrenchPoints?.() ?? 0);
@@ -1084,15 +1088,24 @@ UIFeatures.prototype.setupChestTooltip = function () {
     if (btn.dataset.bound === "1") return;
     btn.dataset.bound = "1";
 
-    const isTouch = () =>
-        window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    // A11y wiring
+    if (!tip.id) tip.id = "daily-chest-tooltip";
+    btn.setAttribute("aria-controls", tip.id);
+
+    // "Touch-first" detection: coarse pointer OR no hover capability
+    const isTouchLike = () => {
+        try {
+            const mqCoarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+            const mqNoHover = window.matchMedia && window.matchMedia("(hover: none)").matches;
+            return !!(mqCoarse || mqNoHover);
+        } catch {
+            return false;
+        }
+    };
 
     const buildText = () => {
         const info = this.getChestInfo();
-        const etaLine = info.available
-            ? "Available now."
-            : `Available in ${info.etaText}.`;
-
+        const etaLine = info.available ? "Available now." : `Available in ${info.etaText}.`;
         return (
             `🎁 One daily chest (calendar streak).\n` +
             `Minimum: ${info.points} French Points. Bonus possible.\n` +
@@ -1104,30 +1117,54 @@ UIFeatures.prototype.setupChestTooltip = function () {
         tipText.textContent = buildText();
         tip.classList.remove("hidden");
         btn.setAttribute("aria-expanded", "true");
+        btn.setAttribute("aria-describedby", tip.id);
     };
 
     const close = () => {
         tip.classList.add("hidden");
         btn.setAttribute("aria-expanded", "false");
+        btn.removeAttribute("aria-describedby");
     };
 
-    btn.addEventListener("mouseenter", () => { if (!isTouch()) open(); });
-    btn.addEventListener("mouseleave", () => { if (!isTouch()) close(); });
-    btn.addEventListener("focus", () => { if (!isTouch()) open(); });
-    btn.addEventListener("blur", () => { if (!isTouch()) close(); });
+    const toggle = () => {
+        if (tip.classList.contains("hidden")) open();
+        else close();
+    };
 
+    // Desktop: hover + keyboard focus
+    const onPointerEnter = () => { if (!isTouchLike()) open(); };
+    const onPointerLeave = () => { if (!isTouchLike()) close(); };
+    const onFocus = () => { if (!isTouchLike()) open(); };
+    const onBlur = () => { if (!isTouchLike()) close(); };
+
+    btn.addEventListener("pointerenter", onPointerEnter);
+    btn.addEventListener("pointerleave", onPointerLeave);
+    btn.addEventListener("focus", onFocus);
+    btn.addEventListener("blur", onBlur);
+
+    // Mobile/touch: tap to toggle
     btn.addEventListener("click", (e) => {
-        if (!isTouch()) return;
+        if (!isTouchLike()) return;
         e.preventDefault();
         e.stopPropagation();
-        tip.classList.contains("hidden") ? open() : close();
+        toggle();
     });
 
+    // Close on outside tap (touch only)
     document.addEventListener("click", (e) => {
-        if (!isTouch()) return;
+        if (!isTouchLike()) return;
         if (btn.contains(e.target) || tip.contains(e.target)) return;
         close();
     });
+
+    // Close on Escape (both)
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+    });
+
+    // Optional: close on resize/scroll to avoid stuck tooltip after layout shift
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, { passive: true });
 };
 
 UIFeatures.prototype.setupResultsEventListeners = function () {
