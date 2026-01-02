@@ -860,10 +860,16 @@
 
         // Si bloqué par progression: guidance uniquement (pas de coût, pas de FP)
         if (unlockStatus.reason === "PREVIOUS_LOCKED") {
-            const prevThemeObj = (this.themeIndexCache || []).find(function (t) {
-                return t && Number(t.id) === Number(themeId - 1);
-            });
-            const previousTheme = (prevThemeObj && prevThemeObj.name) ? prevThemeObj.name : "previous theme";
+            // Déterminer le thème précédent (ordre par id, robuste si ids sont strings)
+            const list = (this.themeIndexCache || [])
+                .filter(t => t && t.id != null)
+                .map(t => ({ ...t, id: Number(t.id) }))
+                .filter(t => Number.isFinite(t.id))
+                .sort((a, b) => a.id - b.id);
+
+            const idx = list.findIndex(t => t.id === Number(themeId));
+            const prev = idx > 0 ? list[idx - 1] : null;
+            const previousTheme = prev ? this.normalizeText(prev.name) : "the previous theme";
 
             return (
                 '<div class="text-xs text-gray-400 mt-2">' +
@@ -872,6 +878,7 @@
                 '</div>'
             );
         }
+
 
 
         // Game master: n’afficher “needed FP” QUE pour le prochain thème atteignable
@@ -923,6 +930,11 @@
             existing.remove();
         }
 
+        // A11Y/UX: mémoriser le focus et bloquer le scroll du fond
+        const previousActiveElement = document.activeElement;
+        const prevBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
         const wrapper = document.createElement("div");
         wrapper.innerHTML = this.generateUnlockRoadmapHTML();
         const modal = wrapper.firstElementChild;
@@ -930,7 +942,40 @@
 
         const closeBtn = modal.querySelector("#close-roadmap-btn");
 
-        // AMÉLIORATION 3: ESC pour fermer (+ "Esc" vieux navigateurs)
+        // Helper: focus trap minimal
+        var getFocusable = function () {
+            return modal.querySelectorAll(
+                'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+            );
+        };
+
+        var handleTabTrap = function (e) {
+            if (e.key !== "Tab") return;
+
+            const focusable = getFocusable();
+            if (!focusable || focusable.length === 0) {
+                e.preventDefault();
+                if (closeBtn) closeBtn.focus();
+                return;
+            }
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first || document.activeElement === modal) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+
+        // ESC pour fermer (+ "Esc" vieux navigateurs)
         var handleEscape = function (e) {
             if (e.key === "Escape" || e.key === "Esc") {
                 cleanup();
@@ -938,13 +983,23 @@
             }
         };
 
-        // CORRECTION: Cleanup centralisé
+        // CORRECTION: Cleanup centralisé (restaure scroll + focus)
         var cleanup = function () {
             document.removeEventListener("keydown", handleEscape);
+            document.removeEventListener("keydown", handleTabTrap);
+
+            document.body.style.overflow = prevBodyOverflow || "";
+
+            try {
+                if (previousActiveElement && typeof previousActiveElement.focus === "function") {
+                    previousActiveElement.focus();
+                }
+            } catch (e) { }
         };
         modal.addEventListener("tyf:close", cleanup, { once: true });
 
         document.addEventListener("keydown", handleEscape);
+        document.addEventListener("keydown", handleTabTrap);
 
         // Close button
         if (closeBtn) {
@@ -953,8 +1008,14 @@
                 modal.remove();
             });
 
-            // AMÉLIORATION 3: Focus initial sur bouton close
+            // Focus initial sur bouton close
             setTimeout(function () { closeBtn.focus(); }, 100);
+        } else {
+            // Fallback focus
+            setTimeout(function () {
+                const focusable = getFocusable();
+                if (focusable && focusable[0]) focusable[0].focus();
+            }, 100);
         }
 
         // Click overlay
@@ -966,10 +1027,6 @@
         });
     };
 
-    // NOUVEAU: Génère HTML de la modal roadmap (P0+P1)
-    // ⚠️ TECH DEBT: getCumulativeForTheme devrait être dans StorageManager ou unlock-utils.js
-    // TODO: Extraire logique métier (cumulative cost) hors de l'UI
-    // TODO: StorageManager.getUnlockInfo(themeId) → { cost, cumulative, daysNeeded, canUnlock }
     UICore.prototype.generateUnlockRoadmapHTML = function () {
         const currentFP = this.storageManager.getFrenchPoints?.() || 0;
         const isPremium = this.storageManager.isPremiumUser?.() || false;
@@ -977,43 +1034,60 @@
         const themeData = this.themeIndexCache || [];
         const self = this;
 
-        // Helper local pour calculer cumulative (basé sur canUnlockTheme)
+        // Helper local pour calculer cumulative (robuste si ids sont des strings)
         const getCumulativeForTheme = function (targetThemeId) {
+            const targetId = Number(targetThemeId);
             let total = 0;
+
             for (let i = 0; i < themeData.length; i++) {
                 const t = themeData[i];
-                if (t.id <= targetThemeId && t.id !== 1) {
-                    const themeCost = typeof self.storageManager.getThemeCost === 'function'
-                        ? self.storageManager.getThemeCost(t.id)
+                const id = Number(t && t.id);
+                if (!Number.isFinite(id)) continue;
+
+                if (id <= targetId && id !== 1) {
+                    const themeCost = typeof self.storageManager.getThemeCost === "function"
+                        ? self.storageManager.getThemeCost(id)
                         : 0;
-                    total += themeCost;
+                    total += (typeof themeCost === "number" ? themeCost : 0);
                 }
             }
             return total;
         };
 
-        // Calculer total et daysNeeded
-        const lastThemeId = themeData.length > 0 ? themeData[themeData.length - 1].id : 10;
+        // Calculer total et daysNeeded (robuste même si themeData n'est pas trié)
+        const lastThemeId = (function () {
+            let maxId = 10;
+            for (let i = 0; i < themeData.length; i++) {
+                const id = Number(themeData[i] && themeData[i].id);
+                if (Number.isFinite(id)) maxId = Math.max(maxId, id);
+            }
+            return maxId;
+        })();
         const totalNeeded = getCumulativeForTheme(lastThemeId);
         const remaining = Math.max(0, totalNeeded - currentFP);
 
-        // Estimation réaliste: 1 coffre (3 FP) + 1 quiz moyen (3-5 FP)
-        const FP_PER_DAY_ESTIMATE = 8;
-        const daysNeeded = remaining === 0 ? 0 : Math.ceil(remaining / FP_PER_DAY_ESTIMATE);
-
+        // Estimation simple: combien de jours pour gagner "remaining" FP
+        // Fallback volontairement conservateur si aucune estimation n'existe ailleurs
+        const FP_PER_DAY_ESTIMATE = (window.TYF_CONFIG && Number(window.TYF_CONFIG.fpPerDayEstimate)) || 8;
+        const daysNeeded = remaining > 0
+            ? Math.max(1, Math.ceil(remaining / Math.max(1, FP_PER_DAY_ESTIMATE)))
+            : 0;
 
         // Générer lignes de thèmes
         let rows = '';
 
         themeData.forEach(function (theme) {
-            const isFree = theme.id === 1; // Colors est gratuit
-            const isUnlocked = self.storageManager.isThemeUnlocked?.(theme.id) || isFree;
-            const unlockStatus = isFree ? null : (self.storageManager.canUnlockTheme?.(theme.id) || {});
+            const id = Number(theme && theme.id);
+            if (!Number.isFinite(id)) return;
+
+            const isFree = id === 1; // Colors est gratuit
+            const isUnlocked = self.storageManager.isThemeUnlocked?.(id) || isFree;
+            const unlockStatus = isFree ? null : (self.storageManager.canUnlockTheme?.(id) || {});
             // Roadmap = coût fixe du thème (25/50/75/100...), pas le “next unlock cost”
             const cost = isFree ? 0 : (typeof self.storageManager.getThemeCost === "function"
-                ? self.storageManager.getThemeCost(theme.id)
+                ? self.storageManager.getThemeCost(id)
                 : null);
-            const cumulative = isFree ? 0 : getCumulativeForTheme(theme.id);
+            const cumulative = isFree ? 0 : getCumulativeForTheme(id);
 
             // Déterminer status et couleur
             let statusHTML = '';
@@ -1050,13 +1124,12 @@
                 '</div>' +
                 '<div class="text-right">';
 
-
             if (isFree) {
                 rows += '<div class="text-sm font-bold text-green-600">FREE</div>';
             } else if (isPremium || isUnlocked) {
                 rows += '<div class="text-sm font-bold text-blue-600">Unlocked</div>';
             } else {
-                // PATCH 2: Afficher "—" si cost inconnu (null)
+                // Afficher "—" si cost inconnu (null)
                 rows += (cost === null)
                     ? '<div class="text-sm font-bold text-gray-900">—</div>'
                     : '<div class="text-sm font-bold text-gray-900">' + cost + ' FP</div>';
@@ -1075,7 +1148,7 @@
             '<div class="sticky top-0 bg-white border-b border-gray-200 p-6 pb-4">' +
             '<div class="flex items-center justify-between mb-2">' +
             '<h2 id="roadmap-title" class="text-2xl font-bold text-gray-900">🗺️ How unlocking works</h2>' +
-            '<button id="close-roadmap-btn" type="button" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>' +
+            '<button id="close-roadmap-btn" type="button" aria-label="Close roadmap" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>' +
             '</div>' +
             '<div class="text-sm text-gray-600 mt-1 mb-3">' +
             'Learn at your own pace, or unlock everything instantly.' +
@@ -1084,9 +1157,9 @@
             (isPremium ? ' • <span class="text-purple-600 font-semibold">Premium ✨</span>' : '') +
             '</div>' +
             (isPremium || !stripeUrl ? '' :
-                '<a href="' + stripeUrl + '" target="_blank" ' +
+                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" ' +
                 'class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-4 rounded-lg text-center transition-colors shadow-sm mb-3">' +
-                'Unlock all themes instantly – $12' +
+                'Unlock all themes instantly - $12' +
                 '</a>'
             ) +
             '</div>' +
@@ -1105,13 +1178,13 @@
                     '<strong>✅ You have enough French Points to unlock more themes!</strong>' :
                     '<div class="space-y-1">' +
                     '<div><strong>Free path:</strong> Unlock all themes in ~' + daysNeeded + ' days with regular play</div>' +
-                    '<div><strong>Premium path:</strong> One-time $12 → all themes unlocked instantly ⚡</div>' +
+                    '<div><strong>Premium path:</strong> One-time $12 -> all themes unlocked instantly ⚡</div>' +
                     '</div>'
                 )
             ) +
             '</div>' +
             (isPremium || !stripeUrl ? '' :
-                '<a href="' + stripeUrl + '" target="_blank" ' +
+                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" ' +
                 'class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors">' +
                 '🚀 Get Premium - $12</a>'
             ) +
@@ -1125,6 +1198,7 @@
             '</div>'
         );
     };
+
 
 
     /* ----------------------------------------
@@ -1187,8 +1261,14 @@
         return (
             quizzes
                 .map(function (quiz) {
-                    const isUnlocked = self.storageManager.isQuizUnlocked(quiz.id);
-                    const isCompleted = self.storageManager.isQuizCompleted(quiz.id);
+                    const isUnlocked = typeof self.storageManager.isQuizUnlocked === "function"
+                        ? self.storageManager.isQuizUnlocked(quiz.id)
+                        : true;
+
+                    const isCompleted = typeof self.storageManager.isQuizCompleted === "function"
+                        ? self.storageManager.isQuizCompleted(quiz.id)
+                        : false;
+
                     const classes =
                         "quiz-item theme-card transition-all " +
                         (!isUnlocked ? "opacity-60" : "hover:shadow-lg cursor-pointer");
@@ -1317,11 +1397,17 @@
                 e.stopPropagation();
 
                 const quizId = parseInt(card.dataset.quizId, 10);
-                if (self.storageManager.isQuizUnlocked(quizId)) {
-                    const realThemeId = Math.floor(quizId / 100);
+
+                // FIX: realThemeId n'existe pas ici. On utilise le thème courant du QuizManager.
+                const themeId = self.quizManager && self.quizManager.currentThemeId;
+
+                if (
+                    typeof self.storageManager.isQuizUnlocked === "function" &&
+                    self.storageManager.isQuizUnlocked(quizId)
+                ) {
                     // QuizManager.loadQuiz() appelle déjà showQuizScreen() en interne
-                    self.quizManager.loadQuiz(realThemeId, quizId).catch(function (e) {
-                        console.error("Failed to load quiz:", e);
+                    self.quizManager.loadQuiz(themeId, quizId).catch(function (err) {
+                        console.error("Failed to load quiz:", err);
                         self.showError("Quiz could not be loaded.");
                     });
                 } else if (self.features && self.features.showPaywallModal) {
@@ -1330,6 +1416,7 @@
             });
         });
     };
+
 
     UICore.prototype.setupQuizEvents = function () {
         const self = this;

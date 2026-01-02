@@ -173,6 +173,12 @@ UIFeatures.prototype.addChestIconToHeader = function () {
         if (typeof this.storageManager.collectDailyReward !== "function") return;
 
         const result = this.storageManager.collectDailyReward();
+        if (result && typeof result.then === "function") {
+            result.then(handleResult).catch(() => { });
+        } else {
+            handleResult(result);
+        }
+
         if (result && result.success) {
             const amount = Number(result.fpEarned ?? result.pointsEarned ?? result.earned ?? 0);
             if (amount > 0) this.showDailyRewardAnimation(amount);
@@ -220,24 +226,42 @@ UIFeatures.prototype.updateXPHeader = function () {
 // DAILY REWARD TOAST
 //================================================================================
 UIFeatures.prototype.showDailyRewardAnimation = function (points) {
-    const id = "daily-reward-toast";
-    const existing = document.getElementById(id);
-    if (existing) existing.remove();
+    const containerId = "daily-reward-toast";
+    const container = document.getElementById(containerId);
 
+    // Si un container existe déjà dans le HTML, on y injecte un toast enfant.
+    // Sinon, on crée un toast standalone (fallback).
     const toast = document.createElement("div");
-    toast.id = id;
     toast.setAttribute("role", "status");
     toast.setAttribute("aria-live", "polite");
 
     const isMobile = window.innerWidth < 640;
-    toast.className = isMobile
-        ? "fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm z-50"
-        : "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50";
+
+    // Toast enfant (si container), sinon toast positionné
+    toast.className = container
+        ? (isMobile
+            ? "bg-green-600 text-white px-3 py-2 rounded-lg text-sm shadow-md"
+            : "bg-green-600 text-white px-4 py-2 rounded-lg shadow-md")
+        : (isMobile
+            ? "fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm z-50"
+            : "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50");
 
     toast.textContent = `+${points} French Points!`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
+
+    if (container) {
+        // Nettoyer les anciens toasts dans le container (optionnel mais propre)
+        while (container.firstChild) container.removeChild(container.firstChild);
+        container.appendChild(toast);
+    } else {
+        document.body.appendChild(toast);
+    }
+
+    setTimeout(() => {
+        try { toast.remove(); } catch { /* no-op */ }
+    }, 2000);
 };
+
+
 
 //================================================================================
 // CONVERSION SYSTEM (PAYWALL)
@@ -305,7 +329,11 @@ UIFeatures.prototype.createPaywallModal = function () {
         Number(this.storageManager.getNextThemeUnlockCost?.()) ||
         Number(this.storageManager.getUnlockCost?.(this.storageManager.getUnlockedPremiumThemesCount?.() || 0)) ||
         0;
-    const daily = Number(this.storageManager.getDailyRewardPoints?.()) || 3;
+    const daily =
+        Number(this.storageManager.getDailyRewardPoints?.()) ||
+        Number(this.storageManager.getDailyRewardMin?.()) ||
+        3;
+
 
     const waitDays = Math.max(0, Math.ceil((nextCost - currentFP) / Math.max(1, daily)));
 
@@ -383,16 +411,23 @@ UIFeatures.prototype.handleResultsFP = function (resultsData) {
 
 UIFeatures.prototype.showFPGain = function (amount) {
     const elem = document.createElement("div");
-    elem.className = "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-blue-600 z-50 pointer-events-none";
+    elem.className =
+        "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-blue-600 z-50 pointer-events-none";
 
     const label = amount === 1 ? "French Point" : "French Points";
     elem.textContent = `+${amount} ${label}`;
-    elem.classList.add("fp-gain-anim");
+
     document.body.appendChild(elem);
 
-    try { if (window.trackMicroConversion) window.trackMicroConversion("fp_earned", { amount }); } catch { }
+    try {
+        if (window.trackMicroConversion) {
+            window.trackMicroConversion("fp_earned", { amount });
+        }
+    } catch { }
+
     setTimeout(() => elem.remove(), 1500);
 };
+
 
 //================================================================================
 // ASSESSMENT FEEDBACK (PER QUESTION)
@@ -520,32 +555,25 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
     }
 
     if (unlockStatus.canUnlock) {
-        const confirmMessage = `Unlock "${theme.name}" for ${unlockStatus.cost} FP?\n\n` +
-            `You have ${this.storageManager.getFrenchPoints?.() ?? 0} FP\n` +
-            `After unlock: ${(this.storageManager.getFrenchPoints?.() ?? 0) - unlockStatus.cost} FP remaining\n\n` +
+        const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
+        const cost = Number(unlockStatus.cost ?? 0);
+
+        const confirmMessage = `Unlock "${theme.name}" for ${cost} FP?\n\n` +
+            `You have ${currentFP} FP\n` +
+            `After unlock: ${Math.max(0, currentFP - cost)} FP remaining\n\n` +
             `This unlocks 5 authentic French quizzes`;
 
         if (confirm(confirmMessage)) {
-            let ok = false;
-
-            if (typeof this.storageManager.unlockTheme === "function") {
-                ok = !!this.storageManager.unlockTheme(theme.id, unlockStatus.cost);
-            } else if (this.storageManager.data && typeof this.storageManager.save === "function") {
-                this.storageManager.data.frenchPoints -= unlockStatus.cost;
-                const baseQuizId = theme.id * 100;
-                this.storageManager.data.unlockedQuizzes = this.storageManager.data.unlockedQuizzes || [];
-                for (let i = 1; i <= 5; i++) {
-                    const qid = baseQuizId + i;
-                    if (!this.storageManager.data.unlockedQuizzes.includes(qid)) {
-                        this.storageManager.data.unlockedQuizzes.push(qid);
-                    }
-                }
-                this.storageManager.save();
-                ok = true;
+            if (typeof this.storageManager.unlockTheme !== "function") {
+                this.showFeedbackMessage("error", "Unlock failed (missing storage method)");
+                return;
             }
 
-            if (ok) {
-                alert(`Unlocked "${theme.name}"!\n\n5 new authentic French quizzes available\n${this.storageManager.getFrenchPoints?.() ?? 0} French Points remaining`);
+            const res = this.storageManager.unlockTheme(theme.id, cost);
+
+            if (res && res.success) {
+                const remaining = Number(res.remainingFP ?? this.storageManager.getFrenchPoints?.() ?? 0);
+                alert(`Unlocked "${theme.name}"!\n\n5 new authentic French quizzes available\n${remaining} French Points remaining`);
                 this.updateXPHeader();
                 setTimeout(() => {
                     if (this.uiCore?.showWelcomeScreen) this.uiCore.showWelcomeScreen();
@@ -557,6 +585,7 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
         }
         return;
     }
+
 
     this.showThemePreviewModal(theme);
 };

@@ -121,6 +121,16 @@ StorageManager.prototype.ensureDataStructure = function () {
     this.data.userProfile = JSON.parse(JSON.stringify(this.defaultData.userProfile));
   }
 
+  // Compat daily reward timestamp (number recommandé)
+  if (typeof this.data.lastDailyRewardAt !== "number") {
+    this.data.lastDailyRewardAt = 0;
+  }
+
+  // Durcir quizCache si présent
+  if (this.data.quizCache && typeof this.data.quizCache !== "object") {
+    this.data.quizCache = {};
+  }
+
   // Conversion tracking + champs optionnels
   if (!this.data.conversionTracking || typeof this.data.conversionTracking !== "object") {
     this.data.conversionTracking = JSON.parse(JSON.stringify(this.defaultData.conversionTracking));
@@ -138,12 +148,14 @@ StorageManager.prototype.save = function () {
   if (!this.initialized) return false;
 
   try {
-    const dataString = JSON.stringify(this.data);
+    let dataString = JSON.stringify(this.data);
 
     // Verification taille avant sauvegarde
     if (dataString.length > 5 * 1024 * 1024) {
       console.warn("Storage data too large, attempting cleanup...");
       this.cleanupOldData();
+      // Recalculer après cleanup (sinon on réécrit l’ancien payload)
+      dataString = JSON.stringify(this.data);
     }
 
     localStorage.setItem(this.storageKey, dataString);
@@ -183,6 +195,7 @@ StorageManager.prototype.save = function () {
   }
 };
 
+
 // Nettoyage agressif en cas de quota
 StorageManager.prototype.emergencyCleanup = function () {
   // Garder seulement les donnees essentielles
@@ -191,12 +204,13 @@ StorageManager.prototype.emergencyCleanup = function () {
     this.data.history = this.data.history.slice(0, 10);
   }
 
-
   // Nettoyer le cache de quiz anciens
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  if (this.data.quizCache) {
-    Object.keys(this.data.quizCache).forEach(key => {
-      if (this.data.quizCache[key].timestamp < oneWeekAgo) {
+  if (this.data.quizCache && typeof this.data.quizCache === "object") {
+    Object.keys(this.data.quizCache).forEach((key) => {
+      const entry = this.data.quizCache[key];
+      const ts = Number(entry && entry.timestamp);
+      if (!Number.isFinite(ts) || ts < oneWeekAgo) {
         delete this.data.quizCache[key];
       }
     });
@@ -389,19 +403,86 @@ StorageManager.prototype.setLastDailyRewardTimestamp = function (ts) {
   this.data.lastDailyRewardAt = ts;
   this.data.lastDailyReward = new Date(ts).toISOString(); // compat ancienne donnee
   localStorage.setItem("tyf:lastDailyRewardAt", String(ts));
-  if (typeof this.save === "function") {
-    this.save();
-  }
+  // IMPORTANT: ne pas appeler save() ici (le caller gère la persistance)
 };
+
 
 StorageManager.prototype.getDailyRewardCooldownMs = function () {
   return DAILY_REWARD_COOLDOWN_MS;
+};
+
+// Utilisé par la paywall pour estimer un "rythme gratuit" simple (min garanti)
+StorageManager.prototype.getDailyRewardPoints = function () {
+  return DAILY_REWARD_MIN;
 };
 
 StorageManager.prototype.getNextDailyRewardTime = function () {
   const last = this.getLastDailyRewardTimestamp();
   return last ? last + this.getDailyRewardCooldownMs() : Date.now();
 };
+
+// Débloque un thème ciblé (compatible avec l'UI qui clique un thème précis)
+// Respecte: thème précédent débloqué + assez de FP
+StorageManager.prototype.unlockTheme = function (themeId, costOverride) {
+  // Colors gratuit
+  if (themeId === 1) {
+    return { success: true, cost: 0, themeId: 1, remainingFP: this.data.frenchPoints };
+  }
+
+  // Premium: tout est déjà ouvert, mais on reste cohérent côté retour
+  if (this.isPremiumUser()) {
+    return { success: true, cost: 0, themeId: themeId, remainingFP: this.data.frenchPoints };
+  }
+
+  // Si déjà débloqué, idempotent
+  if (this.isThemeUnlocked(themeId)) {
+    return { success: true, cost: 0, themeId: themeId, remainingFP: this.data.frenchPoints };
+  }
+
+  const check = this.canUnlockTheme(themeId);
+  if (!check.canUnlock) {
+    return {
+      success: false,
+      reason: check.reason || "LOCKED",
+      cost: typeof check.cost === "number" ? check.cost : null,
+      currentFP: this.data.frenchPoints
+    };
+  }
+
+  const cost = (typeof costOverride === "number") ? costOverride : check.cost;
+  if (typeof cost !== "number" || cost < 0) {
+    return { success: false, reason: "INVALID_COST", cost: null, currentFP: this.data.frenchPoints };
+  }
+
+  if (this.data.frenchPoints < cost) {
+    return {
+      success: false,
+      reason: "INSUFFICIENT_FP",
+      cost: cost,
+      currentFP: this.data.frenchPoints
+    };
+  }
+
+  // Dépenser FP
+  this.data.frenchPoints -= cost;
+
+  // Marquer le thème comme débloqué via le quiz de base (theme*100 + 1)
+  const baseQuizId = themeId * 100 + 1;
+  if (!Array.isArray(this.data.unlockedQuizzes)) this.data.unlockedQuizzes = [];
+  if (!this.data.unlockedQuizzes.includes(baseQuizId)) {
+    this.data.unlockedQuizzes.push(baseQuizId);
+  }
+
+  this.save();
+
+  return {
+    success: true,
+    cost: cost,
+    themeId: themeId,
+    remainingFP: this.data.frenchPoints
+  };
+};
+
 
 StorageManager.prototype.canUnlockWithFP = function () {
   if (this.isPremiumUser()) return { canUnlock: true, cost: 0 };
@@ -444,10 +525,11 @@ StorageManager.prototype.unlockQuizWithFP = function () {
     return {
       success: false,
       reason: check.reason || "LOCKED",
-      cost: typeof check.cost === "number" ? check.cost : 0,
+      cost: typeof check.cost === "number" ? check.cost : null,
       currentFP: this.data.frenchPoints
     };
   }
+
 
   // Dépenser FP
   const cost = check.cost;
@@ -478,7 +560,6 @@ StorageManager.prototype.isThemeUnlocked = function (themeId) {
   // Compat: certaines anciennes versions ont pu stocker 200 au lieu de 201
   return this.data.unlockedQuizzes.includes(base + 1) || this.data.unlockedQuizzes.includes(base);
 };
-
 
 
 StorageManager.prototype.canUnlockTheme = function (themeId) {
@@ -527,8 +608,9 @@ StorageManager.prototype.canUnlockTheme = function (themeId) {
 // Helper de lecture
 StorageManager.prototype.isThemeCompleted = function (themeId) {
   const stats = this.data.themeStats[themeId];
-  return !!(stats && stats.completed > 0);
+  return !!(stats && typeof stats.completed === "number" && stats.completed >= 5);
 };
+
 
 //================================================================================
 // ENDREGION: FRENCH POINTS & PREMIUM SYSTEM
@@ -608,23 +690,49 @@ StorageManager.prototype.updateStreakDays = function () {
   }
 };
 
-StorageManager.prototype.updateStreakDaysFromPrevious = function (previousDate) {
-  if (previousDate) {
-    const lastDate = new Date(previousDate);
-    const now = new Date();
-    const daysDiff = Math.floor(
-      (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+StorageManager.prototype.updateStreakDaysFromPrevious = function (previousDateIso) {
+  const dayKey = (d) => {
+    const x = new Date(d);
+    return (
+      x.getFullYear() +
+      "-" +
+      String(x.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(x.getDate()).padStart(2, "0")
     );
+  };
 
-    if (daysDiff === 1) {
-      this.data.fpStats.streakDays++;
-    } else if (daysDiff > 1) {
-      this.data.fpStats.streakDays = 1;
-    }
+  const todayKey = dayKey(Date.now());
+
+  // Premier coffre
+  if (!previousDateIso) {
+    this.data.fpStats.streakDays = 1;
+    this.data.fpStats._lastDailyRewardDayKey = todayKey; // meta interne (optionnel)
+    return;
+  }
+
+  const prevKey = dayKey(previousDateIso);
+
+  // Si déjà collecté aujourd'hui (edge case), ne pas modifier le streak
+  if (prevKey === todayKey) {
+    this.data.fpStats._lastDailyRewardDayKey = todayKey;
+    return;
+  }
+
+  // Clé "hier" en heure locale
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  const yesterdayKey = dayKey(y);
+
+  if (prevKey === yesterdayKey) {
+    this.data.fpStats.streakDays = (Number(this.data.fpStats.streakDays) || 0) + 1;
   } else {
     this.data.fpStats.streakDays = 1;
   }
+
+  this.data.fpStats._lastDailyRewardDayKey = todayKey;
 };
+
 
 StorageManager.prototype.getBadges = function () {
   return Array.isArray(this.data.badges) ? [...this.data.badges] : [];
@@ -1078,7 +1186,6 @@ StorageManager.prototype.getVisualizationData = function () {
 //================================================================================
 // ENDREGION: STATS & UI STATE
 //================================================================================
-
 //================================================================================
 // REGION: UTILITIES
 //================================================================================
@@ -1104,7 +1211,6 @@ StorageManager.prototype.getUnlockCost = function (premiumQuizCount) {
 
 // Retourne le coût d'un thème spécifique basé sur sa position (informatif)
 // Utilisé pour : roadmap, affichage (futur)
-// Ne change PAS la logique de canUnlockTheme (qui reste "next unlock cost")
 StorageManager.prototype.getThemeCost = function (themeId) {
   if (themeId === 1) return 0; // Colors gratuit
   const stepIndex = themeId - 2; // Theme 2 = step 0
@@ -1125,8 +1231,6 @@ StorageManager.prototype.getNextThemeUnlockCost = function () {
   return this.getUnlockCost(this.getUnlockedPremiumThemesCount());
 };
 
-// Fin du fichier StorageManager
-
 /**
  * Check if there are unplayed free quizzes in Colors theme
  */
@@ -1142,4 +1246,3 @@ StorageManager.prototype.hasUnplayedFreeQuizzes = function () {
 };
 
 window.StorageManager = StorageManager;
-

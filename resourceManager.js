@@ -8,6 +8,9 @@
       quizzes: new Map(),
       maxQuizzes: 50
     };
+    // après loadConfiguration()
+    this.cache.maxQuizzes = Number(this.config.maxCacheSize) || this.cache.maxQuizzes;
+
 
     const hostname = global.location.hostname;
     this.isDevelopment = hostname === "localhost" || hostname === "127.0.0.1";
@@ -172,7 +175,7 @@
 
   ResourceManagerClass.prototype.setQuizCache = function (cacheKey, quiz) {
     // Si cache plein, supprimer le moins récent (premier)
-    if (this.cache.quizzes.size >= this.cache.maxQuizzes) {
+    if (this.cache.quizzes.size >= (this.cache.maxQuizzes || 50)) {
       const oldestKey = this.cache.quizzes.keys().next().value;
       this.cache.quizzes.delete(oldestKey);
       this.logger.log("LRU: eviction of " + oldestKey);
@@ -364,8 +367,11 @@
       const hasText =
         typeof q.question === "string" || typeof q.text === "string";
       const hasOptions = Array.isArray(q.options);
-      const hasCorrect = typeof q.correctAnswer === "string";
+      const hasCorrect =
+        typeof q.correctAnswer === "string" ||
+        typeof q.correctIndex === "number";
       return hasText && hasOptions && hasCorrect;
+
     });
   };
 

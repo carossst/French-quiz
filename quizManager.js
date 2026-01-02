@@ -24,10 +24,17 @@ function QuizManager(resourceManager, storageManager, ui) {
   this.totalTimeElapsed = 0;
   this.startTime = null;
   this.questionStartTime = null;
-  this.feedbackDelay = 1500;
+
+
 
   console.log("QuizManager: Initialized with dependencies (v3)");
 }
+
+QuizManager.prototype._recordTime = function (finalize) {
+  return this._recordTimeForCurrentQuestion(finalize);
+};
+
+
 
 QuizManager.prototype.resetQuizState = function () {
   this.currentThemeId = null;
@@ -38,9 +45,15 @@ QuizManager.prototype.resetQuizState = function () {
   this.questionStatus = [];
   this.questionTimes = [];
   this.score = 0;
+
+  // ⏱️ Reset time tracking
   this.totalTimeElapsed = 0;
+  this.startTime = null;
+  this.questionStartTime = null;
+
   console.log("QuizManager: State reset");
 };
+
 
 QuizManager.prototype.normalizeText = function (s) {
   return String(s || "")
@@ -63,7 +76,11 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
       throw new Error("Invalid quiz data structure received from ResourceManager");
     }
 
-    this.previousBadgeCount = this.storageManager.getBadges().length;
+    const badges = (typeof this.storageManager.getBadges === "function")
+      ? this.storageManager.getBadges()
+      : [];
+    this.previousBadgeCount = Array.isArray(badges) ? badges.length : 0;
+
     this.resetQuizState();
 
     this.currentThemeId = themeId;
@@ -78,6 +95,7 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
           question: this.normalizeText(q.question),
           text: this.normalizeText(q.text),
           explanation: this.normalizeText(q.explanation),
+          correctAnswer: this.normalizeText(q.correctAnswer),
           options: Array.isArray(q.options)
             ? q.options.map(o => this.normalizeText(o))
             : q.options
@@ -85,11 +103,11 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
         : quizData.questions
     };
 
-
     if (
       typeof this.storageManager.isQuizCompleted === "function" &&
       this.storageManager.isQuizCompleted(this.currentQuizId)
     ) {
+
       this.ui?.showFeedbackMessage?.(
         "info",
         "ℹ️ Revision mode: no French Points on replays (first completion only)"
@@ -102,6 +120,13 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
     this.userAnswers = new Array(questionCount).fill(null);
     this.questionStatus = new Array(questionCount).fill(null);
     this.questionTimes = new Array(questionCount).fill(0);
+
+    // ⏱️ START TIMING ICI
+    this.totalTimeElapsed = 0;
+    this.startTime = Date.now();
+    this.questionStartTime = this.startTime;
+
+
 
     if (this.ui && this.ui.showQuizScreen) {
       this.ui.showQuizScreen();
@@ -128,12 +153,50 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
   }
 };
 
+QuizManager.prototype._now = function () {
+  return (typeof performance !== "undefined" && typeof performance.now === "function")
+    ? performance.now()
+    : Date.now();
+};
+
+QuizManager.prototype._startTiming = function () {
+  const now = this._now();
+  if (this.startTime === null) this.startTime = now;
+  this.questionStartTime = now;
+};
+
+QuizManager.prototype._recordTimeForCurrentQuestion = function (finalize) {
+  if (this.questionStartTime === null) return;
+
+  const now = this._now();
+  const delta = Math.max(0, now - this.questionStartTime);
+
+  // total quiz time (ms)
+  this.totalTimeElapsed += delta;
+
+  // per-question time (ms)
+  if (Array.isArray(this.questionTimes) && typeof this.currentIndex === "number") {
+    const prev = this.questionTimes[this.currentIndex] || 0;
+    this.questionTimes[this.currentIndex] = prev + delta;
+  }
+
+  this.questionStartTime = finalize ? null : now;
+};
+
+
 QuizManager.prototype.preprocessQuestions = function () {
   if (!this.currentQuiz || !this.currentQuiz.questions) return;
 
   this.currentQuiz.questions.forEach((question, index) => {
     if (question.correctIndex === undefined && question.correctAnswer !== undefined) {
+      if (!Array.isArray(question.options)) {
+        console.error(`Question ${index + 1}: Invalid - options is not an array`);
+        question.isInvalid = true;
+        question.correctIndex = -1;
+        return;
+      }
       const correctIndex = question.options.findIndex(option => option === question.correctAnswer);
+
 
       if (correctIndex !== -1) {
         question.correctIndex = correctIndex;
@@ -173,14 +236,14 @@ QuizManager.prototype.renderCurrentQuestion = function () {
   if (this.ui && this.ui.updateNavigationButtons) {
     this.ui.updateNavigationButtons();
   }
-  if (this.ui && this.ui.updateProgressBar) {
-    this.ui.updateProgressBar();
+  if (this.ui && this.ui.updateQuizProgress) {
+    this.ui.updateQuizProgress();
   }
 };
 
 QuizManager.prototype.selectAnswer = function (answerIndex) {
   const question = this.getCurrentQuestion();
-  if (!question || answerIndex < 0 || answerIndex >= question.options.length) {
+  if (!question || !Array.isArray(question.options) || answerIndex < 0 || answerIndex >= question.options.length) {
     console.warn("QuizManager: Invalid answer selection", {
       currentIndex: this.currentIndex,
       answerIndex,
@@ -223,18 +286,21 @@ QuizManager.prototype.validateCurrentAnswer = function () {
 };
 
 QuizManager.prototype.nextQuestion = function () {
+  this._recordTime(false);
+
   if (this.currentIndex < this.currentQuiz.questions.length - 1) {
     this.currentIndex++;
     this.renderCurrentQuestion();
     return true;
   } else {
-    console.log("QuizManager: End of quiz reached, preparing to finish.");
     this.finishQuiz();
     return false;
   }
 };
 
+
 QuizManager.prototype.previousQuestion = function () {
+  this._recordTime(false);
   if (this.currentIndex > 0) {
     this.currentIndex--;
     this.renderCurrentQuestion();
@@ -242,6 +308,7 @@ QuizManager.prototype.previousQuestion = function () {
   }
   return false;
 };
+
 
 QuizManager.prototype.submitAnswer = function (answerIndex) {
   console.warn(
@@ -291,6 +358,7 @@ QuizManager.prototype.getQuizProgress = function () {
 };
 
 QuizManager.prototype.finishQuiz = function () {
+  this._recordTime(true);
   if (!this.currentQuiz || !this.storageManager) {
     console.error("QuizManager: Cannot finish quiz - missing currentQuiz or storageManager");
     return;
@@ -319,6 +387,13 @@ QuizManager.prototype.finishQuiz = function () {
 
   const fpBefore = this.storageManager.getFrenchPoints?.() ?? 0;
 
+  if (typeof this.storageManager.markQuizCompleted !== "function") {
+    console.error("QuizManager: storageManager.markQuizCompleted is missing");
+    // Fallback: afficher les résultats sans enregistrer
+    if (this.ui && this.ui.showResults) this.ui.showResults(resultsData);
+    return;
+  }
+
   this.storageManager.markQuizCompleted(
     this.currentThemeId,
     this.currentQuizId,
@@ -326,6 +401,7 @@ QuizManager.prototype.finishQuiz = function () {
     resultsData.total,
     this.totalTimeElapsed
   );
+
 
   const fpAfter = this.storageManager.getFrenchPoints?.() ?? fpBefore;
   resultsData.fpEarned = Math.max(0, fpAfter - fpBefore);
@@ -355,7 +431,8 @@ QuizManager.prototype.triggerBadgeEvents = function () {
     return;
   }
 
-  const currentBadges = this.storageManager.getBadges();
+  const currentBadgesRaw = this.storageManager.getBadges();
+  const currentBadges = Array.isArray(currentBadgesRaw) ? currentBadgesRaw : [];
   const newBadges = currentBadges.length;
   const newlyEarnedCount = newBadges - this.previousBadgeCount;
 
