@@ -207,7 +207,12 @@ async function startApplication() {
     const [metadata] = await Promise.all([resourceManager.loadMetadata(), uiCore.start()]);
 
     Logger.log(`Metadata loaded: ${metadata.themes?.length || 0} themes`);
-    initializeAnalyticsIfPremium(storageManager);
+    if (typeof window.initializeAnalyticsIfPremium === "function") {
+      window.initializeAnalyticsIfPremium(storageManager);
+    } else {
+      Logger.warn("initializeAnalyticsIfPremium not defined – analytics skipped");
+    }
+
     Logger.log("✅ Application started successfully");
 
     if (window.trackMicroConversion) {
