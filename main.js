@@ -117,6 +117,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!validatePrerequisites() || !validateJavaScriptModules()) return;
 
+  // Binder le lien Stripe du header depuis la config (source unique)
+  try {
+    const btn = document.getElementById("premium-unlock-btn");
+    const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl;
+
+    if (btn && stripeUrl) {
+      btn.setAttribute("href", stripeUrl);
+      btn.setAttribute("target", "_blank");
+      btn.setAttribute("rel", "noopener noreferrer");
+    } else if (btn && !stripeUrl) {
+      Logger.warn("Stripe payment URL missing in TYF_CONFIG");
+    }
+  } catch (e) {
+    Logger.warn("Stripe header binding failed", e);
+  }
+
   if (typeof initServiceWorker === "function") {
     initServiceWorker();
   } else if (typeof window.initServiceWorker === "function") {
@@ -125,10 +141,9 @@ document.addEventListener("DOMContentLoaded", function () {
     Logger.warn("initServiceWorker is not defined - continuing without service worker");
   }
 
-
   startApplication();
-
 });
+
 
 function validatePrerequisites() {
   if (!window.TYF_CONFIG) {

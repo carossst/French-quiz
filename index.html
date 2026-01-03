@@ -90,11 +90,7 @@
 
       <!-- Récompense quotidienne (coffre) + info -->
       <div class="relative inline-flex items-center">
-        <div id="daily-chest-wrapper" class="text-xl">🎁</div>
-
-        <button id="daily-chest-info-btn" type="button"
-          class="ml-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
-          aria-label="About the daily chest" aria-expanded="false">i</button>
+        <div id="daily-chest-wrapper" class="text-xl" aria-describedby="daily-chest-tooltip">🎁</div>
 
         <div id="daily-chest-tooltip"
           class="hidden absolute top-full left-0 mt-2 w-72 max-w-[85vw] rounded-lg bg-gray-900 text-white text-xs p-3 shadow-lg"
@@ -104,8 +100,9 @@
         </div>
       </div>
 
+
       <!-- Bouton premium bien visible et accessible -->
-      <a href="https://buy.stripe.com/dRm5kD3g3cNocmq7Ig2Nq02" id="premium-unlock-btn"
+      <a href="#" id="premium-unlock-btn"
         class="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-full font-semibold text-sm hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
         aria-label="Unlock all premium themes for $12 one-time payment">
         <span class="text-base">💎</span>
@@ -142,8 +139,8 @@
   <script src="./ui-charts.js" defer></script>
   <script src="./ui-core.js" defer></script>
   <!-- referral.js removed - feature too complex for MVP v3.0 -->
-  <script src="./main.js" defer></script>
   <script src="./email.js" defer></script>
+  <script src="./main.js" defer></script>
   <script src="./noscript.js" defer></script>
   <script src="./fallback.js" defer></script>
 

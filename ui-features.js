@@ -1079,93 +1079,85 @@ UIFeatures.prototype.getChestInfo = function () {
     return { available, points: 3, etaText };
 };
 
+// APRÈS (ui-features.js - setupChestTooltip)
+// Objectif: tooltip sur le chest, sans casser le click "collect" sur mobile quand le reward est dispo.
 UIFeatures.prototype.setupChestTooltip = function () {
-    const btn = document.getElementById("daily-chest-info-btn");
+    const trigger = document.getElementById("daily-chest-wrapper");
     const tip = document.getElementById("daily-chest-tooltip");
     const tipText = document.getElementById("daily-chest-tooltip-text");
 
-    if (!btn || !tip || !tipText) return;
-    if (btn.dataset.bound === "1") return;
-    btn.dataset.bound = "1";
+    if (!trigger || !tip || !tipText) return;
+    if (trigger.dataset.bound === "1") return;
+    trigger.dataset.bound = "1";
 
-    // A11y wiring
     if (!tip.id) tip.id = "daily-chest-tooltip";
-    btn.setAttribute("aria-controls", tip.id);
+    trigger.setAttribute("aria-controls", tip.id);
 
-    // "Touch-first" detection: coarse pointer OR no hover capability
     const isTouchLike = () => {
         try {
             const mqCoarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
             const mqNoHover = window.matchMedia && window.matchMedia("(hover: none)").matches;
             return !!(mqCoarse || mqNoHover);
-        } catch {
-            return false;
-        }
+        } catch { return false; }
     };
 
     const buildText = () => {
         const info = this.getChestInfo();
         const etaLine = info.available ? "Available now." : `Available in ${info.etaText}.`;
-        return (
-            `🎁 One daily chest (calendar streak).\n` +
-            `Minimum: ${info.points} French Points. Bonus possible.\n` +
-            etaLine
-        );
+        return `🎁 One daily chest (calendar streak).\nMinimum: ${info.points} French Points. Bonus possible.\n${etaLine}`;
     };
 
     const open = () => {
         tipText.textContent = buildText();
         tip.classList.remove("hidden");
-        btn.setAttribute("aria-expanded", "true");
-        btn.setAttribute("aria-describedby", tip.id);
+        trigger.setAttribute("aria-expanded", "true");
+        trigger.setAttribute("aria-describedby", tip.id);
     };
 
     const close = () => {
         tip.classList.add("hidden");
-        btn.setAttribute("aria-expanded", "false");
-        btn.removeAttribute("aria-describedby");
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.removeAttribute("aria-describedby");
     };
 
-    const toggle = () => {
-        if (tip.classList.contains("hidden")) open();
-        else close();
-    };
+    const toggle = () => tip.classList.contains("hidden") ? open() : close();
 
-    // Desktop: hover + keyboard focus
-    const onPointerEnter = () => { if (!isTouchLike()) open(); };
-    const onPointerLeave = () => { if (!isTouchLike()) close(); };
-    const onFocus = () => { if (!isTouchLike()) open(); };
-    const onBlur = () => { if (!isTouchLike()) close(); };
+    // Desktop hover + focus
+    trigger.addEventListener("pointerenter", () => { if (!isTouchLike()) open(); });
+    trigger.addEventListener("pointerleave", () => { if (!isTouchLike()) close(); });
+    trigger.addEventListener("focus", () => { if (!isTouchLike()) open(); });
+    trigger.addEventListener("blur", () => { if (!isTouchLike()) close(); });
 
-    btn.addEventListener("pointerenter", onPointerEnter);
-    btn.addEventListener("pointerleave", onPointerLeave);
-    btn.addEventListener("focus", onFocus);
-    btn.addEventListener("blur", onBlur);
-
-    // Mobile/touch: tap to toggle
-    btn.addEventListener("click", (e) => {
+    // Mobile tap:
+    // - si reward dispo: on laisse le click "collect" existant faire son job
+    // - sinon: tap = toggle tooltip (évite conflit click handlers)
+    trigger.addEventListener("click", (e) => {
         if (!isTouchLike()) return;
+
+        const available = (typeof this.storageManager?.isDailyRewardAvailable === "function")
+            ? !!this.storageManager.isDailyRewardAvailable()
+            : this.getChestInfo().available;
+
+        if (available) return;
+
         e.preventDefault();
         e.stopPropagation();
         toggle();
     });
 
-    // Close on outside tap (touch only)
+    // Outside click closes (touch only)
     document.addEventListener("click", (e) => {
         if (!isTouchLike()) return;
-        if (btn.contains(e.target) || tip.contains(e.target)) return;
+        if (trigger.contains(e.target) || tip.contains(e.target)) return;
         close();
     });
 
-    // Close on Escape (both)
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") close();
-    });
-
-    // Optional: close on resize/scroll to avoid stuck tooltip after layout shift
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
     window.addEventListener("resize", close);
     window.addEventListener("scroll", close, { passive: true });
 };
+
+
 
 UIFeatures.prototype.setupResultsEventListeners = function () {
     document.querySelector('.quiz-wrapper')?.classList.add('results-compact');
