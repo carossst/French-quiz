@@ -1,268 +1,211 @@
-# 📘 Test Your French — v3.1
-**Interactive French-learning web app • Daily quizzes • Gamified progression • Privacy-first**
+# 🇫🇷 Test Your French
 
-Test Your French is a lightweight, mobile-first learning app designed to help users test and improve their real French level through authentic daily quizzes.  
-It runs entirely in the browser (no backend), with offline caching, gamification, and optional Premium unlock.
-
-Live demo:  
-**https://carossst.github.io/French-quiz/**
+> **A PWA to test your real-world French skills — built with vibe coding and AI-assisted development.**
 
 ---
 
-## 🧭 Features
+## 💡 Why This Exists
 
-### 🎯 Interactive French Quizzes
-- Free Colors theme (5 quizzes)
-- 9 additional themes (45 quizzes)
-- Writing, reading, grammar, vocabulary
-- “Authentic French” explanations inside each question
-- Manual “Next” UX (Option B) for better control
+Learning French in a classroom is one thing. **Ordering a croissant in a real Parisian boulangerie is another.**
 
-### ⭐ Gamification
-- French Points
-- Levels
-- Daily reward chest
-- Badges
-- Streak tracking
-- Smart feedback (rotating motivational messages)
+Most apps teach vocabulary. This one tests if you'd actually survive a conversation with a French person — the fast talkers, the slang, the "what did they just say?" moments.
 
-### 📊 Stats Dashboard
-- Level & progress
-- Accuracy
-- Time spent
-- Completed quizzes
-- Recent assessments
-- Earned badges
-- Mobile-adaptive layout
-
-### 🔒 Privacy-first
-- No accounts required
-- All user progress stored locally (`localStorage`)
-- Optional profile collection (email + first name), kept local
-- GDPR-safe by design
-
-### 🛒 Premium Access ($12)
-Unlock:
-- all quiz themes
-- all assessments
-- audio pronunciation
-
-Powered by **Stripe Checkout**.
+**Test Your French** was born from a simple frustration: existing apps don't prepare you for *real* France.
 
 ---
 
-## 🏗 Architecture Overview
+## 🎯 What It Does
 
-```text
-root/
-│
-├── index.html          # Entry point (UI shell + CSP + PWA)
-├── style.css           # Tailwind compiled stylesheet
-│
-├── main.js             # App bootstrap
-├── config.js           # Environment config (local/dev/prod)
-│
-├── ui-core.js          # Main UI controller (navigation, screens)
-├── ui-features.js      # XP, FP, chests, paywall, feedback
-├── ui-charts.js        # Stats & visualization
-│
-├── quizManager.js      # Quiz engine (questions, flow, scoring)
-├── resourceManager.js  # Loads quizzes, metadata, audio
-├── storage.js          # Local storage engine (progress, FP, badges)
-│
-├── email.js            # Anti-scraping contact link generator
-├── noscript.js         # JS-disabled handling
-├── fallback.js         # JS-load failure fallback
-│
-├── metadata.json       # Theme list + quiz metadata
-├── *.json              # Quizzes (Colors 1–5 etc.)
-└── manifest.json       # PWA manifest
+- **10 themed quizzes** — Colors, Numbers, Café, Métro, Boulangerie...
+- **Native French audio** — Real pronunciation, real speed
+- **Gamification** — French Points, daily chests, progressive unlocking
+- **Freemium model** — Colors theme free, premium unlocks everything
+- **Works offline** — Full PWA with service worker caching
+
+---
+
+## 🛠️ How It Was Built
+
+### Vibe Coding with AI
+
+This project was built using **vibe coding** — a human-led, AI-assisted development workflow.
+
+*Vibe coding here means fast iteration with AI, without giving up architectural control or understanding.*
+
+**What that means in practice:**
+- Product vision, UX decisions, and final calls stay human
+- AI (Claude, ChatGPT) is used as a force multiplier, not autopilot
+- One AI reviews the other's output — cross-verification avoids blind spots
+- It's pair programming with a very patient colleague who never gets tired — but also unreliable and forgetful, so you stay sharp
+
+This project was developed through long-term iteration, refactoring, and continuous learning.
+
+### AI Roles in This Project
+
+AI supports the work, but does not own it.
+It is used to suggest architectures, generate and refactor code, and help detect bugs or logical inconsistencies. Different models are deliberately cross-used to review each other’s outputs to reduce blind spots.
+
+All final responsibility remains human. Technical decisions, product vision and positioning, UX trade-offs and constraints, and the monetization model are defined by the project owner. AI accelerates thinking and execution, but judgment and ownership stay human.
+
+AI is treated as a **senior pair programmer**, not a decision-maker.
+
+### Why Not Cursor, Copilot, or Full App Generators?
+
+These tools are powerful. They were intentionally not used here because of the project constraints: learning, full control, and long-term maintainability.
+
+**Tooling philosophy:**
+- **Cursor/Copilot** — useful for autocomplete, but the goal was to understand and actively decide on the logic, not just accept suggestions  
+- **v0** — great for UI scaffolding, but the project required a coherent, lightweight design system fully under control  
+- **Bolt/Lovable** — perfect for quick prototypes, but the objective here was to learn and ship clean, not just ship fast  
+
+
+AI was used as a pair programmer and a, with systematic cross-review between models — not as a black-box generator.
+
+### Tech Stack
+
+```
+Frontend:    Vanilla JS (no framework)
+Styling:     Tailwind CSS
+PWA:         Service Worker, Web App Manifest
+Storage:     localStorage (no backend)
+Payments:    Stripe Checkout
+Hosting:     GitHub Pages
+```
+
+**Why no React/Vue?** The scope doesn't justify a framework. I prioritized a small, auditable codebase with minimal tooling: ES modules, clear separation of concerns, and no build dependency for local development.
+
+---
+
+## 📁 Project Structure
+
+```
+├── index.html          # Main app shell
+├── style.css           # Tailwind-compiled styles
+├── config.js           # App configuration
+├── main.js             # Bootstrap & initialization
+├── ui-core.js          # Screen management & quiz UI
+├── ui-features.js      # Gamification, modals, XP system
+├── ui-charts.js        # Stats visualization
+├── storage.js          # localStorage manager (single source of truth)
+├── quizManager.js      # Quiz logic & scoring
+├── resourceManager.js  # Data loading & caching
+├── sw.js               # Service Worker
+├── metadata.json       # Themes & quizzes index
+└── *_quiz_*.json       # Quiz data files
 ```
 
 ---
 
-## 🚀 Development
-
-### Local usage
-
-Nothing to install.  
-Just clone the repo and open `index.html` in a browser.
+## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/yourusername/French-quiz.git
-cd French-quiz
-```
+# Clone
+git clone https://github.com/your-username/test-your-french.git
 
-Then:
-
-- open `index.html` directly in your browser, or
-- serve with a simple static server, for example:
-
-```bash
+# Serve locally (any static server works)
+npx serve .
+# or
 python -m http.server 8000
-# then open http://localhost:8000/
+
+# Open
+http://localhost:8000
 ```
 
-### Development mode
-
-`config.js` automatically enables:
-
-- debug logs
-- disabled service worker
-- relaxed caching
-
-whenever the hostname is:
-
-- `localhost`
-- `127.0.0.1`
+No build step. No npm install. Just serve and go.
 
 ---
 
-## 📦 Build & Deployment
+## 🎨 Design Principles
 
-This app is pure static HTML/CSS/JS — no build step is required.
-
-### GitHub Pages
-
-1. Commit your changes
-2. Push to the `main` (or `gh-pages`) branch
-3. Configure GitHub Pages to serve from that branch and root (`/`)
-4. The app will be accessible at:
-
-```text
-https://<username>.github.io/French-quiz/
-```
-
-### Service Worker
-
-The service worker is:
-
-- **disabled** in local development
-- **enabled** in production (non-localhost)
-
-It:
-
-- caches metadata, quizzes and shell
-- allows limited offline usage
-- auto-updates when a new version is deployed
+1. **Mobile-first** — Designed for phones, scales up to desktop
+2. **Offline-ready** — Cache everything, work anywhere
+3. **Privacy-first** — All data stays in your browser
+4. **KISS** — Keep It Simple, Stupid
 
 ---
 
-## 🔐 Security
+## 🧠 Philosophy
 
-### Content Security Policy (CSP)
+> *"I don't try to move fast by skipping understanding. I move fast by removing unnecessary complexity."*
 
-`index.html` defines a strict CSP, roughly:
+### AI Usage
 
-- `default-src 'self'`
-- `script-src 'self' 'unsafe-inline' https://js.stripe.com`
-- `style-src 'self' 'unsafe-inline'`
-- `img-src 'self' data: https:`
-- `connect-src 'self' https://api.stripe.com https://buy.stripe.com`
-- `frame-src https://js.stripe.com https://buy.stripe.com`
+- AI is a thinking accelerator, not an authority
+- Every non-trivial output is reviewed, challenged, corrected
+- One model systematically reviews the other
+- Final decisions remain human
 
-This:
+### Engineering Style
 
-- allows Stripe Checkout integration
-- blocks arbitrary third-party scripts
-- keeps the app privacy-friendly
+- Explicit code over magic abstractions
+- Clarity over cleverness
+- One responsibility per file
+- Single source of truth for state
+- Fix bugs by simplifying, not adding layers
 
-### Anti-scraping email
+### Product Mindset
 
-`email.js` uses data attributes:
+- Constraints are features, not limitations
+- Offline-first and privacy-first are product decisions, not accidents
+- Monetization is part of the design, not an afterthought
+- No feature without a clear UX rationale
 
-```html
-<a id="contact-mail"
-   data-user="bonjour"
-   data-domain="testyourfrench.com"
-   href="#">
-  Contact
-</a>
-```
+### Quality Discipline
 
-The script reconstructs the `mailto:` link client-side, reducing naive scraping.
+- Manual testing on real devices (mobile-first)
+- Edge cases found through reasoning, not just testing
+- Refactors only when they reduce cognitive load
 
 ---
 
-## 🧪 Testing the main flow
+## 🧠 What This Project Demonstrates
 
-Recommended test path for QA:
-
-1. **New visitor**
-   - Open the app in a fresh browser profile/private window
-   - Confirm welcome screen, free Colors theme available
-
-2. **First quiz (Colors)**
-   - Start Colors Quiz 1
-   - Answer a few questions (correct and incorrect)
-   - Check feedback timing and “Next” behaviour
-
-3. **Daily chest**
-   - Return to the home screen
-   - Open the daily chest (if available)
-   - Confirm French Points are updated and the header refreshes
-
-4. **Paywall behaviour**
-   - Complete several free quizzes
-   - Confirm paywall suggestions appear only when relevant
-   - Verify Stripe Checkout opens correctly
-
-5. **Stats**
-   - Open “Stats” / “Your progress”
-   - Check:
-     - Level
-     - French Points
-     - Accuracy
-     - Time spent
-     - Recent assessments list
-   - Confirm data matches your recent quiz runs
+- Shipping a complete product end-to-end as a solo builder
+- Strong JavaScript fundamentals without relying on heavy frameworks
+- Clean separation between UI, logic, and storage
+- Pragmatic AI usage as a productivity multiplier
+- Product thinking: UX, monetization, constraints, trade-offs
+- Critical thinking about AI outputs — not blind trust
 
 ---
 
-## 🧩 Adding or editing quizzes
+## ✅ Requirements
 
-1. Add a new quiz JSON file at the root (for example `colors_quiz_3.json`).
-2. Ensure its structure follows the existing quizzes:
-
-```json
-{
-  "id": 103,
-  "themeId": 1,
-  "name": "Writing and Reading Colors – Quiz 3",
-  "description": "Practice Colors vocabulary and grammar.",
-  "version": "2.2.3",
-  "questions": [
-    {
-      "question": "How do you say "Red"?",
-      "options": [
-        "A. Rose",
-        "B. Rouge",
-        "C. Led",
-        "D. Bordeaux"
-      ],
-      "correctAnswer": "B. Rouge",
-      "explanation": "Red is one of the three colors on the French flag."
-    }
-  ]
-}
-```
-
-3. Register the new quiz in `metadata.json` under the appropriate theme.
-4. The ResourceManager will load it automatically.
+- Any modern browser
+- HTTPS required for Service Worker in production
+- Node or Python optional (for local static server)
 
 ---
 
-## 🧱 Tech stack
+## 🤝 Contributing
 
-- HTML5 + vanilla JavaScript
-- Tailwind CSS (precompiled into `style.css`)
-- No frontend framework (no React/Vue/Angular)
-- No backend
-- Stripe Checkout for payments
-- Service Worker for offline support
+Issues and feedback are welcome.  
+This project is primarily a learning and portfolio space.
+
+---
+
+## 🗺️ Roadmap
+
+- Improve audio variety and difficulty scaling
+- Refine stats and progression insights
+- Explore additional real-life scenarios
+
+---
+
+## 👩‍💻 About the Creator
+
+Built by **Carole Stromboni** — product-oriented builder, French native, and AI-assisted development practitioner.
+
+This project started as a concrete experiment: *"Can a single person ship a real, monetized product using AI responsibly?"* 
+
+The answer is yes — with structure, discipline, and human judgment.
+
+**→ [Connect on LinkedIn](https://www.linkedin.com/in/carolestromboni/)**
 
 ---
 
 ## 📄 License
 
-This project is distributed under the terms described in the \`LICENSE\` file at the root of the repository.
+MIT — Use it. Fork it. Learn from it. Build your own.
+
+---

@@ -61,9 +61,14 @@
   <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
   <link rel="manifest" href="./manifest.json">
 
+  <!-- Preconnect pour Stripe (performance) -->
+  <link rel="preconnect" href="https://buy.stripe.com" crossorigin>
+  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
+
   <!-- Styles -->
-  <link rel="preload" href="style.css" as="style" fetchpriority="high">
-  <link rel="stylesheet" href="style.css" media="all">
+  <link rel="preload" href="./style.css" as="style" fetchpriority="high">
+  <link rel="stylesheet" href="./style.css">
+
 
   <!-- CSP - Amélioré pour meilleure sécurité -->
   <meta http-equiv="Content-Security-Policy"
@@ -90,24 +95,28 @@
 
       <!-- Récompense quotidienne (coffre) + info -->
       <div class="relative inline-flex items-center">
-        <div id="daily-chest-wrapper" class="text-xl" aria-describedby="daily-chest-tooltip">🎁</div>
+        <button type="button" id="daily-chest-wrapper"
+          class="text-xl px-2 py-1 hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2"
+          aria-describedby="daily-chest-tooltip" aria-label="Daily reward chest">🎁</button>
 
         <div id="daily-chest-tooltip"
           class="hidden absolute top-full left-0 mt-2 w-72 max-w-[85vw] rounded-lg bg-gray-900 text-white text-xs p-3 shadow-lg"
-          role="tooltip">
+          role="tooltip" aria-hidden="true">
           <div class="font-semibold mb-1">Daily chest</div>
           <div id="daily-chest-tooltip-text"></div>
         </div>
       </div>
 
 
+
+
       <!-- Bouton premium bien visible et accessible -->
-      <a href="#" id="premium-unlock-btn"
-        class="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-full font-semibold text-sm hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-        aria-label="Unlock all premium themes for $12 one-time payment">
+      <a href="https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03" id="premium-unlock-btn"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-full font-semibold text-sm hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
+        aria-label="Unlock premium access for $12 one-time payment">
         <span class="text-base">💎</span>
-        <span>Unlock All</span>
-        <span class="opacity-90">$12</span>
+        <span class="line-through opacity-80">$99</span>
+        <span class="font-bold">$12</span>
       </a>
     </div>
   </div>
@@ -141,8 +150,7 @@
   <!-- referral.js removed - feature too complex for MVP v3.0 -->
   <script src="./email.js" defer></script>
   <script src="./main.js" defer></script>
-  <script src="./noscript.js" defer></script>
-  <script src="./fallback.js" defer></script>
+
 
   <!-- Fallback sans JavaScript -->
   <noscript>
@@ -159,20 +167,9 @@
   </noscript>
 
   <!-- Fallback JS bloqué / erreur -->
-  <div id="js-failed" class="hidden fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
-    <div class="text-center max-w-md mx-auto px-4">
-      <div class="text-6xl mb-4">⚠️</div>
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Something went wrong</h2>
-      <p class="text-gray-600 mb-6">
-        JavaScript seems to be blocked or failed to load.<br>
-        Please try refreshing the page.
-      </p>
-      <button id="reload-btn" aria-label="Refresh the page to reload Test Your French"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-        Refresh Page
-      </button>
-    </div>
-  </div>
+  <!-- supprimé : écran #js-failed (fallback non implémenté, code mort) -->
+
+
 
   <!-- Footer - Amélioré pour mobile et accessibilité -->
   <footer class="text-xs text-gray-500 text-center py-6 mt-10">

@@ -1,4 +1,4 @@
-// ui-features.js v3.2 - UX refined features (XP, paywall, chest, feedback)
+// ui-features.js v3 - UX refined features (XP, paywall, chest, feedback)
 
 function UIFeatures(uiCore, storageManager, resourceManager) {
     if (!uiCore) throw new Error("UIFeatures: uiCore parameter is required");
@@ -35,9 +35,21 @@ function UIFeatures(uiCore, storageManager, resourceManager) {
         ]
     };
 
-    // Start conversion engine
-    this.startConversionTimer();
+    // Conversion engine will start when XP system is initialized (controlled moment)
+
+
+    // No auto-activation: user must paste code manually
 }
+
+// =======================================
+// PRICING (UI ONLY – Stripe stays at $12)
+// =======================================
+UIFeatures.PRICE_DISPLAY = {
+    label: "Launch price: $12 (regular $99)",
+    current: "$12",
+    regular: "$99"
+};
+
 
 //================================================================================
 // SMALL SAFE HELPERS (avoid "is not a function" crashes)
@@ -129,13 +141,126 @@ UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) 
 //================================================================================
 UIFeatures.prototype.initializeXPSystem = function () {
     this.showXPHeader();
+    this.setupChestTooltip();
     this.updateXPHeader();
+    this.bindHeaderPremiumCodeEntry(); // ✅ DOM prêt ici
     this.setupStorageEvents();
     this.initializeNotifications();
-    this.updateFPProgressIndicator();
+    this.startConversionTimer(); // démarrage contrôlé ici
 
-    this.setupChestTooltip();
+    // Notifications désactivées pour MVP v3.0
+    // TODO v3.1: implémenter startNotificationArmingLoop si notifications push activées
+
+
+    // écouter les gains FP réels (StorageManager.addFrenchPoints)
+    this.setupFPEvents();
+    this.setupGamificationUXEvents();
 };
+
+
+
+UIFeatures.prototype.setupFPEvents = function () {
+    if (this._onFPGained) return;
+
+    this._onFPGained = (e) => {
+        const amount = Number(e?.detail?.amount ?? 0);
+        if (!Number.isFinite(amount) || amount <= 0) return;
+
+        this.showFPGain(amount);
+        try { this.updateXPHeader(); } catch { }
+    };
+
+    window.addEventListener("fp-gained", this._onFPGained);
+};
+
+// Header premium button: prevent Stripe navigation when premium is already active
+UIFeatures.prototype.bindHeaderPremiumCodeEntry = function () {
+    const btn = document.getElementById("premium-unlock-btn");
+    if (!btn) return;
+
+    // Si on a déjà bind sur un autre node (rerender), nettoyer avant
+    if (this._premiumBtnHandlers?.node && this._premiumBtnHandlers.node !== btn) {
+        try {
+            if (this._premiumBtnHandlers.onClick) {
+                this._premiumBtnHandlers.node.removeEventListener(
+                    "click",
+                    this._premiumBtnHandlers.onClick
+                );
+            }
+            delete this._premiumBtnHandlers.node.dataset.premiumBound;
+        } catch { }
+        this._premiumBtnHandlers = null;
+    }
+
+    if (btn.dataset.premiumBound === "1") return;
+    btn.dataset.premiumBound = "1";
+
+    if (!this._premiumBtnHandlers) this._premiumBtnHandlers = {};
+    const h = this._premiumBtnHandlers;
+
+    h.onClick = (e) => {
+        const isPremium =
+            (typeof this.storageManager.isPremiumUser === "function")
+                ? !!this.storageManager.isPremiumUser()
+                : false;
+
+        if (!isPremium) return;
+        e.preventDefault();
+        e.stopPropagation?.();
+    };
+
+    h.onKeyDown = (e) => {
+        const key = e.key;
+        if (key !== "Enter" && key !== " ") return;
+
+        const isPremium =
+            (typeof this.storageManager.isPremiumUser === "function")
+                ? !!this.storageManager.isPremiumUser()
+                : false;
+
+        if (!isPremium) return;
+        e.preventDefault();
+        e.stopPropagation?.();
+    };
+
+    btn.addEventListener("click", h.onClick);
+    btn.addEventListener("keydown", h.onKeyDown);
+    h.node = btn;
+
+};
+
+
+UIFeatures.prototype.setupGamificationUXEvents = function () {
+    if (this._gamificationUXBound) return;
+    this._gamificationUXBound = true;
+
+    this._onBadgesEarned = (e) => {
+        const badges = Array.isArray(e?.detail?.badges) ? e.detail.badges : [];
+        if (!badges.length) return;
+
+        // Simple feedback: one message max (avoid spam)
+        const first = badges[0] || {};
+        const name = first.name || "New badge";
+        this.showFeedbackMessage("success", `Badge earned: ${name}`);
+    };
+
+    this._onLevelUp = (e) => {
+        const lvl = e?.detail?.newLevel ?? e?.detail?.level ?? null;
+        const label = (lvl !== null && lvl !== undefined) ? `Level up: ${lvl}` : "Level up";
+        this.showFeedbackMessage("success", label);
+        try { this.updateXPHeader(); } catch { }
+    };
+
+    this._onPremiumUnlocked = () => {
+        this.showFeedbackMessage("success", "Premium unlocked");
+        try { this.updateXPHeader(); } catch { }
+    };
+
+    window.addEventListener("badges-earned", this._onBadgesEarned);
+    window.addEventListener("level-up", this._onLevelUp);
+    window.addEventListener("premium-unlocked", this._onPremiumUnlocked);
+};
+
 
 UIFeatures.prototype.showXPHeader = function () {
     const xpHeader = document.getElementById("xp-header");
@@ -147,60 +272,89 @@ UIFeatures.prototype.addChestIconToHeader = function () {
     const wrapper = document.getElementById("daily-chest-wrapper");
     if (!wrapper) return;
 
+    // daily-chest-wrapper is a <button> by design (see index.html)
+
     const updateState = () => {
+        const info = (typeof this.getChestInfo === "function")
+            ? this.getChestInfo()
+            : { available: false, points: 1, etaText: "" };
+
         const available = (typeof this.storageManager.isDailyRewardAvailable === "function")
             ? !!this.storageManager.isDailyRewardAvailable()
-            : true;
+            : !!info.available;
 
         wrapper.style.opacity = available ? "1" : "0.5";
-        wrapper.style.cursor = available ? "pointer" : "default";
-        wrapper.setAttribute("aria-disabled", available ? "false" : "true");
+        wrapper.dataset.state = available ? "available" : "locked";
+
+        const points = Number.isFinite(info.points) && info.points > 0 ? info.points : 1;
+        const label = points === 1 ? "French Point" : "French Points";
+
+        wrapper.setAttribute(
+            "aria-label",
+            available
+                ? `Collect your daily chest (+${points} ${label})`
+                : `Daily chest locked. Available tomorrow. Reward: +${points} ${label}.`
+        );
     };
 
-    // Prevent stacking listeners
+    if (!this._chestHeaderHandlers) this._chestHeaderHandlers = {};
+    const h = this._chestHeaderHandlers;
+
+    if (h.node && h.node !== wrapper && h.onActivate) {
+        try {
+            h.node.removeEventListener("click", h.onActivate);
+            delete h.node.dataset.chestBound;
+        } catch { }
+        h.node = null;
+    }
+
     if (wrapper.dataset.chestBound === "1") {
         updateState();
         return;
     }
     wrapper.dataset.chestBound = "1";
 
-    const activate = (event) => {
-        if (event.type === "keydown" && event.key !== "Enter" && event.key !== " ") return;
+    h.onActivate = (event) => {
+        const availableNow =
+            (typeof this.storageManager.isDailyRewardAvailable === "function")
+                ? !!this.storageManager.isDailyRewardAvailable()
+                : !!this.getChestInfo?.().available;
 
-        // Prevent page scroll on Space
-        if (event.type === "keydown" && event.key === " ") {
-            event.preventDefault();
-        }
-
-        if (typeof this.storageManager.isDailyRewardAvailable === "function" &&
-            !this.storageManager.isDailyRewardAvailable()) {
+        // 🔒 Coffre verrouillé → tooltip
+        if (!availableNow) {
+            try { this._toggleChestTooltip?.(); } catch { }
+            event.preventDefault?.();
+            event.stopPropagation?.();
             updateState();
             return;
         }
 
+        // 🎁 Coffre dispo → collecte
         if (typeof this.storageManager.collectDailyReward !== "function") return;
 
-        const result = this.storageManager.collectDailyReward();
+        if (wrapper.dataset.collecting === "1") return;
+        wrapper.dataset.collecting = "1";
 
-        if (result && result.success) {
-            const amount = Number(result.fpEarned ?? 0);
-            if (amount > 0) this.showDailyRewardAnimation(amount);
-            this.updateXPHeader();
+        try {
+            const result = this.storageManager.collectDailyReward();
+            if (result?.success) {
+                const amount = Number(result.earned ?? 0);
+                if (amount > 0) this.showDailyRewardAnimation(amount);
+                this.updateXPHeader();
+            }
+            updateState();
+        } finally {
+            delete wrapper.dataset.collecting;
         }
-
-        updateState();
     };
 
-
-    wrapper.setAttribute("role", "button");
-    wrapper.setAttribute("tabindex", "0");
-    wrapper.setAttribute("aria-label", "Collect your daily French Points");
-
-    wrapper.addEventListener("click", activate);
-    wrapper.addEventListener("keydown", activate);
+    wrapper.addEventListener("click", h.onActivate);
+    h.node = wrapper;
 
     updateState();
 };
+
+
 
 
 UIFeatures.prototype.updateXPHeader = function () {
@@ -211,9 +365,47 @@ UIFeatures.prototype.updateXPHeader = function () {
     this.setText("user-level", level);
 
     const fpEl = document.getElementById("user-fp");
-    if (fpEl) fpEl.textContent = `${fp} French Points`;
+    if (fpEl) {
+        const label = fp === 1 ? "French Point" : "French Points";
+        fpEl.textContent = `${fp} ${label}`;
+    }
+
+
+    // ✅ Update premium CTA state in header
+    const premiumBtn = document.getElementById("premium-unlock-btn");
+    const isPremium = (typeof this.storageManager.isPremiumUser === "function")
+        ? !!this.storageManager.isPremiumUser()
+        : false;
+
+    if (premiumBtn) {
+        // mémoriser le HTML initial une seule fois (baseline)
+        if (!premiumBtn.dataset.defaultHtml) {
+            premiumBtn.dataset.defaultHtml = premiumBtn.innerHTML;
+        }
+
+        if (isPremium) {
+            // ✅ ne pas détruire le HTML initial: on remplace, mais on a la baseline
+            premiumBtn.innerHTML = "💎 Premium";
+            premiumBtn.setAttribute("aria-label", "Premium is active");
+            premiumBtn.setAttribute("aria-disabled", "true");
+            premiumBtn.style.pointerEvents = "none";
+            premiumBtn.style.opacity = "0.85";
+            premiumBtn.setAttribute("tabindex", "-1");
+        } else {
+            // ✅ restore baseline correctement
+            premiumBtn.innerHTML = premiumBtn.dataset.defaultHtml;
+            premiumBtn.setAttribute("aria-label", "Unlock premium access for $12 one-time payment");
+            premiumBtn.removeAttribute("aria-disabled");
+            premiumBtn.style.pointerEvents = "";
+            premiumBtn.style.opacity = "";
+            premiumBtn.removeAttribute("tabindex");
+        }
+    }
+
 
     this.updateFPProgressIndicator();
+
+
 
     const progressBar = document.getElementById("xp-progress-bar");
     if (progressBar) {
@@ -227,6 +419,7 @@ UIFeatures.prototype.updateXPHeader = function () {
 
     this.addChestIconToHeader();
 };
+
 
 //================================================================================
 // DAILY REWARD TOAST
@@ -252,7 +445,9 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
             ? "fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm z-50"
             : "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50");
 
-    toast.textContent = `+${points} French Points!`;
+    const amount = Number(points) || 0;
+    const label = amount === 1 ? "French Point" : "French Points";
+    toast.textContent = `+${amount} ${label}!`;
 
     if (container) {
         // Nettoyer les anciens toasts dans le container (optionnel mais propre)
@@ -269,6 +464,7 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
 
 
 
+
 //================================================================================
 // CONVERSION SYSTEM (PAYWALL)
 //================================================================================
@@ -277,11 +473,21 @@ UIFeatures.prototype.startConversionTimer = function () {
         if (this.paywallTimer || document.hidden) return;
 
         this.paywallTimer = setInterval(() => {
+            // App en arrière-plan → on ne fait rien
             if (document.hidden) return;
+
+            // Paywall déjà affiché → on ne spam pas
             if (document.getElementById("sophie-paywall-modal")) return;
+
+            // ✅ STOP IMMÉDIAT si Premium activé entre temps
+            if (this.storageManager.isPremiumUser?.()) {
+                stop();
+                return;
+            }
 
             const shouldTrigger = this.storageManager.shouldTriggerPaywall?.();
 
+            // Sécurité : s’il reste des quiz gratuits jouables, on ne déclenche pas
             const freeLeft = this.storageManager.getThemeProgress
                 ? ((this.storageManager.getThemeProgress(1)?.completedCount || 0) < 5)
                 : true;
@@ -296,7 +502,7 @@ UIFeatures.prototype.startConversionTimer = function () {
                 this.storageManager.markPaywallShown?.();
                 stop();
             }
-        }, 30000);
+        }, 30000); // check toutes les 30s, KISS
     };
 
     const stop = () => {
@@ -306,9 +512,18 @@ UIFeatures.prototype.startConversionTimer = function () {
         }
     };
 
-    document.addEventListener("visibilitychange", () => { document.hidden ? stop() : start(); });
+    // Pause / reprise automatique selon visibilité onglet
+    if (!this._onVisibilityChange) {
+        this._onVisibilityChange = () => {
+            document.hidden ? stop() : start();
+        };
+        document.addEventListener("visibilitychange", this._onVisibilityChange);
+    }
+
     start();
 };
+
+
 
 UIFeatures.prototype.showSophiePaywall = function () {
     if (this.storageManager.isPremiumUser?.()) return;
@@ -318,16 +533,23 @@ UIFeatures.prototype.showSophiePaywall = function () {
     document.body.appendChild(modal);
 
     setTimeout(() => {
-        const buyBtn = modal.querySelector("#paywall-buy-btn");
-        if (buyBtn) buyBtn.focus();
-    }, 100);
+        try {
+            const buyBtn = modal.querySelector("#paywall-buy-btn");
+            const closeBtn = modal.querySelector('[data-action="close"]');
+            (buyBtn || closeBtn || modal).focus?.();
+        } catch { }
+    }, 0);
 };
 
+
+// APRÈS — createPaywallModal()
 UIFeatures.prototype.createPaywallModal = function () {
     const modal = document.createElement("div");
     modal.id = "sophie-paywall-modal";
     modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
     modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "sophie-paywall-title");
 
     const sessionMinutes = Math.max(0, Math.round(Number(this.storageManager.getSessionDuration?.()) || 0));
     const currentFP = Number(this.storageManager.getFrenchPoints?.()) || 0;
@@ -337,27 +559,43 @@ UIFeatures.prototype.createPaywallModal = function () {
         0;
     const daily =
         Number(this.storageManager.getDailyRewardPoints?.()) ||
-        Number(this.storageManager.getDailyRewardMin?.()) ||
-        3;
+        1;
 
+    const rawWaitDays = Math.ceil((nextCost - currentFP) / Math.max(1, daily));
+    const waitDays = Math.max(0, rawWaitDays);
 
-    const waitDays = Math.max(0, Math.ceil((nextCost - currentFP) / Math.max(1, daily)));
+    // Label safe pour UI (évite 0 days)
+    const waitDaysLabel = waitDays <= 0 ? "" : `${waitDays} days`;
 
-    modal.innerHTML = this.generateSophiePaywallHTML(sessionMinutes, waitDays);
+    modal.innerHTML = this.generateSophiePaywallHTML(sessionMinutes, waitDays, waitDaysLabel);
     this.setupPaywallEvents(modal);
 
     return modal;
 };
 
+
 UIFeatures.prototype.setupPaywallEvents = function (modal) {
-    const cleanup = () => document.removeEventListener("keydown", onEsc);
-    const close = () => { cleanup(); modal.remove(); };
+    const previouslyFocused = document.activeElement;
+
+    const cleanup = () => {
+        document.removeEventListener("keydown", onEsc);
+        this._removeFocusTrap?.(modal);
+    };
+
+    const close = () => {
+        cleanup();
+        modal.remove();
+        try { previouslyFocused?.focus?.(); } catch { }
+    };
 
     modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener("click", close));
     modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 
     const onEsc = (e) => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", onEsc);
+
+    // ✅ Focus trap (Tab stays inside modal)
+    this._applyFocusTrap?.(modal);
 
     const buyBtn = modal.querySelector("#paywall-buy-btn");
     if (buyBtn) {
@@ -366,54 +604,96 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
             if (url) window.location.href = url;
         });
     }
+
+    const codeBtn = modal.querySelector("#paywall-code-btn");
+    if (codeBtn) {
+        codeBtn.addEventListener("click", () => {
+            close(); // cleanup + focus restore
+            this.showPremiumCodeModal();
+        });
+    }
+
 };
 
-UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitDays) {
+
+UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitDays, waitDaysLabel) {
+    const freePaceLine = waitDaysLabel
+        ? `• At free pace: ${waitDaysLabel} waiting`
+        : `• At free pace: keep playing for free`;
+
+    const continueFreeText = waitDaysLabel
+        ? `Continue free (${waitDaysLabel})`
+        : `Continue free`;
+
     return `
-        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">×</button>
+    <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">×</button>
 
-            <div class="text-5xl mb-4">📊</div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Want to assess all French domains?</h2>
+      <div class="text-5xl mb-4">📊</div>
+      <h2 id="sophie-paywall-title" class="text-xl font-bold text-gray-800 mb-4">Want to assess all French domains?</h2>
 
-            <div class="bg-orange-50 rounded-lg p-4 mb-6 text-left">
-                <div class="text-orange-800 text-sm space-y-2">
-                    <div>⏱ <strong>You've already invested ${sessionMinutes} minutes</strong></div>
-                    <div>• At free pace: ${waitDays} days waiting</div>
-                    <div>★ With Premium: Complete Quiz now</div>
-                </div>
-            </div>
+      <div class="bg-orange-50 rounded-lg p-4 mb-6 text-left">
+        <div class="text-orange-800 text-sm space-y-2">
+          <div>⏱ <strong>You've already invested ${sessionMinutes} minutes</strong></div>
+          <div>${freePaceLine}</div>
+          <div>★ With Premium: Complete Quiz now</div>
+        </div>
+      </div>
 
-            <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                <div class="text-blue-800 text-sm">
-                    ✓ 9 additional quiz themes<br>
-                    ✓ 45 authentic French quizzes<br>
-                    ✓ Native audio practice<br>
-                    ✓ Realistic feedback
-                </div>
-            </div>
+      <div class="bg-blue-50 rounded-lg p-4 mb-6">
+        <div class="text-blue-800 text-sm">
+          ✓ 9 additional quiz themes<br>
+          ✓ 45 authentic French quizzes<br>
+          ✓ Native audio practice<br>
+          ✓ Realistic feedback
+        </div>
+      </div>
 
-            <div class="text-2xl font-bold text-blue-600 mb-2">$12</div>
-            <div class="text-sm text-gray-600 mb-6">Your time is worth more than 40 cents per day</div>
+      <div class="text-sm text-gray-500 mb-1">
+  Launch price: <strong>${UIFeatures.PRICE_DISPLAY.current}</strong>
+  <span class="ml-1">(regular <span class="line-through">${UIFeatures.PRICE_DISPLAY.regular}</span>)</span>
+</div>
 
-            <button id="paywall-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mb-3">
-                Unlock all themes - $12
-            </button>
+<div class="text-3xl font-bold text-blue-600 mb-2">${UIFeatures.PRICE_DISPLAY.current} one-time</div>
+<div class="text-sm text-gray-600 mb-6">Your time is worth more than 40 cents per day</div>
 
-            <button data-action="close" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg transition-colors">
-                Continue free (${waitDays} days)
-            </button>
-        </div>`;
+
+    <button
+  id="paywall-buy-btn"
+  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mb-3">
+  Unlock all themes – ${UIFeatures.PRICE_DISPLAY.current}
+</button>
+
+
+<button
+  id="paywall-code-btn"
+  class="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors mb-3">
+  I have a premium code
+</button>
+
+<button
+  data-action="close"
+  class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+  ${continueFreeText}
+</button>
+
+    </div>
+  `;
 };
+
 
 //================================================================================
 // RESULTS-LEVEL FP HANDLING
 //================================================================================
-UIFeatures.prototype.handleResultsFP = function (resultsData) {
-    const points = Number(resultsData && resultsData.score);
-    if (!Number.isFinite(points) || points <= 0) return;
-    this.showFPGain(points);
-};
+
+// (ne PAS redéfinir initializeXPSystem ici)
+// on garde la version unique déjà définie plus haut.
+
+// showFPGain reste ici, OK.
+
+
+
+
 
 UIFeatures.prototype.showFPGain = function (amount) {
     const elem = document.createElement("div");
@@ -460,10 +740,11 @@ UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
     if (optionsContainer) {
         optionsContainer.classList.add("is-validated");
         optionsContainer.setAttribute("aria-disabled", "true");
-        options.forEach(o => {
+        options.forEach((o, i) => {
             o.setAttribute("tabindex", "-1");
-            o.setAttribute("aria-checked", "false");
+            o.setAttribute("aria-checked", i === Number(selectedIndex) ? "true" : "false");
         });
+
     }
 
     container.innerHTML = this.generateSimpleFeedback(isCorrect, question);
@@ -536,29 +817,35 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
         return;
     }
 
+    // APRÈS (dynamique avec getChestInfo, cohérent partout)
     if (unlockStatus.reason === "INSUFFICIENT_FP") {
         const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
         const needed = Number(unlockStatus.cost ?? 0) - currentFP;
+
+        const chestInfo = this.getChestInfo?.() || { points: 1 };
+        const chestPoints = Number.isFinite(chestInfo.points) && chestInfo.points > 0 ? chestInfo.points : 1;
+        const chestLabel = chestPoints === 1 ? "French Point" : "French Points";
 
         let message = `${theme.name} needs ${unlockStatus.cost} French Points\n\n` +
             `You have: ${currentFP} French Points\n` +
             `Missing: ${needed} French Points\n\n`;
 
         if (needed <= 5) {
-            message += `So close! Take more quizzes or tomorrow's bonus!\n\n`;
+            message += `So close! Take a few more quizzes or collect tomorrow's chest (+${chestPoints} ${chestLabel}).\n\n`;
             message += `Or get instant access to all themes ($12) - click header link`;
         } else if (needed <= 15) {
-            message += `A few more quizzes and daily bonuses!\n\n`;
+            message += `A few more quizzes + your daily chest (+${chestPoints} ${chestLabel}).\n\n`;
             message += `Or get instant access to all themes ($12) - click header link\n\n`;
-            message += `Don't forget your daily chests!`;
+            message += `Daily chest: 1 per 24h (no accumulation).`;
         } else {
             message += `Or get instant access to all themes ($12) - click header link\n\n`;
-            message += `Free path: complete quizzes to earn French Points + daily chest bonuses`;
+            message += `Free path: quizzes + one daily chest (+${chestPoints} ${chestLabel}, no accumulation)`;
         }
 
         alert(message);
         return;
     }
+
 
     if (unlockStatus.canUnlock) {
         const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
@@ -626,9 +913,10 @@ UIFeatures.prototype.getNextQuizInTheme = function () {
     if (startIndex >= 0 && startIndex < quizzes.length - 1) {
         for (let i = startIndex + 1; i < quizzes.length; i++) {
             const q = quizzes[i];
-            if (isUnlocked(q.id)) return { themeId, quizId: q.id };
+            if (isUnlocked(q.id) && !isCompleted(q.id)) return { themeId, quizId: q.id };
         }
     }
+
 
     for (let i = 0; i < quizzes.length; i++) {
         const q = quizzes[i];
@@ -640,8 +928,11 @@ UIFeatures.prototype.getNextQuizInTheme = function () {
 
 UIFeatures.prototype.showThemePreviewModal = function (theme) {
     const modal = this.createThemePreviewModal?.(theme);
-    if (modal) document.body.appendChild(modal);
+    if (!modal) return;
+    document.body.appendChild(modal);
+    this._applyFocusTrap?.(modal); // ✅ focus initial fiable
 };
+
 
 //================================================================================
 // DAILY REWARD
@@ -649,17 +940,20 @@ UIFeatures.prototype.showThemePreviewModal = function (theme) {
 
 UIFeatures.prototype.setupDailyReward = function () {
     if (window.TYF_CONFIG?.debug?.enabled) {
-        console.debug('🎁 Daily reward system updated - using chest icon in header');
+        console.debug('[TYF] Daily reward system: chest icon in header');
     }
 };
 
 UIFeatures.prototype.collectDailyReward = function () {
     const result = this.storageManager.collectDailyReward();
-    if (result.success) {
-        this.showDailyRewardAnimation(result.fpEarned || result.pointsEarned);
+    if (result && result.success) {
+        const amount = Number(result.earned ?? result.fpEarned ?? result.pointsEarned ?? 0);
+        if (amount > 0) this.showDailyRewardAnimation(amount);
         this.updateXPHeader();
     }
+    return result;
 };
+
 
 //================================================================================
 // PAYWALL HELPERS
@@ -667,7 +961,7 @@ UIFeatures.prototype.collectDailyReward = function () {
 
 UIFeatures.prototype.handlePurchase = function () {
     const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "https://buy.stripe.com/your-payment-link";
-    window.open(stripeUrl, '_blank');
+    window.location.href = stripeUrl;
     try {
         if (window.gtag) {
             gtag('event', 'stripe_clicked', {
@@ -678,9 +972,8 @@ UIFeatures.prototype.handlePurchase = function () {
     } catch { /* no-op */ }
 };
 
-UIFeatures.prototype.closePaywall = function (modal) {
-    modal.remove();
-};
+// Supprimé: closePaywall (inutile et dangereux car ne fait pas cleanup / focus restore)
+
 
 //================================================================================
 // COMPLETION MESSAGES
@@ -703,12 +996,16 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
 
     message += `\n+${fpEarned} French Points earned`;
 
-    const currentFP = this.storageManager.getFrenchPoints();
+    const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
+    const isPremium = (typeof this.storageManager.isPremiumUser === "function")
+        ? !!this.storageManager.isPremiumUser()
+        : false;
 
-    if (this.storageManager.isPremiumUser()) {
+    if (isPremium) {
         message += `\n🚀 Premium active - unlimited learning!`;
         message += `\n🏆 You're mastering authentic French`;
     } else if (currentFP < 10) {
+
         message += `\n🌟 You're building authentic skills!`;
         message += isMobile ?
             `\n✨ Love this? All themes $12` :
@@ -732,56 +1029,88 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
 // THEME PREVIEW MODAL
 //================================================================================
 
+// APRÈS — createThemePreviewModal()
 UIFeatures.prototype.createThemePreviewModal = function (theme) {
     const modal = document.createElement('div');
     modal.id = 'theme-preview-modal';
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'theme-preview-title');
 
     modal.innerHTML = `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
             <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
                 <span aria-hidden="true" class="text-lg">✕</span>
             </button>
-            
+
             <div class="text-4xl mb-4">${theme.icon}</div>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Unlock ${theme.name}?</h2>
-            
-            <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                <div class="text-blue-800 text-sm space-y-2">
-                    <div>🎯 <strong>5 progressive quizzes</strong></div>
-                    <div>🎧 <strong>Authentic French audio</strong></div>
-                    <div>📊 <strong>Real situation testing</strong></div>
-                </div>
-            </div>
-            
-            <div class="space-y-3">
-                <button id="premium-code-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
-                    🔓 I have a premium code
-                </button>
-                
-                <button id="premium-buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
-                    💳 Get Premium Access ($12)
-                </button>
-                
-                <button id="colors-first-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">
-                    🆓 Try Colors theme first
-                </button>
-            </div>
+            <h2 id="theme-preview-title" class="text-xl font-bold text-gray-800 mb-4">
+  Unlock ${theme.name}?
+</h2>
+
+<p class="text-gray-600 mb-2">
+  This theme is part of Premium access.
+</p>
+
+<div class="text-sm text-gray-500 mb-6">
+  Launch price: <strong>${UIFeatures.PRICE_DISPLAY.current}</strong>
+  (regular <span class="line-through">${UIFeatures.PRICE_DISPLAY.regular}</span>)
+</div>
+
+
+<div class="space-y-3">
+  <button
+    id="premium-code-btn"
+    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
+    Enter premium code
+  </button>
+
+  <button
+  id="premium-buy-btn"
+  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+  Unlock all themes – ${UIFeatures.PRICE_DISPLAY.current}
+</button>
+
+
+  <button
+    id="colors-first-btn"
+    class="w-full text-gray-600 hover:text-gray-800 py-2">
+    Continue with free Colors theme
+  </button>
+</div>
+
+    
         </div>`;
 
     this.setupThemePreviewEvents(modal, theme);
     return modal;
 };
 
+
+
 UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme) {
-    const cleanup = () => document.removeEventListener('keydown', onEsc);
-    const close = () => { cleanup(); modal.remove(); };
+    const previouslyFocused = document.activeElement;
+
+    const cleanup = () => {
+        document.removeEventListener('keydown', onEsc);
+        this._removeFocusTrap?.(modal);
+    };
+
+    const close = () => {
+        cleanup();
+        modal.remove();
+        try { previouslyFocused?.focus?.(); } catch { }
+    };
 
     modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener('click', close));
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+
     const onEsc = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onEsc);
+
+    // ✅ Focus trap
+    this._applyFocusTrap?.(modal);
 
     const codeBtn = modal.querySelector('#premium-code-btn');
     if (codeBtn) codeBtn.addEventListener('click', () => { close(); this.showPremiumCodeModal(); });
@@ -805,17 +1134,21 @@ UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme) {
 //================================================================================
 
 UIFeatures.prototype.showPremiumCodeModal = function () {
-    const existing = document.querySelector('#premium-code-input');
-    if (existing) { existing.focus(); return; }
+    const existingModal = document.getElementById("premium-code-modal");
+    if (existingModal) {
+        try { existingModal.querySelector("#premium-code-input")?.focus?.(); } catch { }
+        return;
+    }
 
     const modal = document.createElement('div');
+    modal.id = "premium-code-modal";
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
-    <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative" role="dialog" aria-modal="true" aria-labelledby="premium-code-title">
       <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close" data-action="close">
         <span aria-hidden="true" class="text-lg">✕</span>
       </button>
-      <h2 class="text-xl font-bold text-gray-800 mb-4">Enter Premium Code</h2>
+     <h2 id="premium-code-title" class="text-xl font-bold text-gray-800 mb-4">Enter Premium Code</h2>
       <div class="mb-4">
        <input id="premium-code-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters"
        aria-label="Premium code" maxlength="20"
@@ -829,8 +1162,22 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
       </div>
     </div>`;
 
-    const cleanup = () => document.removeEventListener('keydown', onEsc);
-    const close = () => { cleanup(); modal.remove(); };
+    const previouslyFocused = document.activeElement;
+
+    const cleanup = () => {
+        document.removeEventListener('keydown', onEsc);
+        this._removeFocusTrap?.(modal);
+    };
+
+    const close = () => {
+        cleanup();
+        modal.remove();
+        try { previouslyFocused?.focus?.(); } catch { }
+    };
+
+    // ✅ Focus trap
+    this._applyFocusTrap?.(modal);
+
 
     document.body.appendChild(modal);
     modal.querySelectorAll('[data-action="close"], [data-action="cancel"]').forEach(btn => btn.addEventListener('click', close));
@@ -839,17 +1186,66 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     document.addEventListener('keydown', onEsc);
 
     const input = modal.querySelector('#premium-code-input');
+
+    try {
+        const saved = localStorage.getItem("tyf:vanityCode");
+        if (input && saved && !input.value) input.value = saved;
+    } catch { }
+
+    // Ne pas persister le code tant qu'il n'est pas validé
+    // (tu peux garder le préfill si tu veux, mais pas l'auto-save)
+
+    // if (input) {
+    //     input.addEventListener("input", () => {
+    //         try { localStorage.setItem("tyf:vanityCode", input.value.trim()); } catch { }
+    //     });
+    // }
+
     const validateBtn = modal.querySelector('#validate-code-btn');
     if (validateBtn && input) {
         validateBtn.addEventListener('click', () => {
             const code = input.value.trim();
+
             const result = this.storageManager?.unlockPremiumWithCode
                 ? this.storageManager.unlockPremiumWithCode(code)
                 : { success: false };
-            if (result.success) { this.showFeedbackMessage?.('success', '🎉 Premium unlocked!'); close(); }
-            else { input.classList.add('border-red-400'); input.value = ''; input.placeholder = 'Invalid code - try again'; }
+
+            if (result.success) {
+                this.showFeedbackMessage?.("success", "🎉 Premium unlocked!");
+                try { this.updateXPHeader?.(); } catch { }
+
+                // Fermer le modal code
+                close();
+
+                // Si un paywall est ouvert, le fermer (sinon l’utilisateur reste bloqué visuellement)
+                try {
+                    const paywall = document.getElementById("sophie-paywall-modal");
+                    if (paywall) paywall.remove();
+                } catch { }
+
+                // Rafraîchir l’écran pour refléter les thèmes désormais accessibles
+                try {
+                    if (this.uiCore?.showWelcomeScreen) {
+                        this.uiCore.showWelcomeScreen();
+                    } else if (this.uiCore?.showQuizSelection) {
+                        this.uiCore.showQuizSelection();
+                    } else {
+                        window.location.reload();
+                    }
+                } catch {
+                    window.location.reload();
+                }
+
+            } else {
+                input.classList.add("border-red-400");
+                input.value = "";
+                input.placeholder = "Invalid code - try again";
+                try { localStorage.removeItem("tyf:vanityCode"); } catch { }
+            }
+
         });
     }
+
     const buyBtn = modal.querySelector('#buy-premium-btn');
     if (buyBtn) buyBtn.addEventListener('click', () => {
         const url = window?.TYF_CONFIG?.stripePaymentUrl;
@@ -862,10 +1258,16 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
 //================================================================================
 
 UIFeatures.prototype.showUserProfileModal = function () {
-    if (this.storageManager.isUserIdentified()) return;
-    if (!this.storageManager.shouldShowProfileModal()) return;
+    if (this.storageManager?.isUserIdentified?.()) return;
+    if (!this.storageManager?.shouldShowProfileModal?.()) return;
 
-    const modal = this.createUserProfileModal();
+
+    const modal =
+        this.createUserProfileModal?.()
+        || this.uiCore?.createUserProfileModal?.();
+
+    if (!modal) return;
+
     document.body.appendChild(modal);
 
     setTimeout(() => {
@@ -879,6 +1281,7 @@ UIFeatures.prototype.createUserProfileModal = function () {
     modal.id = 'user-profile-modal';
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-labelledby', 'profile-modal-title');
 
     modal.innerHTML = this.generateUserProfileHTML();
@@ -888,7 +1291,8 @@ UIFeatures.prototype.createUserProfileModal = function () {
 };
 
 UIFeatures.prototype.generateUserProfileHTML = function () {
-    const completedAssessments = this.storageManager.getCompletedQuizzesCount();
+    const completedAssessments = Number(this.storageManager?.getCompletedQuizzesCount?.() ?? 0);
+    const quizLabel = completedAssessments === 1 ? "quiz" : "quizzes";
 
     return `
         <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative animate-fade-in">
@@ -897,7 +1301,7 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
                 Excellent progress!
             </h2>
             <p class="text-gray-600 mb-6">
-                You've completed ${completedAssessments} authentic quiz! Save your progress to keep going.
+                You've completed ${completedAssessments} authentic ${quizLabel}! Save your progress to keep going.
             </p>
             
             <div class="space-y-4 mb-6">
@@ -939,21 +1343,25 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
         </div>`;
 };
 
+
 UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     const emailInput = modal.querySelector('#user-email');
     const firstNameInput = modal.querySelector('#user-firstname');
     const saveBtn = modal.querySelector('#save-profile-btn');
     const skipBtn = modal.querySelector('#skip-profile-btn');
 
+    if (!emailInput || !firstNameInput || !saveBtn || !skipBtn) return;
+
     const validateInputs = () => {
-        const email = emailInput.value.trim();
-        const firstName = firstNameInput.value.trim();
+        const email = (emailInput.value || "").trim();
+        const firstName = (firstNameInput.value || "").trim();
         const isValid = email.includes('@') && firstName.length >= 2;
 
         saveBtn.disabled = !isValid;
         saveBtn.classList.toggle('opacity-50', !isValid);
         saveBtn.classList.toggle('cursor-not-allowed', !isValid);
     };
+
 
     emailInput.addEventListener('input', validateInputs);
     firstNameInput.addEventListener('input', validateInputs);
@@ -963,12 +1371,19 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
         const email = emailInput.value.trim();
         const firstName = firstNameInput.value.trim();
 
+        const canSave = typeof this.storageManager?.setUserProfile === "function";
+        if (!canSave) {
+            this.showFeedbackMessage('error', '❌ Error saving profile');
+            return;
+        }
+
         if (this.storageManager.setUserProfile(email, firstName)) {
             this.showFeedbackMessage('success', `👋 Hi ${firstName}! Your progress is saved`);
             this.closeUserProfileModal(modal);
         } else {
             this.showFeedbackMessage('error', '❌ Error saving profile');
         }
+
     });
 
     skipBtn.addEventListener('click', () => {
@@ -977,13 +1392,17 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     });
 
     const escapeHandler = (e) => {
-        if (e.key === 'Escape') {
-            this.storageManager.markProfileModalRefused();
-            this.closeUserProfileModal(modal);
-            document.removeEventListener('keydown', escapeHandler);
-        }
+        if (e.key !== 'Escape') return;
+        this.storageManager.markProfileModalRefused();
+        this.closeUserProfileModal(modal);
+        document.removeEventListener('keydown', escapeHandler);
     };
+
     document.addEventListener('keydown', escapeHandler);
+
+    // ✅ remove on close too
+    modal._tyfProfileEscapeHandler = escapeHandler;
+
 
     modal.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !saveBtn.disabled) {
@@ -993,63 +1412,119 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
 };
 
 UIFeatures.prototype.closeUserProfileModal = function (modal) {
+    // ✅ cleanup escape handler si présent (évite fuite + double handlers)
+    try {
+        if (modal && modal._tyfProfileEscapeHandler) {
+            document.removeEventListener('keydown', modal._tyfProfileEscapeHandler);
+            modal._tyfProfileEscapeHandler = null;
+        }
+    } catch { }
+
     modal.classList.add('animate-fade-out');
     setTimeout(() => {
-        modal.remove();
+        try { modal.remove(); } catch { }
     }, 300);
 };
 
+
 UIFeatures.prototype.updateUserGreeting = function () {
     const userGreeting = document.getElementById('user-greeting');
-    if (userGreeting) {
-        const displayName = this.storageManager.getUserDisplayName();
-        userGreeting.textContent = `Hi ${displayName}!`;
-    }
+    if (!userGreeting) return;
+
+    const displayName =
+        (typeof this.storageManager.getUserDisplayName === "function")
+            ? this.storageManager.getUserDisplayName()
+            : "";
+
+    userGreeting.textContent = displayName ? `Hi ${displayName}!` : "Hi!";
 };
 
-//================================================================================
-// NOTIFICATIONS
-//================================================================================
 
-UIFeatures.prototype.requestNotificationPermission = function () {
-    if ('Notification' in window) {
-        Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications enabled ✅');
-                this.scheduleNextNotification();
-            } else {
-                if (window.TYF_CONFIG?.debug?.enabled) console.debug('Notifications denied ❌');
-            }
-        });
-    }
-};
+// (SUPPRIMÉ) NOTIFICATIONS: code mort en MVP v3.0.
+// On garde l'UI du coffre (tooltip + click collect) uniquement.
 
-UIFeatures.prototype.scheduleNextNotification = function () {
-    if (!window.isSecureContext) return;
-    if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
 
-    const message = {
-        type: 'SCHEDULE_NOTIFICATION',
-        title: '🎁 Test Your French',
-        body: 'Your daily chest is waiting! Free French Points!',
-        delay: 24 * 60 * 60 * 1000
-    };
 
-    navigator.serviceWorker.ready.then(registration => {
-        if (!registration?.active) return;
-        try {
-            const channel = new MessageChannel();
-            registration.active.postMessage(message, [channel.port2]);
-        } catch {
-            registration.active.postMessage(message);
-        }
-    }).catch(() => {/* no-op */ });
-};
+
 
 //================================================================================
 // UTILITIES
 //================================================================================
+
+
+// APRÈS
+// Helper générique: à mettre une seule fois dans ui-features.js (près des UTILITIES)
+UIFeatures.prototype._getFocusableIn = function (root) {
+    if (!root) return [];
+    const selectors = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+    return Array.from(root.querySelectorAll(selectors))
+        .filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+};
+
+UIFeatures.prototype._applyFocusTrap = function (modal) {
+    if (!modal) return;
+    if (modal.dataset.focusTrapBound === "1") return;
+    modal.dataset.focusTrapBound = "1";
+
+    const getFocusables = () => this._getFocusableIn(modal);
+
+    const onKeyDown = (e) => {
+        if (e.key !== "Tab") return;
+
+        const focusables = getFocusables();
+        if (!focusables.length) {
+            e.preventDefault();
+            return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+
+        // Shift+Tab on first => go to last
+        if (e.shiftKey && active === first) {
+            e.preventDefault();
+            last.focus();
+            return;
+        }
+
+        // Tab on last => go to first
+        if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
+            return;
+        }
+    };
+
+    // Store handler ref on the node for clean removal
+    modal._tyfTrapHandler = onKeyDown;
+    modal.addEventListener("keydown", onKeyDown);
+
+    // Ensure something inside is focused
+    setTimeout(() => {
+        try {
+            const focusables = getFocusables();
+            (focusables[0] || modal).focus?.();
+        } catch { }
+    }, 0);
+};
+
+UIFeatures.prototype._removeFocusTrap = function (modal) {
+    if (!modal) return;
+    const h = modal._tyfTrapHandler;
+    if (h) {
+        modal.removeEventListener("keydown", h);
+        modal._tyfTrapHandler = null;
+    }
+    delete modal.dataset.focusTrapBound;
+};
 
 UIFeatures.prototype.formatDuration = function (ms) {
     if (!Number.isFinite(ms) || ms <= 0) return 'now';
@@ -1061,34 +1536,107 @@ UIFeatures.prototype.formatDuration = function (ms) {
 };
 
 UIFeatures.prototype.getChestInfo = function () {
-    let nextReadyTs = this.storageManager?.getNextDailyRewardTime?.() ?? null;
+    const points = Number(this.storageManager?.getDailyRewardPoints?.());
+    const safePoints = Number.isFinite(points) && points > 0 ? points : 1;
 
-    if (!nextReadyTs) {
-        const lastTs =
-            this.storageManager?.getLastDailyRewardTimestamp?.()
-            ?? Number(localStorage.getItem('tyf:lastDailyRewardAt') || 0);
-        const cooldown = this.storageManager?.getDailyRewardCooldownMs?.() ?? 24 * 60 * 60 * 1000;
-        nextReadyTs = lastTs ? (lastTs + cooldown) : Date.now();
-    }
+    const isSameLocalDay = (a, b) => {
+        const da = new Date(a);
+        const db = new Date(b);
+        return da.getFullYear() === db.getFullYear()
+            && da.getMonth() === db.getMonth()
+            && da.getDate() === db.getDate();
+    };
 
-    const msLeft = nextReadyTs - Date.now();
-    const availableFromStore = this.storageManager?.isDailyRewardAvailable?.() || false;
-    const available = availableFromStore || msLeft <= 0;
-    const etaText = available ? '' : this.formatDuration(msLeft);
+    // 1) Source de vérité si dispo
+    const availableFromStore =
+        (typeof this.storageManager?.isDailyRewardAvailable === "function")
+            ? !!this.storageManager.isDailyRewardAvailable()
+            : null;
 
-    return { available, points: 3, etaText };
+    // 2) Fallback calendaire: dispo si pas collecté aujourd’hui
+    const lastTs =
+        Number(this.storageManager?.getLastDailyRewardTimestamp?.())
+        || Number(localStorage.getItem("tyf:lastDailyRewardAt") || 0);
+
+    const availableFallback = !lastTs ? true : !isSameLocalDay(lastTs, Date.now());
+    const available = (availableFromStore !== null) ? availableFromStore : availableFallback;
+
+    // 3) Next ready time: storage si dispo, sinon minuit local
+    const nextReadyTs =
+        (typeof this.storageManager?.getNextDailyRewardTime === "function")
+            ? Number(this.storageManager.getNextDailyRewardTime())
+            : (() => {
+                const now = new Date();
+                const next = new Date(now);
+                next.setHours(24, 0, 0, 0);
+                return next.getTime();
+            })();
+
+    const msLeft = Number.isFinite(nextReadyTs) ? (nextReadyTs - Date.now()) : 0;
+    const etaText = available ? "" : this.formatDuration(msLeft);
+
+    return { available, points: safePoints, etaText };
 };
 
-// APRÈS (ui-features.js - setupChestTooltip)
-// Objectif: tooltip sur le chest, sans casser le click "collect" sur mobile quand le reward est dispo.
+
+
+
 UIFeatures.prototype.setupChestTooltip = function () {
     const trigger = document.getElementById("daily-chest-wrapper");
     const tip = document.getElementById("daily-chest-tooltip");
     const tipText = document.getElementById("daily-chest-tooltip-text");
 
     if (!trigger || !tip || !tipText) return;
-    if (trigger.dataset.bound === "1") return;
-    trigger.dataset.bound = "1";
+
+    if (!this._chestTooltipHandlers) this._chestTooltipHandlers = {};
+    const h = this._chestTooltipHandlers;
+
+    // If we previously bound to a different trigger (rerender), unbind everything first
+    if (h.node && h.node !== trigger) {
+        try {
+            h.node.removeEventListener("pointerenter", h.onPointerEnter);
+            h.node.removeEventListener("pointerleave", h.onPointerLeave);
+            h.node.removeEventListener("focus", h.onFocus);
+            h.node.removeEventListener("blur", h.onBlur);
+            delete h.node.dataset.chestTooltipBound;
+        } catch { }
+
+        try {
+            document.removeEventListener("click", h.onDocClick);
+            document.removeEventListener("keydown", h.onDocKeydown);
+            window.removeEventListener("resize", h.onResize);
+            window.removeEventListener("scroll", h.onScroll, { passive: true });
+        } catch { }
+
+        h.node = null;
+    }
+
+
+    // Si déjà bind, mais tip/tipText a changé (rerender), on doit rebind
+    if (trigger.dataset.chestTooltipBound === "1") {
+        if (h.tip !== tip || h.tipText !== tipText) {
+            // force cleanup minimal puis rebind
+            try {
+                trigger.removeEventListener("pointerenter", h.onPointerEnter);
+                trigger.removeEventListener("pointerleave", h.onPointerLeave);
+                trigger.removeEventListener("focus", h.onFocus);
+                trigger.removeEventListener("blur", h.onBlur);
+            } catch { }
+
+            try {
+                document.removeEventListener("click", h.onDocClick);
+                document.removeEventListener("keydown", h.onDocKeydown);
+                window.removeEventListener("resize", h.onResize);
+                window.removeEventListener("scroll", h.onScroll, { passive: true });
+            } catch { }
+
+            try { delete trigger.dataset.chestTooltipBound; } catch { }
+        } else {
+            return;
+        }
+    }
+
+    trigger.dataset.chestTooltipBound = "1";
 
     if (!tip.id) tip.id = "daily-chest-tooltip";
     trigger.setAttribute("aria-controls", tip.id);
@@ -1098,95 +1646,204 @@ UIFeatures.prototype.setupChestTooltip = function () {
             const mqCoarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
             const mqNoHover = window.matchMedia && window.matchMedia("(hover: none)").matches;
             return !!(mqCoarse || mqNoHover);
-        } catch { return false; }
+        } catch {
+            return false;
+        }
     };
 
     const buildText = () => {
         const info = this.getChestInfo();
+        const label = info.points === 1 ? "French Point" : "French Points";
         const etaLine = info.available ? "Available now." : `Available in ${info.etaText}.`;
-        return `🎁 One daily chest (calendar streak).\nMinimum: ${info.points} French Points. Bonus possible.\n${etaLine}`;
+        return `🎁 One chest per day (resets at midnight).\nReward: +${info.points} ${label}.\nNo accumulation.\n${etaLine}`;
     };
 
     const open = () => {
         tipText.textContent = buildText();
         tip.classList.remove("hidden");
+        tip.setAttribute("aria-hidden", "false");
         trigger.setAttribute("aria-expanded", "true");
-        trigger.setAttribute("aria-describedby", tip.id);
     };
 
     const close = () => {
         tip.classList.add("hidden");
+        tip.setAttribute("aria-hidden", "true");
         trigger.setAttribute("aria-expanded", "false");
-        trigger.removeAttribute("aria-describedby");
     };
 
-    const toggle = () => tip.classList.contains("hidden") ? open() : close();
+    const toggle = () => (tip.classList.contains("hidden") ? open() : close());
 
-    // Desktop hover + focus
-    trigger.addEventListener("pointerenter", () => { if (!isTouchLike()) open(); });
-    trigger.addEventListener("pointerleave", () => { if (!isTouchLike()) close(); });
-    trigger.addEventListener("focus", () => { if (!isTouchLike()) open(); });
-    trigger.addEventListener("blur", () => { if (!isTouchLike()) close(); });
+    // Expose helpers KISS pour addChestIconToHeader()
+    this._openChestTooltip = () => open();
+    this._closeChestTooltip = () => close();
+    this._toggleChestTooltip = () => toggle(); // utile mobile
 
-    // Mobile tap:
-    // - si reward dispo: on laisse le click "collect" existant faire son job
-    // - sinon: tap = toggle tooltip (évite conflit click handlers)
-    trigger.addEventListener("click", (e) => {
-        if (!isTouchLike()) return;
 
-        const available = (typeof this.storageManager?.isDailyRewardAvailable === "function")
-            ? !!this.storageManager.isDailyRewardAvailable()
-            : this.getChestInfo().available;
+    h.onPointerEnter = () => {
+        if (!isTouchLike()) open();
+    };
+    h.onPointerLeave = () => {
+        if (!isTouchLike()) close();
+    };
+    h.onFocus = () => {
+        if (!isTouchLike()) open();
+    };
+    h.onBlur = () => {
+        if (!isTouchLike()) close();
+    };
 
-        if (available) return;
+    // Mobile-only: only toggles when chest is locked (if unlocked, click is reserved for collect)
+    // supprimé : h.onTriggerClick
+    // La logique "mobile click -> tooltip quand locked" est gérée par addChestIconToHeader()
+    // via this._toggleChestTooltip().
 
-        e.preventDefault();
-        e.stopPropagation();
-        toggle();
-    });
 
-    // Outside click closes (touch only)
-    document.addEventListener("click", (e) => {
+    h.onDocClick = (e) => {
         if (!isTouchLike()) return;
         if (trigger.contains(e.target) || tip.contains(e.target)) return;
         close();
-    });
+    };
 
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-    window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, { passive: true });
+    h.onDocKeydown = (e) => {
+        if (e.key === "Escape") close();
+    };
+    h.onResize = () => close();
+    h.onScroll = () => close();
+
+    trigger.addEventListener("pointerenter", h.onPointerEnter);
+    trigger.addEventListener("pointerleave", h.onPointerLeave);
+    trigger.addEventListener("focus", h.onFocus);
+    trigger.addEventListener("blur", h.onBlur);
+
+    // IMPORTANT:
+    // - Do NOT add a click handler here by default.
+    // - Click is handled by addChestIconToHeader for collect (or mobile tooltip when locked).
+    // If you want tooltip-on-click when locked, uncomment:
+    // trigger.addEventListener("click", h.onTriggerClick);
+
+    document.addEventListener("click", h.onDocClick);
+    document.addEventListener("keydown", h.onDocKeydown);
+    window.addEventListener("resize", h.onResize);
+    window.addEventListener("scroll", h.onScroll, { passive: true });
+
+
+    // Ensure initial state is closed
+    close();
+
+    h.tip = tip;
+    h.tipText = tipText;
+    h.node = trigger;
+
 };
 
 
-
-UIFeatures.prototype.setupResultsEventListeners = function () {
-    document.querySelector('.quiz-wrapper')?.classList.add('results-compact');
-
-    const backBtn = document.getElementById('back-to-themes-btn');
-    if (backBtn) backBtn.addEventListener('click', () => {
-        if (this.uiCore?.showThemeSelection) this.uiCore.showThemeSelection();
-    });
-
-    const toggleBtn = document.getElementById('toggle-details-btn');
-    const details = document.getElementById('detailed-stats');
-    if (toggleBtn && details) {
-        toggleBtn.addEventListener('click', () => details.classList.toggle('hidden'));
-    }
-};
 
 //================================================================================
 // CLEANUP
 //================================================================================
-
 UIFeatures.prototype.destroy = function () {
     if (this.paywallTimer) {
         clearInterval(this.paywallTimer);
         this.paywallTimer = null;
     }
+
+    // Notifications désactivées pour MVP v3.0
+    // this.stopNotificationArmingLoop?.();
+
+    // Premium button cleanup
+    const pb = this._premiumBtnHandlers;
+    if (pb?.node) {
+        try { if (pb.onClick) pb.node.removeEventListener("click", pb.onClick); } catch { }
+        try { if (pb.onKeyDown) pb.node.removeEventListener("keydown", pb.onKeyDown); } catch { }
+        try { delete pb.node.dataset.premiumBound; } catch { }
+    }
+    this._premiumBtnHandlers = null;
+
+
     if (this._onStorageUpdated) {
-        window.removeEventListener('storage-updated', this._onStorageUpdated);
+        window.removeEventListener("storage-updated", this._onStorageUpdated);
         this._onStorageUpdated = null;
     }
+
+    if (this._onFPGained) {
+        window.removeEventListener("fp-gained", this._onFPGained);
+        this._onFPGained = null;
+    }
+
+    if (this._onBadgesEarned) {
+        window.removeEventListener("badges-earned", this._onBadgesEarned);
+        this._onBadgesEarned = null;
+    }
+
+    if (this._onLevelUp) {
+        window.removeEventListener("level-up", this._onLevelUp);
+        this._onLevelUp = null;
+    }
+
+    if (this._onPremiumUnlocked) {
+        window.removeEventListener("premium-unlocked", this._onPremiumUnlocked);
+        this._onPremiumUnlocked = null;
+    }
+
+    this._gamificationUXBound = false;
+
+    if (this._onVisibilityChange) {
+        document.removeEventListener("visibilitychange", this._onVisibilityChange);
+        this._onVisibilityChange = null;
+    }
+
+    // Tooltip cleanup
+    const th = this._chestTooltipHandlers;
+    const trigger = document.getElementById("daily-chest-wrapper");
+
+    if (th) {
+        // 1) Unbind du node réellement bindé si on l'a (meilleur que re-query le DOM)
+        const node = th.node || trigger;
+
+        if (node) {
+            try { node.removeEventListener("pointerenter", th.onPointerEnter); } catch { }
+            try { node.removeEventListener("pointerleave", th.onPointerLeave); } catch { }
+            try { node.removeEventListener("focus", th.onFocus); } catch { }
+            try { node.removeEventListener("blur", th.onBlur); } catch { }
+
+            try { delete node.dataset.chestTooltipBound; } catch { }
+            try { node.removeAttribute("aria-controls"); } catch { }
+            try { node.removeAttribute("aria-expanded"); } catch { }
+        }
+
+        // 2) Unbind global listeners même si le node a disparu
+        try { document.removeEventListener("click", th.onDocClick); } catch { }
+        try { document.removeEventListener("keydown", th.onDocKeydown); } catch { }
+        try { window.removeEventListener("resize", th.onResize); } catch { }
+        try { window.removeEventListener("scroll", th.onScroll, { passive: true }); } catch { }
+
+        this._chestTooltipHandlers = null;
+    }
+
+    // ✅ Désarme le toggle exposé (évite appels après destroy)
+    this._toggleChestTooltip = null;
+
+
+
+    // Chest header cleanup
+    const hh = this._chestHeaderHandlers;
+    if (hh?.node) {
+        try {
+            if (hh.onActivate) hh.node.removeEventListener("click", hh.onActivate);
+            if (hh.onKeyDown) hh.node.removeEventListener("keydown", hh.onKeyDown);
+        } catch { }
+
+        try { delete hh.node.dataset.chestBound; } catch { }
+    }
+    this._chestHeaderHandlers = null;
+
+
+    try { document.getElementById("sophie-paywall-modal")?.remove?.(); } catch { }
+    try { document.getElementById("premium-code-modal")?.remove?.(); } catch { }
+    try { document.getElementById("theme-preview-modal")?.remove?.(); } catch { }
 };
 
+// ===================================================
+// Global export (must run at file load)
+// ===================================================
 window.UIFeatures = UIFeatures;

@@ -1,4 +1,4 @@
-// quizManager.js - Version 3.1 (Option B - manual Next)
+// quizManager.js - v3 (Option B - manual Next)
 
 function QuizManager(resourceManager, storageManager, ui) {
   if (!resourceManager || !storageManager) {
@@ -21,9 +21,14 @@ function QuizManager(resourceManager, storageManager, ui) {
   this.score = 0;
   this.previousBadgeCount = 0;
 
+  // validation cache (manual-next flow)
+  this._lastValidatedAnswerIndex = null;
+  this._lastValidatedQuestionIndex = null;
+
   this.totalTimeElapsed = 0;
   this.startTime = null;
   this.questionStartTime = null;
+
 
 
 
@@ -46,8 +51,13 @@ QuizManager.prototype.resetQuizState = function () {
   this.questionTimes = [];
   this.score = 0;
 
+  // reset validation cache
+  this._lastValidatedAnswerIndex = null;
+  this._lastValidatedQuestionIndex = null;
+
   // ⏱️ Reset time tracking
   this.totalTimeElapsed = 0;
+
   this.startTime = null;
   this.questionStartTime = null;
 
@@ -62,6 +72,8 @@ QuizManager.prototype.normalizeText = function (s) {
     .replace(/[–—]/g, "-")
     .replace(/[·•]/g, "|")
     .replace(/\u00A0/g, " ")
+    .replace(/[’]/g, "'")          // apostrophe typographique -> simple
+    .replace(/\s+/g, " ")          // espaces multiples -> simple
     .trim();
 };
 
@@ -121,18 +133,19 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
     this.questionStatus = new Array(questionCount).fill(null);
     this.questionTimes = new Array(questionCount).fill(0);
 
-    // ⏱️ START TIMING ICI
+    // ⏱️ INIT TIMING STATE (question timing starts when the question is rendered)
     this.totalTimeElapsed = 0;
-    this.startTime = Date.now();
-    this.questionStartTime = this.startTime;
-
-
+    this.startTime = this._now();
+    this.questionStartTime = null;
 
     if (this.ui && this.ui.showQuizScreen) {
       this.ui.showQuizScreen();
     } else {
       console.error("QuizManager: UI method not available");
     }
+
+
+
 
     console.log(`QuizManager: Quiz loaded successfully. ${questionCount} questions.`);
 
@@ -195,7 +208,19 @@ QuizManager.prototype.preprocessQuestions = function () {
         question.correctIndex = -1;
         return;
       }
-      const correctIndex = question.options.findIndex(option => option === question.correctAnswer);
+      // Helper local (même logique que côté UI)
+      const stripLabel = s =>
+        String(s || "").replace(/^[A-D]\s*[.)]\s*/i, "").trim();
+
+      const normalizedCorrect = stripLabel(question.correctAnswer);
+
+      const correctIndex = question.options.findIndex(option => {
+        return (
+          option === question.correctAnswer ||
+          stripLabel(option) === normalizedCorrect
+        );
+      });
+
 
 
       if (correctIndex !== -1) {
@@ -226,6 +251,9 @@ QuizManager.prototype.renderCurrentQuestion = function () {
     console.error("QuizManager: Cannot render question - no quiz loaded");
     return;
   }
+
+  // ⏱️ (re)start timing at the moment the question is rendered
+  this._startTiming();
 
   if (this.ui && this.ui.renderCurrentQuestion) {
     this.ui.renderCurrentQuestion();
@@ -268,13 +296,26 @@ QuizManager.prototype.validateCurrentAnswer = function () {
     return;
   }
 
-  const question = this.getCurrentQuestion();
-  const isCorrect = question && question.correctIndex === answerIndex;
-
-  if (isCorrect) {
-    this.score++;
+  // If already validated and answer hasn't changed, do nothing
+  if (this.questionStatus[this.currentIndex] !== null &&
+    this._lastValidatedAnswerIndex === answerIndex &&
+    this._lastValidatedQuestionIndex === this.currentIndex) {
+    return;
   }
+
+  const question = this.getCurrentQuestion();
+  const isCorrect = !!(question && question.correctIndex === answerIndex);
+
+  const wasCorrect = this.questionStatus[this.currentIndex] === "correct";
+
+  if (!wasCorrect && isCorrect) this.score++;
+  if (wasCorrect && !isCorrect) this.score = Math.max(0, this.score - 1);
+
   this.questionStatus[this.currentIndex] = isCorrect ? "correct" : "incorrect";
+
+  // track last validated selection
+  this._lastValidatedQuestionIndex = this.currentIndex;
+  this._lastValidatedAnswerIndex = answerIndex;
 
   console.log(
     `QuizManager: Validation - Question ${this.currentIndex + 1}, Correct: ${isCorrect}, Score: ${this.score}`
@@ -285,29 +326,47 @@ QuizManager.prototype.validateCurrentAnswer = function () {
   }
 };
 
-QuizManager.prototype.nextQuestion = function () {
-  this._recordTime(false);
 
-  if (this.currentIndex < this.currentQuiz.questions.length - 1) {
+QuizManager.prototype.nextQuestion = function () {
+  if (!this.currentQuiz) return false;
+
+  if (this.questionStatus[this.currentIndex] === null) {
+    if (typeof this.ui?.showFeedbackMessage === "function") {
+      this.ui.showFeedbackMessage("warn", "Validate your answer to continue");
+    } else if (typeof window.showErrorMessage === "function") {
+      window.showErrorMessage("Validate your answer to continue");
+    }
+    return false;
+  }
+
+  const isLast = this.currentIndex >= this.currentQuiz.questions.length - 1;
+
+  // Enregistrer le temps UNE SEULE FOIS
+  this._recordTime(isLast);
+
+  if (!isLast) {
     this.currentIndex++;
     this.renderCurrentQuestion();
     return true;
-  } else {
-    this.finishQuiz();
-    return false;
   }
+
+  this.finishQuiz();
+  return false;
 };
 
 
 QuizManager.prototype.previousQuestion = function () {
-  this._recordTime(false);
   if (this.currentIndex > 0) {
+    // record time spent on the question we are leaving
+    this._recordTime(false);
+
     this.currentIndex--;
     this.renderCurrentQuestion();
     return true;
   }
   return false;
 };
+
 
 
 QuizManager.prototype.submitAnswer = function (answerIndex) {
@@ -358,11 +417,12 @@ QuizManager.prototype.getQuizProgress = function () {
 };
 
 QuizManager.prototype.finishQuiz = function () {
-  this._recordTime(true);
   if (!this.currentQuiz || !this.storageManager) {
     console.error("QuizManager: Cannot finish quiz - missing currentQuiz or storageManager");
     return;
   }
+
+  // plus aucun appel à _recordTime ici
 
   const totalQuestions = this.currentQuiz.questions.length;
 
@@ -371,8 +431,10 @@ QuizManager.prototype.finishQuiz = function () {
     total: totalQuestions,
     percentage: totalQuestions > 0 ? Math.round((this.score / totalQuestions) * 100) : 0,
     themeId: this.currentThemeId,
-    quizId: this.currentQuizId
+    quizId: this.currentQuizId,
+    timeSpentMs: Number(this.totalTimeElapsed) || 0
   };
+
 
 
   if (typeof window.track === "function") {
@@ -394,17 +456,24 @@ QuizManager.prototype.finishQuiz = function () {
     return;
   }
 
-  this.storageManager.markQuizCompleted(
+  const timeSpentMs = Number(this.totalTimeElapsed) || 0;
+
+  const didSave = this.storageManager.markQuizCompleted(
     this.currentThemeId,
     this.currentQuizId,
     resultsData.score,
     resultsData.total,
-    this.totalTimeElapsed
+    timeSpentMs
   );
 
 
   const fpAfter = this.storageManager.getFrenchPoints?.() ?? fpBefore;
-  resultsData.fpEarned = Math.max(0, fpAfter - fpBefore);
+  resultsData.fpEarned = didSave ? Math.max(0, fpAfter - fpBefore) : 0;
+
+  if (!didSave) {
+    resultsData.revisionMode = true;
+  }
+
 
   if (this.ui && this.ui.showResults) {
     this.ui.showResults(resultsData);
@@ -422,40 +491,8 @@ QuizManager.prototype.finishQuiz = function () {
     }, 2000);
   }
 
-  this.triggerBadgeEvents();
-};
-
-QuizManager.prototype.triggerBadgeEvents = function () {
-  if (!this.storageManager || typeof this.storageManager.getBadges !== "function") {
-    console.warn("QuizManager: storageManager.getBadges not available, cannot trigger badge events");
-    return;
-  }
-
-  const currentBadgesRaw = this.storageManager.getBadges();
-  const currentBadges = Array.isArray(currentBadgesRaw) ? currentBadgesRaw : [];
-  const newBadges = currentBadges.length;
-  const newlyEarnedCount = newBadges - this.previousBadgeCount;
-
-  if (newlyEarnedCount > 0) {
-    const newlyEarnedBadges = currentBadges.slice(-newlyEarnedCount);
-
-    console.log("QuizManager: New badges earned:", newlyEarnedBadges);
-
-    const newlyEarnedForThisEvent = newlyEarnedBadges.map(badge => ({
-      id: badge.id || "unknown",
-      name: badge.name || "Badge earned",
-      description: badge.description || "You earned a new badge"
-    }));
-
-    if (typeof window.CustomEvent === "function") {
-      document.dispatchEvent(
-        new CustomEvent("badges-earned", {
-          detail: { badges: newlyEarnedForThisEvent }
-        })
-      );
-      console.log("QuizManager: Badge event triggered for:", newlyEarnedForThisEvent);
-    }
-  }
+  // Badges: StorageManager est la source de vérité et dispatch déjà "badges-earned".
+  // Donc rien à déclencher ici.
 };
 
 QuizManager.prototype.getResultsSummary = function () {

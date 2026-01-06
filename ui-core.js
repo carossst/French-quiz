@@ -111,9 +111,10 @@
 
 
     UICore.prototype.loadThemeIndex = async function () {
-        const metadata = await this.resourceManager.loadMetadata();
-        this.themeIndexCache = metadata.themes || [];
+        const metadata = (await this.resourceManager.loadMetadata()) || {};
+        this.themeIndexCache = Array.isArray(metadata.themes) ? metadata.themes : [];
     };
+
 
     /* ----------------------------------------
        SCREEN RENDERING
@@ -126,12 +127,18 @@
             const html = htmlGenerator.call(this);
             this.appContainer.innerHTML = html;
 
-            // Reset scroll to top for each new screen
+            // Reset scroll to top (smooth only for welcome & stats)
+            const smoothScreens = ["welcome", "stats"];
+
             try {
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.scrollTo({
+                    top: 0,
+                    behavior: smoothScreens.includes(screenId) ? "smooth" : "auto"
+                });
             } catch (e) {
                 window.scrollTo(0, 0);
             }
+
 
             this.setupScreenEvents(screenId);
         } catch (error) {
@@ -214,7 +221,7 @@
             '\n    <p class="text-lg text-gray-700 mb-6">' +
             "\n      No signup. No account. Just answer the questions and get an honest snapshot of your level." +
             "\n    </p>" +
-            '\n    <button id="start-first-quiz-btn" class="quiz-button w-full sm:w-auto">' +
+            '\n    <button id="start-first-quiz-btn" type="button" class="quiz-button w-full sm:w-auto">' +
             "\n      Start the free Colors quiz" +
             "\n    </button>" +
             '\n    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10 text-center text-sm text-gray-700">' +
@@ -252,7 +259,7 @@
 
             // NOUVEAU: Bouton roadmap (P0)
             '\n    <div class="text-center mb-4">' +
-            '\n      <button id="show-roadmap-btn" class="text-sm text-blue-700 hover:text-blue-900 font-semibold px-5 py-3 rounded-lg border-2 border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100 transition-all inline-flex items-center gap-2 shadow-sm">' +
+            '\n      <button id="show-roadmap-btn" type="button" class="text-sm text-blue-700 hover:text-blue-900 font-semibold px-5 py-3 rounded-lg border-2 border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100 transition-all inline-flex items-center gap-2 shadow-sm">' +
             '\n        <span class="text-lg">🗺️</span>' +
             '\n        <span>Why are some themes locked? See how unlocking works</span>' +
             '\n      </button>' +
@@ -265,7 +272,7 @@
             "\n      </div>" +
             "\n    </section>" +
             '\n    <div class="text-center mt-4 lg:mt-2 shrink-0">' +
-            '\n      <button id="view-stats-btn" class="text-gray-600 hover:text-gray-900 underline text-sm">' +
+            '\n      <button id="view-stats-btn" type="button" class="text-gray-600 hover:text-gray-900 underline text-sm">' +
             "\n        View your statistics and history" +
             "\n      </button>" +
             "\n    </div>" +
@@ -355,9 +362,10 @@
             '\n    <div class="fp-display mb-6">' +
             '\n      <div class="text-lg font-bold text-purple-800 mb-1 whitespace-pre-line">' +
             (this.features && this.features.getCompletionMessage
-                ? this.features.getCompletionMessage(resultsData.percentage, resultsData.score)
-                : "+" + resultsData.score + " French Points earned") +
+                ? this.features.getCompletionMessage(resultsData.percentage, resultsData.fpEarned)
+                : "+" + (Number(resultsData.fpEarned) || 0) + " French Points earned") +
             "</div>" +
+
             '\n      <p class="text-sm text-gray-700">' +
             "French Points help you unlock new themes and build a visible history of your level." +
             "</p>" +
@@ -366,7 +374,7 @@
             this.generateNextActionButton(resultsData) +
             "\n    </div>" +
             '\n    <div class="mb-6">' +
-            '\n      <button id="toggle-details-btn" class="quiz-button">' +
+            '\n      <button id="toggle-details-btn" type="button" class="quiz-button">' +
             "View detailed analysis" +
             "</button>" +
             "\n    </div>" +
@@ -389,11 +397,11 @@
             "\n      </div>" +
             "\n    </div>" +
             '\n    <div class="flex flex-col md:flex-row gap-3 justify-center mt-8">' +
-            '\n      <button id="quit-quiz-btn" class="quiz-button">' +
+            '\n      <button id="quit-quiz-btn" type="button" class="quiz-button">' +
             "Back to theme" +
             "</button>" +
-            '\n      <button id="back-to-themes-btn" class="quiz-button">' +
-            "Home" +
+            '\n      <button id="back-to-themes-btn" type="button" class="quiz-button">' +
+            "Back to themes" +
             "</button>" +
             "\n    </div>" +
             "\n  </div>" +
@@ -411,6 +419,7 @@
             self.renderCurrentQuestion();
         }, 80);
     };
+
 
     UICore.prototype.generateQuizHTML = function () {
         const progress =
@@ -431,18 +440,18 @@
             "</span>" +
             "</div>" +
             '\n    <div class="flex items-center gap-2">' +
-            '<button id="go-themes-btn" class="quiz-button">Back to theme</button>' +
-            '<button id="home-quiz-btn" class="quiz-button">Home</button>' +
+            '<button id="go-themes-btn" type="button" class="quiz-button">Back to theme</button>' +
+            '<button id="home-quiz-btn" type="button" class="quiz-button">Home</button>' +
             "</div>" +
             "\n  </div>" +
             '\n  <div class="w-full h-2 bg-gray-200 rounded-full mb-6" aria-hidden="true">' +
-            '<div id="quiz-progress-bar" class="h-2 bg-amber-400 rounded-full transition-all w-pct-0"></div>' +
+            '<div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="h-2 bg-amber-400 rounded-full transition-all w-pct-0"></div>' +
             "</div>" +
             '\n  <div id="question-container" class="space-y-4"></div>' +
             '\n  <div id="feedback-container" class="mt-6" role="status" aria-live="polite"></div>' +
             '\n  <div class="mt-6 flex items-center justify-between">' +
-            '<button id="prev-question-btn" class="quiz-button">Previous</button>' +
-            '<button id="next-question-btn" class="quiz-button">Next</button>' +
+            '<button id="prev-question-btn" type="button" class="quiz-button">Previous</button>' +
+            '<button id="next-question-btn" type="button" class="quiz-button">Next</button>' +
             "</div>" +
             "\n</div>"
         );
@@ -455,36 +464,59 @@
             return;
         }
 
-        const questionContainer = document.getElementById("question-container");
-        if (!questionContainer) {
-            console.error("UICore: question-container not found");
-            return;
-        }
-
         const feedbackContainer = document.getElementById("feedback-container");
         if (feedbackContainer) {
             feedbackContainer.classList.add("hidden");
             feedbackContainer.innerHTML = "";
         }
 
+        const questionContainer = document.getElementById("question-container");
+        if (!questionContainer) {
+            console.error("UICore: #question-container not found");
+            return;
+        }
+
         questionContainer.innerHTML = this.generateQuestionHTML(question);
         this.setupQuestionEvents();
+
+        // Re-appliquer la sélection précédente (si existante)
+        const idx = Number(this.quizManager && this.quizManager.currentIndex) || 0;
+        const ans = Array.isArray(this.quizManager.userAnswers) ? this.quizManager.userAnswers[idx] : null;
+        if (typeof ans === "number") {
+            const opt = document.querySelector('.option[data-option-index="' + ans + '"]');
+            if (opt) {
+                opt.classList.add("selected");
+                opt.setAttribute("aria-checked", "true");
+                const indicator = opt.querySelector(".option-indicator div");
+                if (indicator) {
+                    indicator.classList.remove("scale-0");
+                    indicator.classList.add("scale-100");
+                }
+            }
+        }
+
         this.updateQuizProgress();
+
     };
+
 
     UICore.prototype.generateQuestionHTML = function (question) {
         const questionText = question.question || question.text || "Question text missing";
         const hasAudio = !!question.audio;
-        const questionNumber = this.quizManager.currentIndex + 1;
-        const totalQuestions =
-            (this.quizManager.currentQuiz && this.quizManager.currentQuiz.questions.length) || 0;
+        const questionNumber = (Number(this.quizManager && this.quizManager.currentIndex) || 0) + 1;
 
-        const quizName = this.quizManager.currentQuiz
-            ? this.normalizeText(this.quizManager.currentQuiz.name)
-            : "";
+        const questionsArr =
+            this.quizManager &&
+                this.quizManager.currentQuiz &&
+                Array.isArray(this.quizManager.currentQuiz.questions)
+                ? this.quizManager.currentQuiz.questions
+                : [];
+        const totalQuestions = questionsArr.length;
 
-
-
+        const quizName =
+            this.quizManager && this.quizManager.currentQuiz
+                ? this.normalizeText(this.quizManager.currentQuiz.name)
+                : "";
 
         return (
             '\n<div class="question-content">' +
@@ -505,7 +537,7 @@
             "</h2>" +
             "\n  </div>" +
             '\n  <div class="options-container space-y-3" role="radiogroup" aria-label="Answer choices">' +
-            question.options.map(this.generateOptionHTML.bind(this)).join("") +
+            (Array.isArray(question.options) ? question.options.map(this.generateOptionHTML.bind(this)).join("") : "") +
             "\n  </div>" +
             (question.hint
                 ? '\n  <div class="question-hint mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">' +
@@ -552,6 +584,7 @@
 
     UICore.prototype.generateOptionHTML = function (option, index) {
         const letters = ["A", "B", "C", "D"];
+        const letter = letters[index] || String(index + 1);
         const clean = this._stripChoiceLabel(option);
 
         return (
@@ -563,7 +596,7 @@
             '\n      <div class="w-full h-full rounded-full bg-blue-600 transform scale-0 transition-transform"></div>' +
             "\n    </div>" +
             '\n    <span class="option-letter text-lg font-bold text-gray-600 mr-3">' +
-            letters[index] +
+            letter +
             ".</span>" +
             '\n    <span class="option-text text-gray-900 font-medium flex-1">' +
             clean +
@@ -572,6 +605,7 @@
             "\n</div>"
         );
     };
+
 
     UICore.prototype.setupQuestionEvents = function () {
         const options = document.querySelectorAll(".option");
@@ -722,17 +756,35 @@
             }
 
             this.quizManager.selectAnswer(index);
+
+            // Repartir d'un état propre : sélection = on revalide
+            if (Array.isArray(this.quizManager.questionStatus)) {
+                this.quizManager.questionStatus[this.quizManager.currentIndex] = null;
+            }
+
+            // Important: casser le cache "déjà validé" si l'utilisateur clique plusieurs fois
+            if ("_lastValidatedQuestionIndex" in this.quizManager) {
+                this.quizManager._lastValidatedQuestionIndex = null;
+                this.quizManager._lastValidatedAnswerIndex = null;
+            }
+
+            // Auto-validation immédiate
             this.quizManager.validateCurrentAnswer();
             this.updateNavigationButtons();
 
+            // Focus sur Next uniquement si réellement débloqué
             const nextBtn = document.getElementById("next-question-btn");
             if (nextBtn && !nextBtn.disabled) nextBtn.focus();
+
         } catch (error) {
             console.error("Error selecting option:", error);
         }
     };
 
     UICore.prototype.showQuestionFeedback = function (question, selectedIndex) {
+        const feedbackContainer = document.getElementById("feedback-container");
+        if (feedbackContainer) feedbackContainer.classList.remove("hidden");
+
         if (this.features && this.features.showQuestionFeedback) {
             this.features.showQuestionFeedback(question, selectedIndex);
             return;
@@ -740,21 +792,22 @@
         console.warn("UIFeatures.showQuestionFeedback missing - no feedback rendered.");
     };
 
+
     /* ----------------------------------------
        THEME GRID & THEME STATE
        ---------------------------------------- */
     UICore.prototype.getThemeStateClass = function (theme) {
         if (theme.id === 1) return "section-theme-free";
-        if (this.storageManager.isPremiumUser()) return "section-theme-premium";
 
-        // FIX BUG: Utiliser isThemeUnlocked au lieu de calcul fragile (theme.id * 100 + 1)
-        const isUnlocked = this.storageManager.isThemeUnlocked?.(theme.id) || false;
-        if (isUnlocked && !this.storageManager.isPremiumUser()) {
-            return "section-theme-unlocked";
-        }
+        const isPremium = !!this.storageManager.isPremiumUser?.();
+        if (isPremium) return "section-theme-premium";
+
+        const isUnlocked = !!this.storageManager.isThemeUnlocked?.(theme.id);
+        if (isUnlocked) return "section-theme-unlocked";
 
         return "section-theme-locked";
     };
+
 
     UICore.prototype.generateSimpleThemesGrid = function () {
         if (!this.themeIndexCache || this.themeIndexCache.length === 0) {
@@ -765,16 +818,24 @@
         return this.themeIndexCache
             .map(function (theme) {
                 var isLocked = self.getThemeStateClass(theme) === 'section-theme-locked';
-                var ariaLabel =
-                    self.normalizeText(theme.name) + (isLocked ? " (locked)" : "");
+                var ariaLabel = self.normalizeText(theme.name) + (isLocked ? " (locked)" : "");
+                var ariaDisabled = isLocked ? ' aria-disabled="true"' : ' aria-disabled="false"';
+                // A11Y: un élément "aria-disabled" ne doit pas être focusable au clavier
+                var tabIndexAttr = isLocked ? ' tabindex="-1"' : ' tabindex="0"';
+
                 return (
                     '\n<div class="theme-item ' +
                     self.getThemeStateClass(theme) +
                     '" data-theme-id="' +
                     theme.id +
-                    '" role="button" tabindex="0" aria-label="' +
+                    '" role="button"' +
+                    tabIndexAttr +
+                    ' aria-label="' +
                     ariaLabel +
-                    '">' +
+                    '"' + ariaDisabled +
+                    '>' +
+
+
                     '\n  <div class="text-center">' +
                     '\n    <div class="text-2xl mb-2">' +
                     (theme.icon || "") +
@@ -810,17 +871,18 @@
                     completedCount: 0,
                     total: 0
                 };
-                const color = progress.completedCount > 0 ? "green" : "blue";
+                const colorClass = progress.completedCount > 0 ? "text-green-600" : "text-blue-600";
 
                 return (
-                    '<div class="text-xs text-' +
-                    color +
-                    '-600 mt-2">Completed ' +
+                    '<div class="text-xs ' +
+                    colorClass +
+                    ' mt-2">Completed ' +
                     progress.completedCount +
                     "/" +
                     progress.total +
                     "</div>"
                 );
+
             }
 
             return '<div class="text-xs text-green-600 mt-2">Theme unlocked.</div>';
@@ -916,41 +978,72 @@
     };
 
 
-
-    /* ----------------------------------------
-       UNLOCK ROADMAP MODAL (NOUVEAU - P0+P1)
-       ---------------------------------------- */
-
-    // NOUVEAU: Affiche la modal roadmap (P0)
     UICore.prototype.showUnlockRoadmap = function () {
-        // CORRECTION: Cleanup modal existante proprement
         const existing = document.getElementById("roadmap-modal");
         if (existing) {
-            existing.dispatchEvent(new Event("tyf:close"));
-            existing.remove();
+            let ev;
+            try {
+                ev = new Event("tyf:close", { bubbles: true });
+            } catch (e) {
+                ev = document.createEvent("Event");
+                ev.initEvent("tyf:close", true, true);
+            }
+            existing.dispatchEvent(ev);
+            if (existing.parentNode) existing.parentNode.removeChild(existing);
         }
 
-        // A11Y/UX: mémoriser le focus et bloquer le scroll du fond
+
         const previousActiveElement = document.activeElement;
         const prevBodyOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         const wrapper = document.createElement("div");
         wrapper.innerHTML = this.generateUnlockRoadmapHTML();
+
         const modal = wrapper.firstElementChild;
+        if (!modal) {
+            document.body.style.overflow = prevBodyOverflow || "";
+            return;
+        }
+
         document.body.appendChild(modal);
 
         const closeBtn = modal.querySelector("#close-roadmap-btn");
+        let cleaned = false;
 
-        // Helper: focus trap minimal
         var getFocusable = function () {
             return modal.querySelectorAll(
                 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
             );
         };
 
+        var cleanup = function () {
+            if (cleaned) return;
+            cleaned = true;
+
+            document.removeEventListener("keydown", handleEscape);
+            document.removeEventListener("keydown", handleTabTrap);
+
+            document.body.style.overflow = prevBodyOverflow || "";
+
+            try {
+                if (previousActiveElement && typeof previousActiveElement.focus === "function") {
+                    previousActiveElement.focus();
+                }
+            } catch (e) { }
+        };
+
         var handleTabTrap = function (e) {
             if (e.key !== "Tab") return;
+
+            // si le focus est sorti de la modal, on le ramène dedans
+            if (!modal.contains(document.activeElement)) {
+                e.preventDefault();
+                const focusable = getFocusable();
+                if (focusable && focusable[0]) focusable[0].focus();
+                else if (closeBtn) closeBtn.focus();
+                return;
+            }
 
             const focusable = getFocusable();
             if (!focusable || focusable.length === 0) {
@@ -963,7 +1056,7 @@
             const last = focusable[focusable.length - 1];
 
             if (e.shiftKey) {
-                if (document.activeElement === first || document.activeElement === modal) {
+                if (document.activeElement === first) {
                     e.preventDefault();
                     last.focus();
                 }
@@ -975,7 +1068,6 @@
             }
         };
 
-        // ESC pour fermer (+ "Esc" vieux navigateurs)
         var handleEscape = function (e) {
             if (e.key === "Escape" || e.key === "Esc") {
                 cleanup();
@@ -983,49 +1075,36 @@
             }
         };
 
-        // CORRECTION: Cleanup centralisé (restaure scroll + focus)
-        var cleanup = function () {
-            document.removeEventListener("keydown", handleEscape);
-            document.removeEventListener("keydown", handleTabTrap);
-
-            document.body.style.overflow = prevBodyOverflow || "";
-
-            try {
-                if (previousActiveElement && typeof previousActiveElement.focus === "function") {
-                    previousActiveElement.focus();
-                }
-            } catch (e) { }
-        };
         modal.addEventListener("tyf:close", cleanup, { once: true });
 
         document.addEventListener("keydown", handleEscape);
         document.addEventListener("keydown", handleTabTrap);
 
-        // Close button
         if (closeBtn) {
-            closeBtn.addEventListener("click", function () {
+            closeBtn.addEventListener("click", function (e) {
+                if (e) e.preventDefault();
                 cleanup();
                 modal.remove();
             });
 
-            // Focus initial sur bouton close
             setTimeout(function () { closeBtn.focus(); }, 100);
         } else {
-            // Fallback focus
             setTimeout(function () {
                 const focusable = getFocusable();
                 if (focusable && focusable[0]) focusable[0].focus();
             }, 100);
         }
 
-        // Click overlay
         modal.addEventListener("click", function (e) {
             if (e.target === modal) {
+                e.preventDefault();
+                e.stopPropagation();
                 cleanup();
                 modal.remove();
             }
         });
     };
+
 
     UICore.prototype.generateUnlockRoadmapHTML = function () {
         const currentFP = this.storageManager.getFrenchPoints?.() || 0;
@@ -1260,7 +1339,7 @@
 
         return (
             quizzes
-                .map(function (quiz) {
+                .map(function (quiz, idx) {
                     const isUnlocked = typeof self.storageManager.isQuizUnlocked === "function"
                         ? self.storageManager.isQuizUnlocked(quiz.id)
                         : true;
@@ -1281,7 +1360,7 @@
                         '">' +
                         '\n  <div class="flex items-center justify-between mb-4">' +
                         '\n    <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">' +
-                        (quiz.id % 10) +
+                        (idx + 1) +
                         "</span>" +
                         (isCompleted ? '\n    <span class="text-green-600 text-sm">Done</span>' : "") +
                         (!isUnlocked ? '\n    <span class="text-gray-400 text-sm">Locked</span>' : "") +
@@ -1353,12 +1432,21 @@
         // New user button
         // QuizManager.loadQuiz() appelle déjà showQuizScreen() en interne (ligne 76)
         this.addClickHandler("start-first-quiz-btn", function () {
-            self.quizManager.currentThemeId = 1;
-            self.quizManager.loadQuiz(1, 101).catch(function (e) {
+            const themeId = 1;
+            const quizId = 101;
+
+            self.quizManager.currentThemeId = themeId;
+
+            // Track "attempt" at quiz start (not completion)
+            self.storageManager?.markQuizStarted?.({ themeId: themeId, quizId: quizId });
+
+            self.quizManager.loadQuiz(themeId, quizId).catch(function (e) {
                 console.error("Failed to load quiz:", e);
                 self.showError("Quiz could not be loaded. Check quiz JSON path and metadata.");
             });
         });
+
+
 
         // Returning user: stats button
         this.bindEvent("view-stats-btn", "showStatsScreen");
@@ -1368,22 +1456,35 @@
             self.showUnlockRoadmap();
         });
 
-        // Event delegation pour "See roadmap" dans les cartes
+        // Event delegation pour "See roadmap" (scope: appContainer, pas document)
         if (!this._roadmapListenerAttached) {
-            document.addEventListener('click', function (e) {
+            const handler = function (e) {
                 const target = e.target.closest('[data-action="show-roadmap"]');
-                if (target && typeof self.showUnlockRoadmap === 'function') {
-                    e.preventDefault();
-                    e.stopPropagation();
+                if (!target) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Toujours utiliser l'instance courante via `self`
+                if (typeof self.showUnlockRoadmap === "function") {
                     self.showUnlockRoadmap();
                 }
-            });
+            };
+
+            // Stocker la ref pour cleanup si un jour tu ajoutes destroy()
+            this._roadmapDelegatedHandler = handler;
+
+            // appContainer reste stable, contrairement au HTML interne
+            this.appContainer.addEventListener("click", handler);
+
             this._roadmapListenerAttached = true;
         }
+
 
         // Theme tiles
         this.setupThemeClickEvents();
     };
+
 
 
     UICore.prototype.setupQuizSelectionEvents = function () {
@@ -1392,20 +1493,31 @@
 
         const quizCards = document.querySelectorAll(".quiz-item[data-quiz-id]");
         quizCards.forEach(function (card) {
-            card.addEventListener("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+            card.setAttribute("role", "button");
+            card.setAttribute("tabindex", "0");
+
+            const activate = function (e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
 
                 const quizId = parseInt(card.dataset.quizId, 10);
+                if (!Number.isFinite(quizId)) {
+                    console.error("Invalid quizId on card:", card.dataset.quizId);
+                    return;
+                }
 
-                // FIX: realThemeId n'existe pas ici. On utilise le thème courant du QuizManager.
                 const themeId = self.quizManager && self.quizManager.currentThemeId;
+                if (!Number.isFinite(Number(themeId))) {
+                    console.error("Invalid themeId in QuizManager:", themeId);
+                    self.showError("Theme not found. Please go back and try again.");
+                    return;
+                }
 
-                if (
-                    typeof self.storageManager.isQuizUnlocked === "function" &&
-                    self.storageManager.isQuizUnlocked(quizId)
-                ) {
-                    // QuizManager.loadQuiz() appelle déjà showQuizScreen() en interne
+                if (typeof self.storageManager.isQuizUnlocked === "function" && self.storageManager.isQuizUnlocked(quizId)) {
+                    self.storageManager?.markQuizStarted?.({ themeId: Number(themeId), quizId: quizId });
+
                     self.quizManager.loadQuiz(themeId, quizId).catch(function (err) {
                         console.error("Failed to load quiz:", err);
                         self.showError("Quiz could not be loaded.");
@@ -1413,8 +1525,14 @@
                 } else if (self.features && self.features.showPaywallModal) {
                     self.features.showPaywallModal("unlock-quiz-" + quizId);
                 }
+            };
+
+            card.addEventListener("click", activate);
+            card.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") activate(e);
             });
         });
+
     };
 
 
@@ -1452,8 +1570,7 @@
             }
         };
 
-        addClick("quit-quiz-btn", goBackToSelection);
-        addClick("back-to-themes-btn", goBackToSelection);
+        // Quiz screen IDs: go-themes-btn / home-quiz-btn (pas quit-quiz-btn / back-to-themes-btn)
         addClick("go-themes-btn", goBackToSelection);
         addClick("home-quiz-btn", function () {
             self.showWelcomeScreen();
@@ -1472,6 +1589,7 @@
         });
     };
 
+
     UICore.prototype.setupResultsEvents = function () {
         const self = this;
 
@@ -1482,6 +1600,9 @@
                     ? self.features.getNextQuizInTheme()
                     : null;
             if (nextQuiz) {
+                // Track "attempt" at quiz start (not completion)
+                self.storageManager?.markQuizStarted?.({ themeId: nextQuiz.themeId, quizId: nextQuiz.quizId });
+
                 self.quizManager.loadQuiz(nextQuiz.themeId, nextQuiz.quizId).catch(function (e) {
                     console.error("Failed to load next quiz:", e);
                     self.showError("Unable to load next quiz.");
@@ -1489,6 +1610,7 @@
             } else {
                 self.showQuizSelection();
             }
+
         });
 
         // QuizManager.loadQuiz() appelle déjà showQuizScreen() en interne
@@ -1497,11 +1619,15 @@
                 const currentThemeId = self.quizManager.currentThemeId;
                 const currentQuizId = self.quizManager.currentQuizId;
                 if (currentThemeId && currentQuizId) {
+                    // Track "attempt" at quiz start (not completion)
+                    self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
+
                     self.quizManager.loadQuiz(currentThemeId, currentQuizId).catch(function (e) {
                         console.error("Failed to reload quiz:", e);
                         self.showError("Unable to reload quiz.");
                     });
                 }
+
             });
         });
 
@@ -1543,6 +1669,8 @@
 
         // AMÉLIORATION 1: Fonction partagée pour clic ET clavier
         var handleThemeActivate = function (tile) {
+            if (tile.getAttribute("aria-disabled") === "true") return;
+
             const id = Number(tile.dataset.themeId || "0");
 
             const theme =
@@ -1648,15 +1776,32 @@
         const prevBtn = document.getElementById("prev-question-btn");
         const nextBtn = document.getElementById("next-question-btn");
 
-        if (prevBtn) prevBtn.disabled = this.quizManager.isFirstQuestion();
+        const qm = this.quizManager;
+
+        if (prevBtn) {
+            prevBtn.disabled = (qm && typeof qm.isFirstQuestion === "function") ? !!qm.isFirstQuestion() : false;
+        }
 
         if (nextBtn) {
-            const hasAnswered = this.quizManager.hasAnsweredCurrentQuestion();
-            const isLast = this.quizManager.isLastQuestion();
-            nextBtn.disabled = !hasAnswered;
+            const idx = (qm && Number.isFinite(Number(qm.currentIndex))) ? Number(qm.currentIndex) : 0;
+
+            const statusArr = (qm && Array.isArray(qm.questionStatus)) ? qm.questionStatus : [];
+            const status = statusArr[idx];
+
+            // validé uniquement si status est "correct" ou "incorrect"
+            const isValidated = (status === "correct" || status === "incorrect");
+
+            const isLast = (qm && typeof qm.isLastQuestion === "function") ? !!qm.isLastQuestion() : false;
+
+            // si question invalide, on bloque (évite de “valider” un contenu cassé)
+            const q = (qm && typeof qm.getCurrentQuestion === "function") ? qm.getCurrentQuestion() : null;
+            const isInvalid = !!(q && q.isInvalid);
+
+            nextBtn.disabled = !isValidated || isInvalid;
             nextBtn.textContent = isLast ? "Finish quiz" : "Next";
         }
     };
+
 
 
     /* ----------------------------------------
@@ -1668,12 +1813,16 @@
             if (!reviewContainer || !this.quizManager.currentQuiz) return;
 
             const self = this;
-            const questions = this.quizManager.currentQuiz.questions;
-            const userAnswers = this.quizManager.userAnswers;
-            const questionStatus = this.quizManager.questionStatus;
+            const questions = Array.isArray(this.quizManager.currentQuiz.questions)
+                ? this.quizManager.currentQuiz.questions
+                : [];
+
+            const userAnswers = Array.isArray(this.quizManager.userAnswers) ? this.quizManager.userAnswers : [];
+            const questionStatus = Array.isArray(this.quizManager.questionStatus) ? this.quizManager.questionStatus : [];
 
             const reviewHTML = questions
                 .map(function (question, index) {
+
                     const userAnswerIndex = userAnswers[index];
                     const isCorrect = questionStatus[index] === "correct";
                     const correctIndex = question.correctIndex;
@@ -1830,8 +1979,14 @@
         const el = document.getElementById(elementId);
         if (!el) return;
 
-        el.addEventListener("click", handler);
+        el.addEventListener("click", function (e) {
+            if (e && typeof e.preventDefault === "function") e.preventDefault();
+            if (el.disabled) return;
+            handler(e);
+        });
     };
+
+
 
 
     // MODIFIÉ: bindEvent utilise addClickHandler (binding unique)

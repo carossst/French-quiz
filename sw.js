@@ -1,6 +1,6 @@
-/* sw.js - Service Worker v3.1 pour Test Your French */
+/* sw.js - Service Worker v3.2 pour Test Your French */
 
-const APP_VERSION = "3.1";   // À incrémenter à chaque gros déploiement
+const APP_VERSION = "3.2";   // À incrémenter à chaque gros déploiement
 const CACHE_PREFIX = "tyf";
 
 const CACHE_NAME = `${CACHE_PREFIX}-cache-${APP_VERSION}`;
@@ -10,16 +10,20 @@ const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./style.css",
-  "./manifest.json",       // manifest.json à la racine
-  "./main.js",             // fichiers JS à la racine
+  "./manifest.json",
+  "./config.js",
+  "./main.js",
   "./ui-core.js",
   "./ui-features.js",
   "./ui-charts.js",
   "./quizManager.js",
   "./resourceManager.js",
   "./storage.js",
-  "./metadata.json",       // metadata à la racine
-  "./icons/icon-192x192.png"
+  "./metadata.json",
+  "./icons/icon-192x192.png",
+  "./email.js",
+  "./noscript.js",
+  "./fallback.js"
 ];
 
 // Détection environnement
@@ -30,8 +34,9 @@ const isGitHubPages = hostname.includes("github.io");
 const DEBUG = isLocalhost;
 
 const log = DEBUG ? (...args) => console.log("[SW]", ...args) : () => { };
-const warn = (...args) => console.warn("[SW]", ...args);
-const error = (...args) => console.error("[SW]", ...args);
+const warn = DEBUG ? (...args) => console.warn("[SW]", ...args) : () => { };
+const error = DEBUG ? (...args) => console.error("[SW]", ...args) : () => { };
+
 
 /* ============================================================
    INSTALL
@@ -190,16 +195,17 @@ async function handleJsonRequest(request) {
   } catch (err) {
     warn(`JSON network failed: ${request.url}`, err && err.message ? err.message : err);
 
-    const cached = await caches.match(request);
-    if (cached) return cached;
+    const cachedDynamic = await caches.match(request, { cacheName: DYNAMIC_CACHE });
+    if (cachedDynamic) return cachedDynamic;
 
     const cachedMain = await caches.match(request, { cacheName: CACHE_NAME });
     if (cachedMain) return cachedMain;
 
-    // Dernière chance : retry réseau brut
+    // Dernière chance : retry réseau brut (peut encore échouer)
     return fetch(request);
   }
 }
+
 
 /* ============================================================
    STATIC REQUEST HANDLING
@@ -342,6 +348,55 @@ self.addEventListener("message", event => {
       }
       break;
 
+    // ✅ NEW: notification scheduling (best-effort)
+    case "SCHEDULE_NOTIFICATION": {
+      const title = String(event.data.title || "Test Your French");
+      const body = String(event.data.body || "");
+      const delay = Number(event.data.delay || 0);
+
+      const respond = (payload) => {
+        try { event.ports && event.ports[0] && event.ports[0].postMessage(payload); } catch { }
+      };
+
+      // Guardrails
+      if (!self.registration || typeof self.registration.showNotification !== "function") {
+        warn("showNotification not available");
+        respond({ success: false, scheduled: false, reason: "no_showNotification" });
+        break;
+      }
+
+      // KISS: only reliable for short delays
+      const MAX_RELIABLE_DELAY_MS = 5 * 60 * 1000; // 5 minutes
+      const safeDelay = Math.max(0, delay);
+
+      if (safeDelay > MAX_RELIABLE_DELAY_MS) {
+        warn("Delay too long for reliable SW timer:", safeDelay);
+        respond({ success: true, scheduled: false, reason: "delay_too_long", maxReliableMs: MAX_RELIABLE_DELAY_MS });
+        break;
+      }
+
+      // Keep the SW alive (best effort) for the short delay
+      event.waitUntil(new Promise((resolve) => {
+        setTimeout(async () => {
+          try {
+            await self.registration.showNotification(title, {
+              body,
+              tag: "tyf-daily-chest",
+              renotify: false
+            });
+            respond({ success: true, scheduled: true, delay: safeDelay });
+          } catch (e) {
+            error("Notification failed:", e);
+            respond({ success: false, scheduled: false, reason: "showNotification_failed" });
+          } finally {
+            resolve();
+          }
+        }, safeDelay);
+      }));
+
+      break;
+    }
+
     default:
       warn("Unknown message type:", event.data && event.data.type);
   }
@@ -356,7 +411,7 @@ async function cacheAudioFiles(urls) {
 
   for (const url of urls) {
     try {
-      const exists = await caches.match(url);
+      const exists = await caches.match(url, { cacheName: DYNAMIC_CACHE });
       if (exists) {
         results.push({ url, success: true, status: "Already cached" });
         continue;
@@ -375,6 +430,8 @@ async function cacheAudioFiles(urls) {
   }
   return results;
 }
+
+
 
 /* ============================================================
    CLEAR ALL CACHES
@@ -397,7 +454,9 @@ async function cleanOldDynamicCache() {
 
     for (const request of requests) {
       const response = await cache.match(request);
-      const dateHeader = response && response.headers.get("date");
+      if (!response) continue;
+
+      const dateHeader = response.headers.get("date");
       const cacheDate = dateHeader ? new Date(dateHeader).getTime() : now;
 
       if (now - cacheDate > maxAge) {
@@ -409,6 +468,7 @@ async function cleanOldDynamicCache() {
     warn("Dynamic cache cleanup failed:", err);
   }
 }
+
 
 /* ============================================================
    GLOBAL ERROR HANDLERS

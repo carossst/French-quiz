@@ -76,6 +76,43 @@ function showErrorMessage(message) {
 // Export global (utilisé partout)
 window.showErrorMessage = showErrorMessage;
 
+/**
+ * Service Worker registration (PWA)
+ * À placer ici, AVANT DOMContentLoaded
+ */
+function initServiceWorker() {
+  try {
+    if (!("serviceWorker" in navigator)) {
+      Logger.warn("Service Worker not supported");
+      return;
+    }
+
+    window.addEventListener("load", function () {
+      navigator.serviceWorker
+        .register("./sw.js", { scope: "./" })
+        .then(function (registration) {
+          Logger.log("✅ Service Worker registered:", registration.scope);
+
+          // Best effort: check updates hourly
+          setInterval(function () {
+            registration.update().catch(function () { });
+          }, 60 * 60 * 1000);
+        })
+        .catch(function (err) {
+          Logger.warn(
+            "❌ Service Worker registration failed:",
+            err && err.message ? err.message : err
+          );
+        });
+    });
+  } catch (e) {
+    Logger.warn("Service Worker init failed:", e);
+  }
+}
+
+// Exposition globale (cohérence avec le reste de main.js)
+window.initServiceWorker = initServiceWorker;
+
 
 function initializeUXTracking() {
   try {
@@ -122,27 +159,34 @@ document.addEventListener("DOMContentLoaded", function () {
     const btn = document.getElementById("premium-unlock-btn");
     const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl;
 
-    if (btn && stripeUrl) {
+    const isValidStripeUrl =
+      typeof stripeUrl === "string" &&
+      stripeUrl.startsWith("https://buy.stripe.com/");
+
+    if (btn && isValidStripeUrl) {
       btn.setAttribute("href", stripeUrl);
-      btn.setAttribute("target", "_blank");
-      btn.setAttribute("rel", "noopener noreferrer");
+      // même onglet pour cohérence app
+      btn.removeAttribute("target");
+      btn.removeAttribute("rel");
+    } else if (btn && stripeUrl && !isValidStripeUrl) {
+      Logger.warn("Invalid Stripe payment URL in TYF_CONFIG");
+      // ne pas écraser le fallback HTML
     } else if (btn && !stripeUrl) {
       Logger.warn("Stripe payment URL missing in TYF_CONFIG");
+      // ne pas écraser le fallback HTML
     }
   } catch (e) {
     Logger.warn("Stripe header binding failed", e);
   }
 
-  if (typeof initServiceWorker === "function") {
-    initServiceWorker();
-  } else if (typeof window.initServiceWorker === "function") {
-    window.initServiceWorker();
-  } else {
-    Logger.warn("initServiceWorker is not defined - continuing without service worker");
-  }
+
+  // PWA – Service Worker (appel indispensable)
+  initServiceWorker();
 
   startApplication();
 });
+
+
 
 
 function validatePrerequisites() {
@@ -202,13 +246,8 @@ async function startApplication() {
     uiCore = new window.UICore(quizManager, appContainer, resourceManager, storageManager);
     quizManager.ui = uiCore;
 
-    if (typeof setupGamificationEvents === "function") {
-      try {
-        setupGamificationEvents();
-      } catch (e) {
-        Logger.warn("Gamification events init failed", e);
-      }
-    }
+    // Gamification events are handled inside UIFeatures (single source of truth)
+
 
     if (typeof window.loadUserPreferences === "function") {
       window.loadUserPreferences(quizManager, storageManager);
@@ -219,9 +258,11 @@ async function startApplication() {
 
     Logger.debug("Managers initialized");
 
-    const [metadata] = await Promise.all([resourceManager.loadMetadata(), uiCore.start()]);
+    await uiCore.start();
 
-    Logger.log(`Metadata loaded: ${metadata.themes?.length || 0} themes`);
+    // si tu veux garder le log, récupère depuis uiCore.themeIndexCache
+    Logger.log(`Metadata loaded: ${uiCore.themeIndexCache?.length || 0} themes`);
+
     if (typeof window.initializeAnalyticsIfPremium === "function") {
       window.initializeAnalyticsIfPremium(storageManager);
     } else {
@@ -242,37 +283,12 @@ async function startApplication() {
   }
 }
 
-function setupGamificationEvents() {
-  cleanupGamificationEvents();
-
-  const events = [
-    ["badges-earned", window.handleBadgeEarned],
-    ["fp-gained", window.handleFPGained],
-    ["level-up", window.handleLevelUp],
-    ["premium-unlocked", window.handlePremiumUnlocked]
-  ].filter(([_, fn]) => typeof fn === "function");
+// (removed) Gamification event wiring lives in UIFeatures to avoid globals and duplicate listeners
 
 
-  if (!window.TYF_EVENT_HANDLERS) window.TYF_EVENT_HANDLERS = [];
+// supprimé : cleanupGamificationEvents (code mort)
+// la gestion des events gamification est dans UIFeatures
 
-  // IMPORTANT: StorageManager dispatch avec window.dispatchEvent -> écouter sur window
-  events.forEach(([eventName, fn]) => {
-    window.addEventListener(eventName, fn);
-    window.TYF_EVENT_HANDLERS.push({ eventName, handler: fn });
-  });
-
-
-  Logger.debug("Gamification events setup");
-}
-
-function cleanupGamificationEvents() {
-  if (window.TYF_EVENT_HANDLERS) {
-    window.TYF_EVENT_HANDLERS.forEach(({ eventName, handler }) => {
-      window.removeEventListener(eventName, handler);
-    });
-    window.TYF_EVENT_HANDLERS = [];
-  }
-}
 
 if (window.TYF_CONFIG?.debug?.enabled) {
   window.TYF_DEBUG = {

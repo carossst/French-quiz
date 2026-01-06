@@ -28,10 +28,11 @@
             <!-- Code Section -->
             <section class="mb-6">
                 <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-4 sm:p-6">
-                    <h2 class="text-lg sm:text-xl font-bold mb-3">⭐ Your Premium Code:</h2>
+                    <h2 class="text-lg sm:text-xl font-bold mb-3">⭐ Your Premium Code (personal reference):</h2>
 
                     <div class="bg-white bg-opacity-20 rounded-lg p-3 sm:p-4 mb-4">
-                        <code class="text-lg sm:text-xl font-mono font-bold break-all">FRENCHCHALLENGE</code>
+                        <code id="premium-code"
+                            class="text-lg sm:text-xl font-mono font-bold break-all">TYF-XXXX-XXXX</code>
                     </div>
 
                     <button id="copy-btn"
@@ -60,7 +61,11 @@
                         <li class="flex items-start">
                             <span
                                 class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 mt-0.5">3</span>
-                            <span><strong>Enter:</strong> FRENCHCHALLENGE</span>
+                            <span><strong>Enter this code:</strong> <span
+                                    id="premium-code-inline">TYF-XXXX-XXXX</span><br><span
+                                    class="text-xs opacity-90">This is a personal reference stored in this
+                                    browser.</span></span>
+
                         </li>
                     </ol>
                 </div>
@@ -105,8 +110,13 @@
             <aside class="mt-6 pt-4 border-t border-gray-200">
                 <div class="bg-purple-50 rounded-lg p-3 text-center">
                     <p class="text-xs text-purple-800 font-medium">
-                        💡 <strong>Save this code:</strong> FRENCHCHALLENGE
+                        💡 <strong>Save this code for your records:</strong> <span
+                            id="premium-code-save">TYF-XXXX-XXXX</span><br>
+                        <span class="text-[11px] text-purple-700/90">It’s stored on this device (browser storage). If
+                            you clear site data,
+                            it may change.</span>
                     </p>
+
                 </div>
             </aside>
 
@@ -121,36 +131,69 @@
     </main>
 
     <script>
-        const copyCode = () => {
-            const code = 'FRENCHCHALLENGE';
-            const primaryBtn = document.getElementById('copy-btn');
-            const secondaryBtn = document.getElementById('copy-again');
+        (function () {
+            const KEY = "tyf:vanityCode"; // personal reference stored on this browser
 
-            if (navigator.clipboard) {
+            function rand4() {
+                return Math.random()
+                    .toString(36)
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9]/g, "")
+                    .slice(0, 4)
+                    .padEnd(4, "X");
+            }
+
+            function getOrCreateCode() {
+                let code = localStorage.getItem(KEY);
+                if (!code) {
+                    code = "TYF-" + rand4() + "-" + rand4();
+                    localStorage.setItem(KEY, code);
+                }
+                return code;
+            }
+
+            function renderCode(code) {
+                ["premium-code", "premium-code-inline", "premium-code-save"].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = code;
+                });
+            }
+
+            function copyCode() {
+                const el = document.getElementById("premium-code");
+                const code = el ? el.textContent.trim() : "";
+                const primaryBtn = document.getElementById("copy-btn");
+                const secondaryBtn = document.getElementById("copy-again");
+
+                if (!code || !navigator.clipboard) return;
+
                 navigator.clipboard.writeText(code).then(() => {
-                    if (primaryBtn) primaryBtn.textContent = '✅ Copied!';
-                    if (secondaryBtn) secondaryBtn.textContent = '✅ Copied!';
+                    if (primaryBtn) primaryBtn.textContent = "✅ Copied!";
+                    if (secondaryBtn) secondaryBtn.textContent = "✅ Copied!";
 
                     setTimeout(() => {
-                        if (primaryBtn) primaryBtn.textContent = '📋 Copy Code';
-                        if (secondaryBtn) secondaryBtn.textContent = '📋 Copy code again';
+                        if (primaryBtn) primaryBtn.textContent = "📋 Copy Code";
+                        if (secondaryBtn) secondaryBtn.textContent = "📋 Copy code again";
                     }, 2000);
                 });
             }
-        };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const primaryBtn = document.getElementById('copy-btn');
-            const secondaryBtn = document.getElementById('copy-again');
+            document.addEventListener("DOMContentLoaded", () => {
+                const code = getOrCreateCode();
+                renderCode(code);
 
-            if (primaryBtn) primaryBtn.addEventListener('click', copyCode);
-            if (secondaryBtn) secondaryBtn.addEventListener('click', copyCode);
+                const primaryBtn = document.getElementById("copy-btn");
+                const secondaryBtn = document.getElementById("copy-again");
+                if (primaryBtn) primaryBtn.addEventListener("click", copyCode);
+                if (secondaryBtn) secondaryBtn.addEventListener("click", copyCode);
 
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'purchase_success', { value: 12 });
-            }
-        });
+                if (typeof gtag !== "undefined") {
+                    gtag("event", "purchase_success", { value: 12 });
+                }
+            });
+        })();
     </script>
+
 </body>
 
 </html>

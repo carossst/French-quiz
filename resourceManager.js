@@ -17,7 +17,9 @@
     };
 
     // maintenant this.config existe
-    this.cache.maxQuizzes = Number(this.config?.maxCacheSize) || this.cache.maxQuizzes;
+    const m = Number(this.config && this.config.maxCacheSize);
+    this.cache.maxQuizzes = Number.isFinite(m) ? m : this.cache.maxQuizzes;
+
 
     this.initializeMappings();
 
@@ -125,17 +127,15 @@
       const userConfig = global.resourceManagerConfig || {};
       const config = Object.assign({}, defaults, userConfig);
 
-      // Harmonisation timeoutConfig / timeouts
-      if (userConfig.timeoutConfig && !userConfig.timeouts) {
-        config.timeouts = Object.assign(
-          {},
-          defaults.timeouts,
-          userConfig.timeoutConfig
-        );
-      }
-      if (!config.timeouts) {
-        config.timeouts = defaults.timeouts;
-      }
+      // Toujours merger les timeouts avec les defaults (évite l’écrasement partiel)
+      const mergedTimeouts = Object.assign(
+        {},
+        defaults.timeouts,
+        userConfig.timeouts || {},
+        (!userConfig.timeouts && userConfig.timeoutConfig) ? userConfig.timeoutConfig : {}
+      );
+      config.timeouts = mergedTimeouts;
+
 
       // logger safe (au cas où l'ordre d'init change un jour)
       const warn = (this.logger && typeof this.logger.warn === "function")
@@ -152,10 +152,37 @@
 
       return config;
     } catch (error) {
-      console.error("Config load failed:", error.message);
+      const msg = (error && error.message) ? error.message : String(error);
+      console.error("Config load failed:", msg);
       return defaults;
     }
+
   };
+
+  ResourceManagerClass.prototype.fetchWithTimeout = function (url, timeoutMs) {
+    const ms = Number(timeoutMs) || 8000;
+
+    if (typeof AbortController === "undefined") {
+      return fetch(url);
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(function () {
+      try { controller.abort(); } catch (e) { }
+    }, ms);
+
+    try {
+      return fetch(url, { signal: controller.signal })
+        .finally(function () { clearTimeout(timer); });
+    } catch (err) {
+      clearTimeout(timer);
+      throw err;
+    }
+
+
+
+  };
+
 
 
   ResourceManagerClass.prototype.accessQuizCache = function (cacheKey) {
@@ -170,14 +197,21 @@
   };
 
   ResourceManagerClass.prototype.setQuizCache = function (cacheKey, quiz) {
-    // Si cache plein, supprimer le moins récent (premier)
-    if (this.cache.quizzes.size >= (this.cache.maxQuizzes || 50)) {
+    const max = Number(this.cache && this.cache.maxQuizzes);
+
+    if (!Number.isFinite(max) || max <= 0) return;
+
+    if (this.cache.quizzes.size >= max) {
       const oldestKey = this.cache.quizzes.keys().next().value;
-      this.cache.quizzes.delete(oldestKey);
-      this.logger.log("LRU: eviction of " + oldestKey);
+      if (typeof oldestKey !== "undefined") {
+        this.cache.quizzes.delete(oldestKey);
+        this.logger.log("LRU: eviction of " + oldestKey);
+      }
     }
+
     this.cache.quizzes.set(cacheKey, quiz);
   };
+
 
   ResourceManagerClass.prototype.getEnvironment = function () {
     if (this.isDevelopment) return "development";
@@ -204,21 +238,33 @@
   ResourceManagerClass.prototype.loadMetadata = async function () {
     const now = Date.now();
 
-    if (this.cache.metadata && this.config.cacheEnabled) {
-      if (now - this.cache.metadataTimestamp < 5 * 60 * 1000) {
+    const cfg = this.config || {};
+    const maxAge = Number.isFinite(Number(cfg.cacheMaxAge)) ? Number(cfg.cacheMaxAge) : 5 * 60 * 1000;
+
+    if (this.cache.metadata && cfg.cacheEnabled === true) {
+      if (now - this.cache.metadataTimestamp < maxAge) {
         this.logger.debug("Using cached metadata");
         return this.cache.metadata;
       }
     }
 
-    const metadataPath = this.config.baseDataPath + "metadata.json";
+
+
+    const basePath = (this.config && this.config.baseDataPath) ? this.config.baseDataPath : "./";
+    const metadataPath = basePath + "metadata.json";
+
 
     try {
-      const response = await fetch(metadataPath);
+      const metadataTimeout =
+        (this.config && this.config.timeouts && Number(this.config.timeouts.metadata)) || 8000;
+
+      const response = await this.fetchWithTimeout(metadataPath, metadataTimeout);
+
       if (!response.ok) {
         throw new Error("HTTP " + response.status + ": " + response.statusText);
       }
       const metadata = await response.json();
+
 
       if (!this.validateMetadata(metadata)) {
         throw new Error("Invalid metadata structure");
@@ -231,7 +277,12 @@
       this.logger.log("Metadata loaded: " + themeCount + " themes");
       return metadata;
     } catch (error) {
-      this.logger.error("Metadata load failed:", error.message);
+      const msg = (error && error.name === "AbortError")
+        ? "Timeout while loading metadata"
+        : (error && error.message) ? error.message : String(error);
+
+      this.logger.error("Metadata load failed:", msg);
+
 
       // Fallback: utiliser cache même expiré
       if (this.cache.metadata) {
@@ -270,63 +321,72 @@
   ResourceManagerClass.prototype.getQuiz = async function (themeId, quizId) {
     const cacheKey = "quiz_" + themeId + "_" + quizId;
 
-    if (this.config.cacheEnabled) {
+    const cfg = this.config || {};
+    if (cfg.cacheEnabled === true) {
       const cachedQuiz = this.accessQuizCache(cacheKey);
-      if (cachedQuiz) {
-        return cachedQuiz;
-      }
+      if (cachedQuiz && typeof cachedQuiz === "object") return cachedQuiz;
     }
+
+    if (!this.themeKeys) this.initializeMappings();
 
     const themeKey = this.themeKeys[themeId];
-    if (!themeKey) {
-      throw new Error("Invalid theme " + themeId);
+    if (!themeKey) throw new Error("Invalid theme " + themeId);
+
+    const quizNumber = this.getQuizNumber(quizId);
+    if (!quizNumber) {
+      throw new Error("Invalid quiz id " + quizId + " (cannot derive quiz number)");
     }
 
-    // IMPORTANT : les fichiers sont à la racine :
-    //   ./colors_quiz_1.json
-    //   ./numbers_quiz_2.json
-    const filename = themeKey + "_quiz_" + quizId + ".json";
-    const quizPath = this.config.baseDataPath + filename;
+    const filenamePrimary = themeKey + "_quiz_" + quizId + ".json";     // Ex: colors_quiz_101.json
+    const filenameFallback = themeKey + "_quiz_" + quizNumber + ".json"; // Ex: colors_quiz_1.json (fallback legacy)
+    const basePath = (this.config && this.config.baseDataPath) ? this.config.baseDataPath : "./";
+    const quizPathPrimary = basePath + filenamePrimary;
+    const quizPathFallback = basePath + filenameFallback;
+
 
     try {
-      const response = await fetch(quizPath);
+      const quizTimeout =
+        (this.config && this.config.timeouts && Number(this.config.timeouts.quiz)) || 6000;
+
+      let response = await this.fetchWithTimeout(quizPathPrimary, quizTimeout);
+      if (!response.ok) response = await this.fetchWithTimeout(quizPathFallback, quizTimeout);
+
       if (!response.ok) {
-        throw new Error(
-          "Quiz " + quizId + " not found (HTTP " + response.status + ")"
-        );
+        throw new Error("Quiz " + quizId + " not found (HTTP " + response.status + ")");
       }
 
       const quizData = await response.json();
+
       await this.enrichQuizData(quizData, themeId, quizId);
 
-      if (!this.validateQuiz(quizData)) {
-        throw new Error("Invalid quiz structure");
-      }
+      if (!this.validateQuiz(quizData)) throw new Error("Invalid quiz structure");
 
       this.enrichQuizWithAudio(quizData, themeId, quizId);
       this.setQuizCache(cacheKey, quizData);
-
       return quizData;
     } catch (error) {
+      const msg = (error && error.name === "AbortError")
+        ? "Timeout while loading quiz"
+        : (error && error.message) ? error.message : String(error);
+
       this.logger.error(
-        "Quiz load failed (theme " +
-        themeId +
-        ", quiz " +
-        quizId +
-        "):",
-        error.message
+        "Quiz load failed (theme " + themeId + ", quiz " + quizId + "):",
+        msg
       );
 
-      // Fallback: chercher dans le cache
+
       const cachedQuiz = this.accessQuizCache(cacheKey);
       if (cachedQuiz) {
         this.logger.warn("Using cached quiz as fallback");
         return cachedQuiz;
       }
 
-      throw new Error("Unable to load quiz " + quizId + ": " + error.message);
+      throw new Error("Unable to load quiz " + quizId + ": " + msg);
+
     }
   };
+
+
 
   ResourceManagerClass.prototype.enrichQuizData = async function (
     quizData,
@@ -341,19 +401,29 @@
 
     if (typeof quizData.name === "undefined") {
       const metadata = await this.loadMetadata();
-      const theme =
-        metadata.themes &&
-        metadata.themes.find(function (t) {
-          return t.id === themeId;
-        });
+      const themes = metadata && Array.isArray(metadata.themes) ? metadata.themes : [];
+      const theme = themes.find(function (t) {
+        return Number(t && t.id) === Number(themeId);
+      });
+
+
+      const quizNumber = this.getQuizNumber(quizId);
+
+      const quizIdNum = Number(quizId);
+
+      const quizzes = (theme && Array.isArray(theme.quizzes)) ? theme.quizzes : [];
+
       const quizMeta =
-        theme &&
-        theme.quizzes &&
-        theme.quizzes.find(function (q) {
-          return q.id === quizId;
-        });
+        quizzes.find(function (q) { return Number(q && q.id) === quizIdNum; }) ||
+        (quizNumber
+          ? quizzes.find(function (q) { return Number(q && q.id) === Number(quizNumber); })
+          : null);
+
+
+
       quizData.name = (quizMeta && quizMeta.name) || "Quiz " + quizId;
     }
+
   };
 
   ResourceManagerClass.prototype.validateQuiz = function (quizData) {
@@ -366,7 +436,15 @@
       const hasCorrect =
         typeof q.correctAnswer === "string" ||
         typeof q.correctIndex === "number";
-      return hasText && hasOptions && hasCorrect;
+
+      if (!(hasText && hasOptions && hasCorrect)) return false;
+
+      if (typeof q.correctIndex === "number") {
+        if (!(q.correctIndex >= 0 && q.correctIndex < q.options.length)) return false;
+      }
+
+      return true;
+
 
     });
   };
@@ -381,13 +459,14 @@
     const quizNumber = this.getQuizNumber(quizId);
     const themeName = this.audioThemeNames[themeId];
     const audioType = this.audioQuizTypes[quizNumber];
+    if (!themeName || !audioType) return;
 
-    if (!audioType || !themeName) return;
 
     quizData.questions.forEach(function (q, index) {
       q.audio =
         "TYF_" + themeName + "_" + quizNumber + "_" + (index + 1) + ".mp3";
     });
+
   };
 
   ResourceManagerClass.prototype.getQuizNumber = function (quizId) {
@@ -407,6 +486,49 @@
     return "./audio/" + folder + "/" + audioFilename;
   };
 
+  // Theme helper (sync). Uses cached metadata set by loadMetadata().
+  ResourceManagerClass.prototype.getThemeById = function (themeId) {
+    if (themeId === null || typeof themeId === "undefined") return null;
+
+    const idNum = Number(themeId);
+    if (!Number.isFinite(idNum)) return null;
+
+    const metadata = this.cache && this.cache.metadata;
+    if (metadata && Array.isArray(metadata.themes)) {
+      for (var i = 0; i < metadata.themes.length; i++) {
+        var t = metadata.themes[i];
+        if (t && Number(t.id) === idNum) return t;
+      }
+    }
+
+    return {
+      id: idNum,
+      name: this.audioThemeNames[idNum] || "Theme " + idNum,
+      icon: "*",
+      quizzes: []
+    };
+  };
+
+
+
+  // Optional async variant for future use (renamed for clarity)
+  ResourceManagerClass.prototype.getThemeByIdAsync = async function (themeId) {
+    if (themeId === null || typeof themeId === "undefined") return null;
+
+    const metadata = await this.loadMetadata();
+    if (!metadata || !Array.isArray(metadata.themes)) return null;
+
+    const idNum = Number(themeId);
+    for (var i = 0; i < metadata.themes.length; i++) {
+      var t = metadata.themes[i];
+      if (!t) continue;
+      if (Number(t.id) === idNum) return t;
+    }
+    return null;
+  };
+
+
   // Export global
   global.ResourceManager = ResourceManagerClass;
 })(window);
+
