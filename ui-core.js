@@ -60,54 +60,35 @@
             throw error;
         }
     };
+
     UICore.prototype.initializeDependencies = function () {
-        const FeaturesCtor = window.UIFeatures;
-
-        // Sécurité : si UIFeatures n'est pas dispo, on ne bloque pas l'app
-        if (typeof FeaturesCtor === "function") {
-            this.features = new FeaturesCtor(this, this.storageManager, this.resourceManager);
-
-            this.features.initializeXPSystem?.();
-            this.features.updateXPHeader?.();
-            this.features.addChestIconToHeader?.();
-
-            if (this.features.setupGlobalEventListeners) {
-                this.features.setupGlobalEventListeners();
-            }
-        } else {
-            console.warn("UIFeatures not available – XP header disabled.");
-            // Stub minimal pour éviter les erreurs plus loin dans le code
-            this.features = {
-                initializeXPSystem() { },
-                updateXPHeader() { },
-                addChestIconToHeader() { },
-                setupGlobalEventListeners() { },
-                showQuestionFeedback() { },
-                handleResultsFP() { },
-                getCompletionMessage() {
-                    return "Quiz completed – French Points earned.";
-                },
-                getNextQuizInTheme() {
-                    return null;
-                },
-                handleThemeClick: null
-            };
+        // UIFeatures (UI-only layer)
+        if (typeof window.UIFeatures === "function" && !this.features) {
+            this.features = new window.UIFeatures(this, this.storageManager, this.resourceManager);
         }
 
-        // Charts module (stats)
-        // CORRIGÉ: window.UICharts au lieu de UICharts (bug scope)
-        this.charts =
-            typeof window.UICharts !== "undefined"
-                ? new window.UICharts(this, this.storageManager, this.resourceManager)
-                : {
-                    generateFullStatsPage: function () {
-                        return "<div class='p-4'>Statistics are temporarily unavailable.</div>";
-                    },
-                    loadDetailedStats: function () {
-                        return Promise.resolve();
-                    }
-                };
+        // UICharts (stats screen)
+        if (typeof window.UICharts === "function" && !this.charts) {
+            this.charts = new window.UICharts(this, this.storageManager, this.resourceManager);
+        }
     };
+
+    UICore.prototype.generateWelcomeHTML = function () {
+        var uiState = { completedQuizzes: 0 };
+
+        try {
+            uiState = this.storageManager.getUIState() || uiState;
+        } catch (e) {
+            console.error("UICore: getUIState failed, fallback to new user welcome", e);
+        }
+
+        var isNewUser = Number(uiState.completedQuizzes) === 0;
+
+        return isNewUser
+            ? this.generateNewUserWelcome()
+            : this.generateReturningUserWelcome(uiState);
+    };
+
 
 
     UICore.prototype.loadThemeIndex = async function () {
@@ -178,13 +159,8 @@
         this.showScreen("welcome", this.generateWelcomeHTML);
     };
 
-    UICore.prototype.generateWelcomeHTML = function () {
-        const uiState = this.storageManager.getUIState();
-        const isNewUser = uiState.completedQuizzes === 0;
-        return isNewUser
-            ? this.generateNewUserWelcome()
-            : this.generateReturningUserWelcome(uiState);
-    };
+
+
 
     // New visitor: clear hero focused on Colors
     UICore.prototype.generateNewUserWelcome = function () {
@@ -397,11 +373,11 @@
             "\n      </div>" +
             "\n    </div>" +
             '\n    <div class="flex flex-col md:flex-row gap-3 justify-center mt-8">' +
-            '\n      <button id="quit-quiz-btn" type="button" class="quiz-button">' +
-            "Back to theme" +
+            '\n      <button id="back-to-theme-btn" type="button" class="quiz-button">' +
+            this.getBackToThemeLabel() +
             "</button>" +
-            '\n      <button id="back-to-themes-btn" type="button" class="quiz-button">' +
-            "Back to themes" +
+            '\n      <button id="back-to-home-btn" type="button" class="quiz-button">' +
+            "Home" +
             "</button>" +
             "\n    </div>" +
             "\n  </div>" +
@@ -440,7 +416,9 @@
             "</span>" +
             "</div>" +
             '\n    <div class="flex items-center gap-2">' +
-            '<button id="go-themes-btn" type="button" class="quiz-button">Back to theme</button>' +
+            '<button id="go-themes-btn" type="button" class="quiz-button">' +
+            this.getBackToThemeLabel() +
+            '</button>' +
             '<button id="home-quiz-btn" type="button" class="quiz-button">Home</button>' +
             "</div>" +
             "\n  </div>" +
@@ -768,8 +746,10 @@
                 this.quizManager._lastValidatedAnswerIndex = null;
             }
 
-            // Auto-validation immédiate
-            this.quizManager.validateCurrentAnswer();
+            // Auto-validation immédiate (robuste)
+            if (this.quizManager && typeof this.quizManager.validateCurrentAnswer === "function") {
+                this.quizManager.validateCurrentAnswer();
+            }
             this.updateNavigationButtons();
 
             // Focus sur Next uniquement si réellement débloqué
@@ -1305,8 +1285,8 @@
             '\n<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" role="main" aria-label="Quiz selection">' +
             '\n  <div class="max-w-4xl mx-auto px-4 pt-6 pb-10">' +
             '\n    <div class="flex gap-4 mb-6">' +
-            '\n      <button id="back-to-themes-btn" class="text-blue-600 hover:text-blue-800 font-medium py-2 px-6 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">' +
-            "Back to all themes" +
+            '\n      <button id="back-to-home-btn" class="text-blue-600 hover:text-blue-800 font-medium py-2 px-6 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">' +
+            "Home" +
             "</button>" +
             "\n    </div>" +
             '\n    <div class="text-center mb-8">' +
@@ -1489,7 +1469,8 @@
 
     UICore.prototype.setupQuizSelectionEvents = function () {
         const self = this;
-        this.bindEvent("back-to-themes-btn", "showWelcomeScreen");
+        this.bindEvent("back-to-home-btn", "showWelcomeScreen");
+
 
         const quizCards = document.querySelectorAll(".quiz-item[data-quiz-id]");
         quizCards.forEach(function (card) {
@@ -1631,12 +1612,14 @@
             });
         });
 
-        this.addClickHandler("quit-quiz-btn", function () {
+        this.addClickHandler("back-to-theme-btn", function () {
             self.showQuizSelection();
         });
-        this.addClickHandler("back-to-themes-btn", function () {
+
+        this.addClickHandler("back-to-home-btn", function () {
             self.showWelcomeScreen();
         });
+
 
         this.addClickHandler("toggle-details-btn", function () {
             const detailsDiv = document.getElementById("detailed-stats");
@@ -1773,35 +1756,47 @@
     };
 
     UICore.prototype.updateNavigationButtons = function () {
-        const prevBtn = document.getElementById("prev-question-btn");
-        const nextBtn = document.getElementById("next-question-btn");
-
-        const qm = this.quizManager;
+        var prevBtn = document.getElementById("prev-question-btn");
+        var nextBtn = document.getElementById("next-question-btn");
+        var qm = this.quizManager;
 
         if (prevBtn) {
-            prevBtn.disabled = (qm && typeof qm.isFirstQuestion === "function") ? !!qm.isFirstQuestion() : false;
+            var prevDisabled =
+                qm && typeof qm.isFirstQuestion === "function"
+                    ? !!qm.isFirstQuestion()
+                    : false;
+            prevBtn.disabled = prevDisabled;
+            prevBtn.setAttribute("aria-disabled", prevDisabled ? "true" : "false");
         }
 
         if (nextBtn) {
-            const idx = (qm && Number.isFinite(Number(qm.currentIndex))) ? Number(qm.currentIndex) : 0;
+            var idx = Number.isFinite(Number(qm && qm.currentIndex))
+                ? Number(qm.currentIndex)
+                : 0;
 
-            const statusArr = (qm && Array.isArray(qm.questionStatus)) ? qm.questionStatus : [];
-            const status = statusArr[idx];
+            var statusArr = Array.isArray(qm && qm.questionStatus)
+                ? qm.questionStatus
+                : [];
+            var status = statusArr[idx];
 
-            // validé uniquement si status est "correct" ou "incorrect"
-            const isValidated = (status === "correct" || status === "incorrect");
+            var isValidated = status === "correct" || status === "incorrect";
+            var isLast =
+                qm && typeof qm.isLastQuestion === "function"
+                    ? !!qm.isLastQuestion()
+                    : false;
 
-            const isLast = (qm && typeof qm.isLastQuestion === "function") ? !!qm.isLastQuestion() : false;
+            var q =
+                qm && typeof qm.getCurrentQuestion === "function"
+                    ? qm.getCurrentQuestion()
+                    : null;
+            var isInvalid = !!(q && q.isInvalid);
 
-            // si question invalide, on bloque (évite de “valider” un contenu cassé)
-            const q = (qm && typeof qm.getCurrentQuestion === "function") ? qm.getCurrentQuestion() : null;
-            const isInvalid = !!(q && q.isInvalid);
-
-            nextBtn.disabled = !isValidated || isInvalid;
+            var nextDisabled = !isValidated || isInvalid;
+            nextBtn.disabled = nextDisabled;
+            nextBtn.setAttribute("aria-disabled", nextDisabled ? "true" : "false");
             nextBtn.textContent = isLast ? "Finish quiz" : "Next";
         }
     };
-
 
 
     /* ----------------------------------------
@@ -1893,6 +1888,25 @@
     /* ----------------------------------------
        TEXT HELPERS (PROGRESS / CEFR STYLE)
        ---------------------------------------- */
+
+    UICore.prototype.getCurrentThemeName = function () {
+        const id = Number(this.quizManager?.currentThemeId);
+        if (!Number.isFinite(id)) return null;
+
+        const theme =
+            (this.resourceManager &&
+                typeof this.resourceManager.getThemeById === "function" &&
+                this.resourceManager.getThemeById(id)) ||
+            (this.themeIndexCache || []).find(t => Number(t.id) === id);
+
+        return theme ? this.normalizeText(theme.name) : null;
+    };
+
+    UICore.prototype.getBackToThemeLabel = function () {
+        const name = this.getCurrentThemeName();
+        return name ? "Back to " + name : "Back";
+    };
+
     UICore.prototype.getProgressText = function (uiState) {
         if (uiState.completedQuizzes < 1) {
             return "Start with a first quiz to see where you stand.";
@@ -1968,11 +1982,12 @@
             '\n    <p class="text-gray-700 mb-4">' +
             (message || "An error occurred.") +
             "</p>" +
-            '\n    <button id="back-to-themes-btn" class="quiz-button">Back to home</button>' +
+            '\n    <button id="back-to-home-btn" class="quiz-button">Home</button>' +
             "\n  </div>" +
             "\n</div>"
         );
     };
+
 
     // CLICK HANDLER: simple et fiable (les écrans sont re-rendus, donc pas de doublons sur les mêmes nodes)
     UICore.prototype.addClickHandler = function (elementId, handler) {
