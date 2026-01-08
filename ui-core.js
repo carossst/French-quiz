@@ -218,7 +218,6 @@
             "\n</section>\n"
         );
     };
-
     // Returning visitor: direct access to themes + stats
     UICore.prototype.generateReturningUserWelcome = function (uiState) {
         const progressText = this.getProgressText(uiState);
@@ -233,29 +232,30 @@
             "</p>" +
             "\n    </div>" +
 
-            // NOUVEAU: Bouton roadmap (P0)
-            '\n    <div class="text-center mb-4">' +
-            '\n      <button id="show-roadmap-btn" type="button" class="text-sm text-blue-700 hover:text-blue-900 font-semibold px-5 py-3 rounded-lg border-2 border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100 transition-all inline-flex items-center gap-2 shadow-sm">' +
-            '\n        <span class="text-lg">🗺️</span>' +
-            '\n        <span>Why are some themes locked? See how unlocking works</span>' +
-            '\n      </button>' +
-            '\n    </div>' +
-
             '\n    <section id="themes-section" aria-label="Available themes" class="lg:flex-1">' +
             '\n      <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-2 text-center">Choose your next theme</h2>' +
             '\n      <div id="themes-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-2">' +
             this.generateSimpleThemesGrid() +
             "\n      </div>" +
             "\n    </section>" +
+
             '\n    <div class="text-center mt-4 lg:mt-2 shrink-0">' +
             '\n      <button id="view-stats-btn" type="button" class="text-gray-600 hover:text-gray-900 underline text-sm">' +
             "\n        View your statistics and history" +
             "\n      </button>" +
             "\n    </div>" +
+
+            '\n    <div class="text-center mt-3 shrink-0">' +
+            '\n      <button id="show-roadmap-btn" type="button" class="text-xs text-gray-500 hover:text-gray-800 underline">' +
+            '\n        Why are some themes locked?' +
+            '\n      </button>' +
+            '\n    </div>' +
+
             "\n  </div>" +
             "\n</div>\n"
         );
     };
+
 
     /* ----------------------------------------
        RESULTS SCREEN
