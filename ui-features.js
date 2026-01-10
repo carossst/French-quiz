@@ -386,16 +386,15 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
     toast.setAttribute("role", "status");
     toast.setAttribute("aria-live", "polite");
 
-    const isMobile = window.innerWidth < 640;
+
 
     // Toast enfant (si container), sinon toast positionné
-    toast.className = container
-        ? (isMobile
-            ? "bg-green-600 text-white px-3 py-2 rounded-lg text-sm shadow-md"
-            : "bg-green-600 text-white px-4 py-2 rounded-lg shadow-md")
-        : (isMobile
-            ? "fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-2 rounded-lg text-sm z-50"
-            : "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg z-50");
+    toast.className = (container ? "" : "fixed top-4 right-4 z-50 ") + "tyf-toast tyf-message";
+    toast.style.background = "rgb(22 163 74)";
+    toast.style.color = "#fff";
+    toast.style.padding = window.innerWidth < 640 ? "0.5rem 0.75rem" : "0.5rem 1rem";
+    toast.style.borderRadius = "0.75rem";
+    toast.style.boxShadow = "var(--shadow-2)";
 
     const amount = Number(points) || 0;
     const label = amount === 1 ? "French Point" : "French Points";
@@ -1373,16 +1372,19 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     });
 
     skipBtn.addEventListener('click', () => {
-        this.storageManager.markProfileModalRefused();
+        try { this.storageManager?.markProfileModalRefused?.(); } catch { }
         this.closeUserProfileModal(modal);
+
     });
 
     const escapeHandler = (e) => {
         if (e.key !== 'Escape') return;
-        this.storageManager.markProfileModalRefused();
+        try { this.storageManager?.markProfileModalRefused?.(); } catch { }
         this.closeUserProfileModal(modal);
         document.removeEventListener('keydown', escapeHandler);
     };
+
+
 
     document.addEventListener('keydown', escapeHandler);
 
@@ -1554,10 +1556,37 @@ UIFeatures.prototype.getChestInfo = function () {
 
 UIFeatures.prototype.setupChestTooltip = function () {
     const trigger = document.getElementById("daily-chest-wrapper");
-    const tip = document.getElementById("daily-chest-tooltip");
-    const tipText = document.getElementById("daily-chest-tooltip-text");
+    if (!trigger) return;
 
-    if (!trigger || !tip || !tipText) return;
+    // ✅ Auto-create tooltip nodes if missing (fix: tooltip never shows / click does nothing when locked)
+    let tip = document.getElementById("daily-chest-tooltip");
+    let tipText = document.getElementById("daily-chest-tooltip-text");
+
+    if (!tip || !tipText) {
+        // Remove any partial remnants
+        try { tip?.remove?.(); } catch { }
+
+        tip = document.createElement("div");
+        tip.id = "daily-chest-tooltip";
+        tip.className = "hidden tyf-tooltip-panel";
+        tip.setAttribute("role", "tooltip");
+        tip.setAttribute("aria-hidden", "true");
+
+        // important: tooltip ancré au viewport (sinon coords fausses au scroll)
+        tip.style.position = "fixed";
+
+        tipText = document.createElement("div");
+        tipText.id = "daily-chest-tooltip-text";
+        tipText.className = "tyf-message"; // ton design system gère déjà pre-line
+
+        tip.appendChild(tipText);
+        document.body.appendChild(tip);
+
+    }
+
+    // ✅ Make trigger focusable / button-like (helps keyboard + consistent tooltip behavior)
+    if (!trigger.hasAttribute("tabindex")) trigger.setAttribute("tabindex", "0");
+    if (!trigger.hasAttribute("role")) trigger.setAttribute("role", "button");
 
     if (!this._chestTooltipHandlers) this._chestTooltipHandlers = {};
     const h = this._chestTooltipHandlers;
@@ -1582,10 +1611,9 @@ UIFeatures.prototype.setupChestTooltip = function () {
         h.node = null;
     }
 
-    // Si déjà bind, mais tip/tipText a changé (rerender), on doit rebind
+    // Rebind if rerender changed tooltip nodes
     if (trigger.dataset.chestTooltipBound === "1") {
         if (h.tip !== tip || h.tipText !== tipText) {
-            // force cleanup minimal puis rebind
             try {
                 trigger.removeEventListener("pointerenter", h.onPointerEnter);
                 trigger.removeEventListener("pointerleave", h.onPointerLeave);
@@ -1621,17 +1649,31 @@ UIFeatures.prototype.setupChestTooltip = function () {
         }
     };
 
-    // APRÈS (setupChestTooltip → buildText, calendar-based wording + uses etaText)
     const buildText = () => {
         const info = this.getChestInfo();
         const label = info.points === 1 ? "French Point" : "French Points";
-        const etaLine = info.available ? "Available now." : (info.etaText ? `Available in ${info.etaText}.` : "Available tomorrow.");
+        const etaLine = info.available
+            ? "Available now."
+            : (info.etaText ? `Available in ${info.etaText}.` : "Available tomorrow.");
         return `🎁 One chest per calendar day.\nReward: +${info.points} ${label}.\nNo accumulation.\n${etaLine}`;
     };
 
+    // ✅ Position tooltip near the trigger (fixed tooltip)
+    const position = () => {
+        try {
+            const r = trigger.getBoundingClientRect();
+            const top = Math.round(r.bottom + 8);
+            const centerX = r.left + (r.width / 2);
+            const left = Math.round(Math.min(window.innerWidth - 16, Math.max(16, centerX)));
+            tip.style.top = `${top}px`;
+            tip.style.left = `${left}px`;
+
+        } catch { }
+    };
 
     const open = () => {
         tipText.textContent = buildText();
+        position();
         tip.classList.remove("hidden");
         tip.setAttribute("aria-hidden", "false");
         trigger.setAttribute("aria-expanded", "true");
@@ -1645,7 +1687,6 @@ UIFeatures.prototype.setupChestTooltip = function () {
 
     const toggle = () => (tip.classList.contains("hidden") ? open() : close());
 
-    // Expose helpers KISS pour addChestIconToHeader()
     this._openChestTooltip = () => open();
     this._closeChestTooltip = () => close();
     this._toggleChestTooltip = () => toggle();
@@ -1662,19 +1703,40 @@ UIFeatures.prototype.setupChestTooltip = function () {
     };
 
     h.onDocKeydown = (e) => { if (e.key === "Escape") close(); };
-    h.onResize = () => close();
-    h.onScroll = () => close();
+    h.onResize = () => { close(); };
+    h.onScroll = () => { close(); };
 
     trigger.addEventListener("pointerenter", h.onPointerEnter);
     trigger.addEventListener("pointerleave", h.onPointerLeave);
     trigger.addEventListener("focus", h.onFocus);
     trigger.addEventListener("blur", h.onBlur);
 
+    h.onKeydown = (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+
+        const availableNow =
+            (typeof this.storageManager?.isDailyRewardAvailable === "function")
+                ? !!this.storageManager.isDailyRewardAvailable()
+                : !!this.getChestInfo?.().available;
+
+        if (availableNow && typeof this.collectDailyReward === "function") {
+            try { this._closeChestTooltip?.(); } catch { }
+            this.collectDailyReward();
+            try { this.updateXPHeader?.(); } catch { }
+            return;
+        }
+
+        this._toggleChestTooltip?.();
+    };
+
+    trigger.addEventListener("keydown", h.onKeydown);
+
+
     document.addEventListener("click", h.onDocClick);
     document.addEventListener("keydown", h.onDocKeydown);
     window.addEventListener("resize", h.onResize);
 
-    // ✅ passive scroll + options stockées pour removeEventListener fiable
     h._scrollOptions = { passive: true };
     window.addEventListener("scroll", h.onScroll, h._scrollOptions);
 
@@ -1754,6 +1816,7 @@ UIFeatures.prototype.destroy = function () {
             try { node.removeEventListener("pointerleave", th.onPointerLeave); } catch { }
             try { node.removeEventListener("focus", th.onFocus); } catch { }
             try { node.removeEventListener("blur", th.onBlur); } catch { }
+            try { node.removeEventListener("keydown", th.onKeydown); } catch { } // ✅ AJOUT
 
             try { delete node.dataset.chestTooltipBound; } catch { }
             try { node.removeAttribute("aria-controls"); } catch { }

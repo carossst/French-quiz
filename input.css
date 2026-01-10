@@ -114,7 +114,7 @@
     .tyf-stats-hero {
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 20px;
+        border-radius: var(--radius-card);
         padding: 1rem 1.1rem;
 
         /* 2025: ombre plus “calme” */
@@ -216,7 +216,7 @@
     .tyf-stats-card {
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 18px;
+        border-radius: var(--radius-card);
         padding: 0.95rem 1rem;
 
         /* 2025: cartes quasi “flat”, avec séparation nette */
@@ -692,6 +692,10 @@
         text-align: center;
 
         cursor: pointer;
+
+        /* DUOLINGO PRESS DEPTH */
+        box-shadow: 0 2px 0 rgba(15, 23, 42, 0.10);
+
         transition:
             transform 140ms ease,
             border-color 140ms ease,
@@ -699,14 +703,17 @@
             box-shadow 140ms ease;
     }
 
-    /* Hover léger + lift doux */
+    /* Hover unique (ne pas dupliquer) */
     .theme-item:hover {
         transform: translateY(-1px);
         border-color: rgb(203 213 225);
         background: rgb(248 250 252);
+        box-shadow: 0 3px 0 rgba(15, 23, 42, 0.12);
+    }
 
-        /* 2025: moins de lift, ombre plus courte */
-        box-shadow: var(--shadow-1);
+    .theme-item:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.10);
     }
 
     /* Focus propre (pas de gros jump -6px) */
@@ -857,12 +864,16 @@
         position: relative;
         background: #ffffff;
         border: 2px solid rgb(226 232 240);
-        border-radius: 14px;
+        border-radius: var(--radius-button);
         padding: 0.9rem 1rem;
         margin-bottom: 0.6rem;
         cursor: pointer;
 
         font-weight: 650;
+
+        /* DUOLINGO PRESS DEPTH */
+        box-shadow: 0 2px 0 rgba(15, 23, 42, 0.10);
+
         transition:
             background-color 120ms ease,
             border-color 120ms ease,
@@ -873,10 +884,12 @@
     .option:hover {
         background: rgb(248 250 252);
         border-color: rgb(203 213 225);
+        box-shadow: 0 3px 0 rgba(15, 23, 42, 0.12);
     }
 
     .option:active {
-        transform: translateY(1px);
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.10);
     }
 
     .option:focus-visible {
@@ -885,12 +898,20 @@
         border-color: rgb(var(--color-primary));
     }
 
-    /* Sélection (avant validation) */
+    /* APRÈS */
+    /* Sélection = état global cohérent (bord + indicator ring) */
     .option.selected {
-        background: rgba(59, 130, 246, 0.12) !important;
-        border-color: rgb(59, 130, 246) !important;
-        color: rgb(30, 58, 138) !important;
+        background: rgb(var(--color-primary) / 0.12) !important;
+        border-color: rgb(var(--color-primary)) !important;
+        color: rgb(15 23 42) !important;
         font-weight: 800 !important;
+
+        /* keep physical feel when selected */
+        box-shadow: 0 3px 0 rgba(15, 23, 42, 0.10);
+    }
+
+    .option.selected .option-indicator {
+        border-color: rgb(var(--color-primary));
     }
 
     /* Correct / incorrect (validé) : moins agressif que 0.30 */
@@ -899,6 +920,8 @@
         border-color: rgb(22, 163, 74) !important;
         color: rgb(22, 101, 52) !important;
         font-weight: 900 !important;
+
+        box-shadow: 0 3px 0 rgba(15, 23, 42, 0.10);
     }
 
     .option.incorrect-validated {
@@ -906,15 +929,31 @@
         border-color: rgb(239, 68, 68) !important;
         color: rgb(153, 27, 27) !important;
         font-weight: 850 !important;
+
+        box-shadow: 0 3px 0 rgba(15, 23, 42, 0.10);
     }
 
-    /* 1) Groupe primary SANS #premium-unlock-btn */
+    /* =========================
+       BUTTONS (KISS + no conflict)
+       ========================= */
+
+    /* Primary CTA buttons only (NO header nav pills here) */
     .tyf-btn-primary,
-    :where(.quiz-button, #start-first-quiz-btn, #retry-quiz-primary-btn, #next-quiz-btn,
-        #back-to-themes-btn, #premium-code-btn, #premium-buy-btn, #paywall-buy-btn,
-        #paywall-code-btn, #buy-premium-btn,
-        #validate-code-btn, #save-profile-btn, #quit-quiz-btn, #home-quiz-btn,
-        #prev-question-btn, #next-question-btn, #reload-btn) {
+    :where(.quiz-button,
+        #start-first-quiz-btn,
+        #retry-quiz-primary-btn,
+        #next-quiz-btn,
+        #back-to-themes-btn,
+        #premium-code-btn,
+        #premium-buy-btn,
+        #paywall-buy-btn,
+        #paywall-code-btn,
+        #buy-premium-btn,
+        #validate-code-btn,
+        #save-profile-btn,
+        #quit-quiz-btn,
+        #next-question-btn,
+        #reload-btn) {
         background: rgb(var(--color-primary));
         color: #ffffff;
         font-weight: 800;
@@ -926,37 +965,128 @@
         transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease, filter 120ms ease;
     }
 
-    /* Hover: léger, pas de glow */
     .tyf-btn-primary:hover:not(:disabled),
-    :where(.quiz-button, #start-first-quiz-btn, #retry-quiz-primary-btn, #next-quiz-btn,
-        #back-to-themes-btn, #premium-code-btn, #premium-buy-btn, #paywall-buy-btn,
-        #paywall-code-btn, #buy-premium-btn,
-        #validate-code-btn, #save-profile-btn, #quit-quiz-btn, #home-quiz-btn,
-        #prev-question-btn, #next-question-btn, #reload-btn):hover:not(:disabled) {
+    :where(.quiz-button,
+        #start-first-quiz-btn,
+        #retry-quiz-primary-btn,
+        #next-quiz-btn,
+        #back-to-themes-btn,
+        #premium-code-btn,
+        #premium-buy-btn,
+        #paywall-buy-btn,
+        #paywall-code-btn,
+        #buy-premium-btn,
+        #validate-code-btn,
+        #save-profile-btn,
+        #quit-quiz-btn,
+        #next-question-btn,
+        #reload-btn):hover:not(:disabled) {
         filter: brightness(0.98);
     }
 
-    /* Pressed cohérent (Duolingo-like) */
     .tyf-btn-primary:active:not(:disabled),
-    :where(.quiz-button, #start-first-quiz-btn, #retry-quiz-primary-btn, #next-quiz-btn,
-        #back-to-themes-btn, #premium-code-btn, #premium-buy-btn, #paywall-buy-btn,
-        #paywall-code-btn, #buy-premium-btn,
-        #validate-code-btn, #save-profile-btn, #quit-quiz-btn, #home-quiz-btn,
-        #prev-question-btn, #next-question-btn, #reload-btn):active:not(:disabled) {
+    :where(.quiz-button,
+        #start-first-quiz-btn,
+        #retry-quiz-primary-btn,
+        #next-quiz-btn,
+        #back-to-themes-btn,
+        #premium-code-btn,
+        #premium-buy-btn,
+        #paywall-buy-btn,
+        #paywall-code-btn,
+        #buy-premium-btn,
+        #validate-code-btn,
+        #save-profile-btn,
+        #quit-quiz-btn,
+        #next-question-btn,
+        #reload-btn):active:not(:disabled) {
         transform: translateY(2px);
         box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
     }
 
-    /* Disabled */
     .tyf-btn-primary:disabled,
-    :where(.quiz-button, #start-first-quiz-btn, #retry-quiz-primary-btn, #next-quiz-btn,
-        #back-to-themes-btn, #premium-code-btn, #premium-buy-btn, #paywall-buy-btn,
-        #paywall-code-btn, #buy-premium-btn,
-        #validate-code-btn, #save-profile-btn, #quit-quiz-btn, #home-quiz-btn,
-        #prev-question-btn, #next-question-btn, #reload-btn):disabled {
+    :where(.quiz-button,
+        #start-first-quiz-btn,
+        #retry-quiz-primary-btn,
+        #next-quiz-btn,
+        #back-to-themes-btn,
+        #premium-code-btn,
+        #premium-buy-btn,
+        #paywall-buy-btn,
+        #paywall-code-btn,
+        #buy-premium-btn,
+        #validate-code-btn,
+        #save-profile-btn,
+        #quit-quiz-btn,
+        #next-question-btn,
+        #reload-btn):disabled {
         opacity: 0.5;
         cursor: not-allowed;
         box-shadow: none;
+    }
+
+    /* Quiz: Back button must be secondary (not CTA) */
+    #prev-question-btn {
+        background: rgb(243 244 246);
+        color: rgb(55 65 81);
+        font-weight: 700;
+        padding: 0.9rem 1.4rem;
+        border-radius: 14px;
+        border: 2px solid rgb(229 231 235);
+        cursor: pointer;
+        box-shadow: none;
+        transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+
+    #prev-question-btn:hover:not(:disabled) {
+        background: rgb(229 231 235);
+        border-color: rgb(209 213 219);
+    }
+
+    #prev-question-btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    #prev-question-btn:focus-visible {
+        outline: none;
+        border-color: rgb(var(--color-primary));
+        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
+    }
+
+    #prev-question-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Header quiz navigation pills (always secondary, never CTA) */
+    #go-themes-btn,
+    #home-quiz-btn {
+        background: rgb(248 250 252);
+        color: rgb(15 23 42);
+        font-weight: 900;
+        padding: 0.55rem 0.85rem;
+        border-radius: 9999px;
+        border: 1px solid rgb(226 232 240);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+        transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    #go-themes-btn:hover:not(:disabled),
+    #home-quiz-btn:hover:not(:disabled) {
+        background: rgb(241 245 249);
+        border-color: rgb(203 213 225);
+    }
+
+    #go-themes-btn:active:not(:disabled),
+    #home-quiz-btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    #go-themes-btn:focus-visible,
+    #home-quiz-btn:focus-visible {
+        outline: none;
+        border-color: rgb(var(--color-primary));
+        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
     }
 
     /* Premium unlock (placé APRÈS les états primary, avant secondary) */
@@ -1037,6 +1167,10 @@
     }
 
     /* Quiz wrapper (Duolingo-like) */
+    /* =========================
+   QUIZ SURFACE (KISS)
+   ========================= */
+
     .quiz-wrapper {
         max-width: 42rem;
         margin: 1.25rem auto 1.5rem auto;
@@ -1048,6 +1182,20 @@
         position: relative;
     }
 
+    /* Make the inside feel like one coherent surface (Duolingo-like) */
+    #question-container {
+        border-radius: 16px;
+        border: 1px solid rgb(226 232 240);
+        padding: 1.1rem;
+        margin-bottom: 0.75rem;
+        background: rgb(248 250 252);
+    }
+
+    /* Optional: when you want it flatter (less “double card”), keep border but remove tint */
+    #question-container.flat {
+        background: #ffffff;
+    }
+
     /* Question = élément roi */
     .quiz-question {
         font-size: clamp(1.15rem, 2.6vw, 1.35rem);
@@ -1057,15 +1205,6 @@
         color: rgb(15 23 42);
     }
 
-    /* Container question : plus léger, moins “double card” */
-    #question-container {
-        border-radius: 16px;
-        border: 1px solid rgb(226 232 240);
-        padding: 1.1rem;
-        margin-bottom: 0.75rem;
-        background: rgb(248 250 252);
-        box-shadow: none;
-    }
 
     /* Feedback (sorti du bloc cassé) */
     #feedback-container {
@@ -1096,6 +1235,11 @@
 
     .options-container.is-validated .option:focus {
         outline: none;
+    }
+
+    /* Affiche correctement les retours ligne (\n) dans les messages UI (toasts/feedback) */
+    :where(#feedback-container, #daily-reward-toast, #toast-container, .tyf-toast, .tyf-message) {
+        white-space: pre-line;
     }
 
     /* Timer (sorti du bloc cassé) */
@@ -1143,6 +1287,13 @@
         box-shadow: var(--shadow-1);
     }
 
+    .feedback-content.neutral {
+        background: rgb(248 250 252);
+        color: rgb(15 23 42);
+        border: 1px solid rgb(226 232 240);
+        box-shadow: var(--shadow-1);
+    }
+
     /* Neutralise TOUT le "text-white" (et variantes) à l'intérieur du feedback */
     #feedback-container .feedback-content,
     #feedback-container .feedback-content * {
@@ -1154,6 +1305,86 @@
         color: #fff !important;
     }
 
+    /* Audio panel (cohérent avec cards) */
+    .tyf-audio-panel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0.85rem;
+        border-radius: 16px;
+        border: 1px solid rgb(226 232 240);
+        background: rgb(248 250 252);
+        box-shadow: var(--shadow-1);
+    }
+
+    .tyf-audio-meta {
+        font-size: 0.75rem;
+        font-weight: 900;
+        color: rgb(100 116 139);
+        letter-spacing: 0.02em;
+    }
+
+    .tyf-question-kicker {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: rgb(100 116 139);
+    }
+
+    .tyf-question-intent {
+        font-size: 0.8rem;
+        font-weight: 900;
+        color: rgb(var(--color-primary));
+    }
+
+    /* =========================
+       OPTIONS (KISS + JS-aligned)
+       JS toggles: .option-indicator div scale-0/scale-100
+       ========================= */
+
+    .option-indicator {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgb(148 163 184);
+        border-radius: 9999px;
+        margin-right: 16px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* APRÈS */
+    /* Dot piloté par CSS (couleur sémantique) + Tailwind garde scale-0/scale-100 si tu veux */
+    .option-indicator>.option-indicator-dot {
+        width: 100%;
+        height: 100%;
+        border-radius: 9999px;
+        background: rgb(var(--color-primary));
+        transition: transform 120ms ease;
+        transform-origin: center;
+    }
+
+    /* =========================
+       DUOLINGO-LIKE QUIZ ACTION BAR (KISS)
+       ========================= */
+
+    .tyf-quiz-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: space-between;
+        align-items: center;
+
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgb(226 232 240);
+    }
+
+    #next-question-btn {
+        min-width: 160px;
+    }
+
+
+    /* Keep your existing selection/validated states as-is (no need to change) */
 
     /* ====================================
        UIFeatures - Modal compat layer (anti purge Tailwind)
@@ -1180,7 +1411,7 @@
 
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 18px;
+        border-radius: var(--radius-card);
         box-shadow: var(--shadow-3);
 
         padding: 1.25rem;
@@ -1219,7 +1450,7 @@
         width: 100%;
         padding: 0.9rem 1rem;
         border: 2px solid rgb(226 232 240);
-        border-radius: 14px;
+        border-radius: var(--radius-button);
         font-size: 1rem;
         line-height: 1.2;
         background: rgb(248 250 252);
@@ -1312,7 +1543,7 @@
     }
 
     /* Focus global: visible par défaut */
-    *:focus-visible {
+    :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible {
         outline: 2px solid rgb(var(--color-primary));
         outline-offset: 2px;
     }
@@ -1385,6 +1616,12 @@
         margin-bottom: 1rem;
     }
 
+
+    /* Affiche correctement les retours ligne (\n) dans les messages UI (toasts/feedback) */
+    :where(#feedback-container, #daily-reward-toast, #toast-container, .tyf-toast, .tyf-feedback, .tyf-message) {
+        white-space: pre-line;
+    }
+
     /* fermeture correcte de @layer components */
 }
 
@@ -1423,10 +1660,17 @@
     }
 
     .timer-hidden {
-        transition: opacity var(--transition-fast),
-            transform var(--transition-fast);
+        transition: opacity var(--transition-fast), transform var(--transition-fast);
     }
 
+    /* QUIZ PROGRESS (KISS) */
+    :where(#quiz-progress-bar) {
+        background: rgb(var(--color-primary));
+        border-radius: 9999px;
+        box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.10);
+    }
+
+    /* Width utility classes remain the single mechanism */
     .w-pct-0 {
         width: 0%;
     }

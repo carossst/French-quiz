@@ -143,10 +143,21 @@
             case "welcome":
                 this.setupWelcomeEvents();
                 if (this.features) {
+                    // 1) Injecte le header
                     this.features.showXPHeader && this.features.showXPHeader();
+
+                    // 2) Bind des listeners (si la fonction existe)
+                    //    IMPORTANT: à faire après showXPHeader(), sinon les IDs n’existent pas.
+                    this.features.initializeXPSystem && this.features.initializeXPSystem();
+
+                    // 3) Tooltips chest (si séparé)
+                    this.features.setupChestTooltip && this.features.setupChestTooltip();
+
+                    // 4) Sync UI
                     this.features.updateXPHeader && this.features.updateXPHeader();
                 }
                 break;
+
             case "quiz-selection":
                 this.setupQuizSelectionEvents();
                 break;
