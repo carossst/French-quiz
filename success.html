@@ -2,128 +2,122 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description"
-        content="Payment successful! Get your Test Your French premium access code and unlock all themes instantly.">
-    <meta name="robots" content="noindex, nofollow">
+        content="Payment successful! Get your Test Your French premium access code and unlock all themes instantly." />
+    <meta name="robots" content="noindex, nofollow" />
     <title>Premium Unlocked - Test Your French</title>
-    <link rel="preload" href="./style.css" as="style">
-    <link rel="stylesheet" href="./style.css">
+
+    <link rel="preload" href="./style.css" as="style" />
+    <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body class="bg-gradient-to-br from-green-50 to-blue-50">
-
-    <main class="min-h-screen flex items-center justify-center px-4 py-8">
-        <div class="bg-white rounded-2xl p-4 sm:p-8 max-w-sm sm:max-w-lg text-center shadow-xl">
-
+<body>
+    <main class="min-h-screen flex items-center justify-center px-4 py-10">
+        <div class="tyf-card max-w-lg w-full p-5 sm:p-7 text-center">
             <!-- Header -->
             <header class="mb-6">
-                <div class="text-4xl sm:text-6xl mb-4">🎉</div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Premium Unlocked!</h1>
-                <p class="text-gray-700">Welcome to full premium access!</p>
-
+                <div class="text-5xl mb-3" aria-hidden="true">🎉</div>
+                <h1 class="tyf-hero-title mb-2">Premium Unlocked</h1>
+                <p class="tyf-hero-sub">Your access is ready. Save your code and activate it in the app.</p>
+                <p class="tyf-hero-kicker">This page is safe to bookmark for your records.</p>
             </header>
 
-            <!-- Code Section -->
-            <section class="mb-6">
-                <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-4 sm:p-6">
-                    <h2 class="text-lg sm:text-xl font-bold mb-3">⭐ Your Premium Code (personal reference):</h2>
-
-                    <div class="bg-white bg-opacity-20 rounded-lg p-3 sm:p-4 mb-4">
-                        <code id="premium-code"
-                            class="text-lg sm:text-xl font-mono font-bold break-all">TYF-XXXX-XXXX</code>
-                    </div>
-
-                    <button id="copy-btn"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                        📋 Copy Code
-                    </button>
+            <!-- Code -->
+            <section class="tyf-card-soft p-4 sm:p-5 mb-6">
+                <div class="tyf-section-head">
+                    <h2 class="tyf-section-title">Your Premium Code</h2>
+                    <span class="tyf-pill" aria-hidden="true">PERSONAL</span>
                 </div>
+
+                <div class="tyf-track mb-3" aria-hidden="true">
+                    <div class="tyf-fill" style="width: 100%"></div>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 mb-4">
+                    <code id="premium-code"
+                        class="block text-lg sm:text-xl font-mono font-black tracking-widest break-all">
+            TYF-XXXX-XXXX
+          </code>
+                    <p class="tyf-hint mt-2">
+                        Stored in this browser. If you clear site data, it may change.
+                    </p>
+                </div>
+
+                <button id="copy-btn" class="copy-code-btn w-full" type="button" aria-label="Copy premium code">
+                    Copy code
+                </button>
             </section>
 
-            <!-- Instructions -->
-            <section class="text-left mb-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 text-center">🪄 How to activate:</h3>
-
-                <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                    <ol class="space-y-2 text-sm">
-                        <li class="flex items-start">
-                            <span
-                                class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 mt-0.5">1</span>
-                            <span><strong>Return to the app</strong> → click any premium theme</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span
-                                class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 mt-0.5">2</span>
-                            <span><strong>Select "I have a premium code"</strong> (purple button)</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span
-                                class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 mt-0.5">3</span>
-                            <span><strong>Enter this code:</strong> <span
-                                    id="premium-code-inline">TYF-XXXX-XXXX</span><br><span
-                                    class="text-xs opacity-90">This is a personal reference stored in this
-                                    browser.</span></span>
-
-                        </li>
-                    </ol>
+            <!-- How to activate -->
+            <section class="tyf-card-soft p-4 sm:p-5 mb-6 text-left">
+                <div class="tyf-section-head">
+                    <h3 class="tyf-section-title">How to activate</h3>
+                    <span class="tyf-pill" aria-hidden="true">3 STEPS</span>
                 </div>
+
+                <ol class="space-y-3 text-sm text-slate-700">
+                    <li class="flex items-start gap-2">
+                        <span class="tyf-pill tyf-nowrap" aria-hidden="true">1</span>
+                        <span><strong>Return to the app</strong> and click any premium theme.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="tyf-pill tyf-nowrap" aria-hidden="true">2</span>
+                        <span><strong>Select “I have a premium code”</strong>.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="tyf-pill tyf-nowrap" aria-hidden="true">3</span>
+                        <span>
+                            <strong>Enter this code:</strong>
+                            <span id="premium-code-inline"
+                                class="font-mono font-black tracking-widest break-all">TYF-XXXX-XXXX</span>
+                        </span>
+                    </li>
+                </ol>
             </section>
 
             <!-- Benefits -->
-            <section class="mb-6">
-                <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
-                    <h4 class="font-bold mb-3 text-green-800">✅ What you get:</h4>
-                    <div class="space-y-2 text-sm text-green-700">
-                        <div>✅ <strong>All 10 themes</strong> (50 total quizzes)</div>
-                        <div>✅ <strong>Native French audio</strong> practice</div>
-                        <div>✅ <strong>Unlimited access</strong> while the service is available</div>
-
+            <section class="tyf-stats-card tyf-nudge mb-6 text-left">
+                <div class="tyf-nudge-inner">
+                    <div>
+                        <div class="tyf-nudge-title">What you get</div>
+                        <div class="tyf-nudge-sub">Full access is now enabled for this device.</div>
+                        <div class="mt-3 space-y-2 text-sm text-slate-700">
+                            <div>✅ <strong>All 10 themes</strong> (50 total quizzes)</div>
+                            <div>✅ <strong>Native French audio</strong> practice</div>
+                            <div>✅ <strong>Unlimited access</strong> while the service is available</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- French Points Info -->
-            <section class="mb-6">
-                <div class="bg-yellow-50 rounded-lg p-4 border-l-4 border-yellow-400">
-                    <h4 class="font-bold mb-2 text-yellow-800">⭐ Keep earning French Points!</h4>
-                    <p class="text-sm text-yellow-700">
-                        French Points unlock daily bonuses, achievements, and future content.
-                    </p>
+            <!-- French Points -->
+            <section class="tyf-stats-card mb-6 text-left">
+                <div class="tyf-section-head">
+                    <h4 class="tyf-section-title">Keep earning French Points</h4>
+                    <span class="tyf-pill" aria-hidden="true">FP</span>
                 </div>
+                <p class="tyf-hint">
+                    French Points unlock daily bonuses, achievements, and future content.
+                </p>
             </section>
 
             <!-- Actions -->
             <section class="space-y-3">
-                <a href="./index.html"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg inline-block transition-colors">
-                    ← Back to app
+                <a href="./index.html" class="tyf-btn-primary w-full inline-flex items-center justify-center">
+                    Back to app
                 </a>
-                <button id="copy-again"
-                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-colors">
-                    📋 Copy code again
+
+                <button id="copy-again" class="tyf-btn-secondary w-full" type="button">
+                    Copy code again
                 </button>
             </section>
 
-            <!-- Important -->
-            <aside class="mt-6 pt-4 border-t border-gray-200">
-                <div class="bg-purple-50 rounded-lg p-3 text-center">
-                    <p class="text-xs text-purple-800 font-medium">
-                        💡 <strong>Save this code for your records:</strong> <span
-                            id="premium-code-save">TYF-XXXX-XXXX</span><br>
-                        <span class="text-[11px] text-purple-700/90">It’s stored on this device (browser storage). If
-                            you clear site data,
-                            it may change.</span>
-                    </p>
-
-                </div>
-            </aside>
-
             <!-- Support -->
-            <footer class="mt-4 text-xs text-gray-600 text-center">
+            <footer class="mt-6 pt-4 border-t border-slate-200 text-xs text-slate-600 text-center">
                 Need help?
-                <a href="mailto:bonjour&#64;testyourfrench&#46;com" class="text-blue-600 hover:text-blue-800">
+                <a href="mailto:bonjour&#64;testyourfrench&#46;com" class="underline">
                     Contact us
                 </a>
             </footer>
@@ -131,8 +125,6 @@
     </main>
 
     <script src="./success.js" defer></script>
-
-
 </body>
 
 </html>

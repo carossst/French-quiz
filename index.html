@@ -66,7 +66,7 @@
   <link rel="preconnect" href="https://js.stripe.com" crossorigin>
 
   <!-- Styles -->
-  <link rel="preload" href="./style.css" as="style" fetchpriority="high">
+  <link rel="preload" href="./style.css" as="style">
   <link rel="stylesheet" href="./style.css">
 
 
@@ -80,41 +80,48 @@
   <a href="#app-container" class="skip-link">Skip to main content</a>
 
   <!-- Header XP compact avec meilleur espacement et hiérarchie -->
-  <div id="xp-header" class="py-3 bg-gray-50 border-b border-gray-200">
+  <div id="xp-header" class="py-2 bg-gray-50 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4">
-      <div class="flex flex-col sm:flex-row sm:inline-flex items-center gap-4 sm:gap-4 sm:flex-nowrap justify-center">
-        <span class="text-blue-700 font-bold text-lg">
-          ⭐ Level <span id="user-level">1</span>
-        </span>
+      <div class="flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-4">
 
-        <span class="text-2xl">🇫🇷</span>
+        <!-- Block 1: Level + flag + FP (always stable) -->
+        <div class="flex items-center gap-3">
+          <span class="text-blue-700 font-extrabold text-base sm:text-lg whitespace-nowrap">
+            ⭐ Level <span id="user-level">1</span>
+          </span>
 
-        <span id="user-fp" class="font-semibold text-blue-600 text-base whitespace-nowrap">0 FP</span>
+          <span class="text-xl sm:text-2xl" aria-hidden="true">🇫🇷</span>
 
-        <div class="relative inline-flex items-center">
-          <button type="button" id="daily-chest-wrapper"
-            class="text-xl px-2 py-1 hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2"
-            aria-describedby="daily-chest-tooltip" aria-label="Daily reward chest">🎁</button>
+          <span id="user-fp" class="font-bold text-blue-600 text-sm sm:text-base whitespace-nowrap">0 FP</span>
 
-          <div id="daily-chest-tooltip"
-            class="hidden absolute top-full left-0 mt-2 w-72 max-w-[85vw] rounded-lg bg-gray-900 text-white text-xs p-3 shadow-lg"
-            role="tooltip" aria-hidden="true">
-            <div class="font-semibold mb-1">Daily chest</div>
-            <div id="daily-chest-tooltip-text"></div>
+          <div class="tyf-tooltip-wrap relative inline-flex items-center">
+            <button type="button" id="daily-chest-wrapper"
+              class="text-xl px-2 py-1 hover:brightness-110 transition-[filter] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              aria-label="Daily reward chest">
+              🎁
+            </button>
+
+
+            <div id="daily-chest-tooltip" class="tyf-tooltip-panel hidden" role="tooltip" aria-hidden="true">
+              <div class="font-semibold mb-1">Daily chest</div>
+              <div id="daily-chest-tooltip-text"></div>
+            </div>
           </div>
         </div>
 
+        <!-- Block 2: Premium CTA (separate, no layout jumps) -->
         <a href="https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03" id="premium-unlock-btn"
-          class="inline-flex items-center gap-2 whitespace-nowrap bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1.5 rounded-full font-semibold text-sm hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-          aria-label="Unlock premium access. Regular price $99. Launch price $12.">
-          <span class="text-base">💎</span>
-          <span class="font-bold text-base">$12</span>
-          <span class="text-xs opacity-80">launch price</span>
-          <span class="text-xs line-through opacity-60">$99</span>
+          class="inline-flex items-center gap-2 whitespace-nowrap"
+          aria-label="Unlock premium access for $12. Launch price. Regular price $99.">
+          <span class="text-base" aria-hidden="true">💎</span>
+          <span class="text-base">$12</span>
+          <span class="text-[11px] font-semibold opacity-90">launch</span>
+          <span class="text-[11px] line-through opacity-50">$99</span>
         </a>
       </div>
     </div>
   </div>
+
 
 
   <!-- H1 pour SEO et accessibilité (invisible visuellement) -->

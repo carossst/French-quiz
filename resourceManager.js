@@ -67,6 +67,9 @@
       10: "Cafe"
     };
 
+    // Quiz 1-2: text only (reading/writing)
+    // Quiz 3-4: full audio (listening)
+    // Quiz 5: partial audio (mixed skills)
     this.audioQuizTypes = { 3: "full_audio", 4: "full_audio", 5: "partial_audio" };
   };
 
@@ -292,7 +295,18 @@
 
       // Fallback minimal
       const fallbackMetadata = {
-        themes: [{ id: 1, name: "I Speak Colors", icon: "*", quizzes: [] }]
+        themes: [{
+          id: 1,
+          name: "I Speak Colors",
+          icon: "🎨",
+          quizzes: [
+            { id: 101, name: "Quiz 1" },
+            { id: 102, name: "Quiz 2" },
+            { id: 103, name: "Quiz 3" },
+            { id: 104, name: "Quiz 4" },
+            { id: 105, name: "Quiz 5" }
+          ]
+        }]
       };
       this.logger.warn("Using fallback metadata structure");
       return fallbackMetadata;
@@ -473,8 +487,14 @@
     const idString = String(quizId);
     const lastDigit = parseInt(idString.slice(-1), 10);
     if (!Number.isFinite(lastDigit)) return null;
-    return lastDigit >= 1 && lastDigit <= 5 ? lastDigit : null;
+
+    // KISS: ce projet supporte uniquement 5 quizzes par thème (suffixe 1..5)
+    if (lastDigit >= 1 && lastDigit <= 5) return lastDigit;
+
+    // IMPORTANT: on refuse explicitement au lieu de "null silencieux"
+    throw new Error("Unsupported quiz id " + quizId + " (expected id ending with 1..5)");
   };
+
 
   ResourceManagerClass.prototype.getAudioPath = function (
     themeId,

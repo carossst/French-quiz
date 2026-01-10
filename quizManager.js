@@ -66,16 +66,9 @@ QuizManager.prototype.resetQuizState = function () {
 
 
 QuizManager.prototype.normalizeText = function (s) {
-  return String(s || "")
-    .replace(/â€“/g, "-")
-    .replace(/â€”/g, "-")
-    .replace(/[–—]/g, "-")
-    .replace(/[·•]/g, "|")
-    .replace(/\u00A0/g, " ")
-    .replace(/[’]/g, "'")          // apostrophe typographique -> simple
-    .replace(/\s+/g, " ")          // espaces multiples -> simple
-    .trim();
+  return window.TYF_UTILS.normalizeText(s);
 };
+
 
 
 QuizManager.prototype.loadQuiz = async function (themeId, quizId) {

@@ -55,3 +55,19 @@ window.resourceManagerConfig = {
         audioCheck: 3000        // 3s timeout pour vérification existence audio
     }
 };
+
+// ===============================
+// TYF_UTILS – shared helpers
+// ===============================
+window.TYF_UTILS = {
+    normalizeText: function (s) {
+        return String(s || "")
+            .replace(/â€“|â€”|[–—]/g, "-")
+            .replace(/[·•]/g, "|")
+            .replace(/\u00A0/g, " ")
+            .replace(/[’]/g, "'")
+            .replace(/\s+/g, " ")
+            .replace(/[“”]/g, '"')
+            .trim();
+    }
+};

@@ -154,6 +154,12 @@ StorageManager.prototype.ensureDataStructure = function () {
   if (!Number.isFinite(fpStats.dailyRewardsCount)) fpStats.dailyRewardsCount = 0;
   if (!Number.isFinite(fpStats.streakDays)) fpStats.streakDays = 0;
 
+  // Durcir champs optionnels fpStats
+  if (fpStats._lastDailyRewardDayKey !== undefined && typeof fpStats._lastDailyRewardDayKey !== "string") {
+    delete fpStats._lastDailyRewardDayKey;
+  }
+
+
 
   if (!this.data.globalStats || typeof this.data.globalStats !== "object") {
     this.data.globalStats = JSON.parse(JSON.stringify(this.defaultData.globalStats));
@@ -173,6 +179,19 @@ StorageManager.prototype.ensureDataStructure = function () {
   if (typeof this.data.lastDailyRewardAt !== "number" || !Number.isFinite(this.data.lastDailyRewardAt)) {
     this.data.lastDailyRewardAt = 0;
   }
+
+  // Migration legacy: tyf:lastDailyRewardAt -> data.lastDailyRewardAt (une seule fois)
+  if (!this.data.lastDailyRewardAt) {
+    try {
+      const legacy = Number(localStorage.getItem("tyf:lastDailyRewardAt") || 0);
+      if (Number.isFinite(legacy) && legacy > 0) {
+        this.data.lastDailyRewardAt = legacy;
+        this.data.lastDailyReward = new Date(legacy).toISOString();
+        localStorage.removeItem("tyf:lastDailyRewardAt");
+      }
+    } catch { }
+  }
+
   // Compat ISO legacy (string ou null)
   if (this.data.lastDailyReward !== null && typeof this.data.lastDailyReward !== "string") {
     this.data.lastDailyReward = null;
@@ -983,18 +1002,16 @@ StorageManager.prototype.updateBadges = function (score, total, options = {}) {
 //================================================================================
 
 StorageManager.prototype.isQuizCompleted = function (quizId) {
-  // Ne pas calculer themeId, le chercher dans les stats
-  for (const themeId in this.data.themeStats) {
-    if (
-      this.data.themeStats[themeId] &&
-      this.data.themeStats[themeId].quizzes &&
-      this.data.themeStats[themeId].quizzes[quizId] !== undefined
-    ) {
-      return true;
-    }
-  }
-  return false;
+  const id = Number(quizId);
+  if (!Number.isFinite(id) || id <= 0) return false;
+
+  const themeId = Math.floor(id / 100);
+  const theme = this.data.themeStats && this.data.themeStats[themeId];
+  const quizzes = theme && theme.quizzes;
+
+  return !!(quizzes && quizzes[id] !== undefined);
 };
+
 
 // APRÈS — storage.js: markQuizCompleted() sans double dispatch incohérent
 // Objectif: garder l’event "badges-earned" mais avec payload détaillé (objets) au lieu de strings.
@@ -1083,7 +1100,6 @@ StorageManager.prototype.markQuizCompleted = function (
 
 
 
-
 StorageManager.prototype.updateThemeStats = function (
   themeId,
   quizId,
@@ -1099,21 +1115,22 @@ StorageManager.prototype.updateThemeStats = function (
   const quizzes = this.data.themeStats[themeId].quizzes || {};
   this.data.themeStats[themeId].quizzes = quizzes;
 
-  const wasAlreadyCompleted = Object.prototype.hasOwnProperty.call(quizzes, String(quizId));
+  const key = String(quizId);
+  const wasAlreadyCompleted = Object.prototype.hasOwnProperty.call(quizzes, key);
 
   if (!wasAlreadyCompleted) {
     this.data.themeStats[themeId].completed++;
   }
 
-
-  this.data.themeStats[themeId].quizzes[quizId] = {
+  quizzes[key] = {
     score: score,
     total: total,
-    timeSpent: timeSpent,
+    timeSpent: Number(timeSpent) || 0,
     date: now.toISOString(),
     accuracy: Math.round((score / total) * 100)
   };
 };
+
 
 StorageManager.prototype.updateGlobalStats = function (
   score,
@@ -1121,15 +1138,20 @@ StorageManager.prototype.updateGlobalStats = function (
   timeSpent,
   date
 ) {
-  this.data.globalStats.totalQuestions += total;
-  this.data.globalStats.totalCorrect += score;
-  this.data.globalStats.totalTimeSpent += timeSpent;
+  const t = Number(total) || 0;
+  const s = Number(score) || 0;
+  const ts = Number(timeSpent) || 0;
+
+  this.data.globalStats.totalQuestions += t;
+  this.data.globalStats.totalCorrect += s;
+  this.data.globalStats.totalTimeSpent += ts;
 
   if (!this.data.globalStats.firstQuizDate) {
     this.data.globalStats.firstQuizDate = date.toISOString();
   }
   this.data.globalStats.lastQuizDate = date.toISOString();
 };
+
 
 StorageManager.prototype.updateStreak = function (today) {
   if (this.data.streak.lastActiveDate !== today) {

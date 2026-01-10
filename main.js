@@ -11,12 +11,13 @@ const Logger = {
     window.TYF_CONFIG?.debug?.enabled &&
     ["debug", "log"].includes(window.TYF_CONFIG.debug.logLevel) &&
     console.log("[TYF]", ...args),
-  warn: (...args) =>
-    window.TYF_CONFIG?.debug?.enabled &&
-    ["debug", "log", "warn"].includes(window.TYF_CONFIG.debug.logLevel) &&
-    console.warn("[TYF Warning]", ...args),
+
+  // WARNINGS: toujours visibles (prod incluse)
+  warn: (...args) => console.warn("[TYF Warning]", ...args),
+
   error: (...args) => console.error("[TYF Error]", ...args)
 };
+
 
 
 /**
@@ -118,12 +119,13 @@ function initializeUXTracking() {
   try {
     if (window.TYF_CONFIG?.debug?.enabled) {
       const sessionTime = window.storageManager?.getSessionDuration?.();
-      console.log("UX Session started -", sessionTime || 0, "minutes");
+      Logger.debug("UX Session started -", sessionTime || 0, "minutes");
     }
   } catch (error) {
-    console.warn("UX tracking failed:", error);
+    Logger.warn("UX tracking failed:", error);
   }
 }
+
 
 window.addEventListener("error", (event) => {
   Logger.error("Global error:", event.error || event);

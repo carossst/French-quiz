@@ -21,10 +21,12 @@ const ASSETS_TO_CACHE = [
   "./storage.js",
   "./metadata.json",
   "./icons/icon-192x192.png",
+  "./icons/icon-512x512.png",
   "./email.js",
   "./noscript.js",
   "./fallback.js"
 ];
+
 
 // Détection environnement
 const hostname = self.location.hostname;
@@ -135,13 +137,15 @@ async function handleAudioRequest(request) {
   log(`Audio request: ${request.url}`);
 
   try {
-    const cached = await caches.match(request, { cacheName: DYNAMIC_CACHE });
-    if (cached) {
+    const dynCache = await caches.open(DYNAMIC_CACHE);
+    const cachedDyn = await dynCache.match(request);
+    if (cachedDyn) {
       log(`Audio from dynamic cache: ${request.url}`);
-      return cached;
+      return cachedDyn;
     }
 
-    const cachedMain = await caches.match(request, { cacheName: CACHE_NAME });
+    const mainCache = await caches.open(CACHE_NAME);
+    const cachedMain = await mainCache.match(request);
     if (cachedMain) {
       log(`Audio from main cache: ${request.url}`);
       return cachedMain;
@@ -151,8 +155,7 @@ async function handleAudioRequest(request) {
     const response = await fetch(request);
 
     if (response.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, response.clone());
+      await dynCache.put(request, response.clone());
       log(`Audio cached: ${request.url}`);
     }
 
@@ -173,6 +176,7 @@ async function handleAudioRequest(request) {
   }
 }
 
+
 /* ============================================================
    JSON REQUEST HANDLING
 ============================================================ */
@@ -180,12 +184,11 @@ async function handleJsonRequest(request) {
   log(`JSON request: ${request.url}`);
 
   try {
-    // Stratégie réseau-d'abord, cache en secours
     const response = await fetch(request);
 
     if (response.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, response.clone());
+      const dynCache = await caches.open(DYNAMIC_CACHE);
+      await dynCache.put(request, response.clone());
       log(`JSON cached: ${request.url}`);
       return response;
     }
@@ -195,14 +198,18 @@ async function handleJsonRequest(request) {
   } catch (err) {
     warn(`JSON network failed: ${request.url}`, err && err.message ? err.message : err);
 
-    const cachedDynamic = await caches.match(request, { cacheName: DYNAMIC_CACHE });
+    const dynCache = await caches.open(DYNAMIC_CACHE);
+    const cachedDynamic = await dynCache.match(request);
     if (cachedDynamic) return cachedDynamic;
 
-    const cachedMain = await caches.match(request, { cacheName: CACHE_NAME });
+    const mainCache = await caches.open(CACHE_NAME);
+    const cachedMain = await mainCache.match(request);
     if (cachedMain) return cachedMain;
 
-    // Dernière chance : retry réseau brut (peut encore échouer)
-    return fetch(request);
+    return new Response(JSON.stringify({ error: "offline" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json; charset=utf-8" }
+    });
   }
 }
 
@@ -211,13 +218,15 @@ async function handleJsonRequest(request) {
    STATIC REQUEST HANDLING
 ============================================================ */
 async function handleStaticRequest(request) {
-  const cached = await caches.match(request, { cacheName: CACHE_NAME });
+  const mainCache = await caches.open(CACHE_NAME);
+  const cached = await mainCache.match(request);
   if (cached) {
     log(`Static from main cache: ${request.url}`);
     return cached;
   }
 
-  const cachedDynamic = await caches.match(request, { cacheName: DYNAMIC_CACHE });
+  const dynCache = await caches.open(DYNAMIC_CACHE);
+  const cachedDynamic = await dynCache.match(request);
   if (cachedDynamic) {
     log(`Static from dynamic cache: ${request.url}`);
     return cachedDynamic;
@@ -241,8 +250,7 @@ async function handleStaticRequest(request) {
       !urlObj.pathname.includes("/audio/");
 
     if (shouldCache) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+      await mainCache.put(request, response.clone());
       log(`Static cached: ${request.url}`);
     }
 
@@ -300,6 +308,7 @@ async function handleStaticRequest(request) {
     throw err;
   }
 }
+
 
 /* ============================================================
    MESSAGE HANDLER
@@ -406,12 +415,12 @@ self.addEventListener("message", event => {
    AUDIO PRECACHE
 ============================================================ */
 async function cacheAudioFiles(urls) {
-  const cache = await caches.open(DYNAMIC_CACHE);
+  const dynCache = await caches.open(DYNAMIC_CACHE);
   const results = [];
 
   for (const url of urls) {
     try {
-      const exists = await caches.match(url, { cacheName: DYNAMIC_CACHE });
+      const exists = await dynCache.match(url);
       if (exists) {
         results.push({ url, success: true, status: "Already cached" });
         continue;
@@ -419,7 +428,7 @@ async function cacheAudioFiles(urls) {
 
       const response = await fetch(url);
       if (response.ok) {
-        await cache.put(url, response.clone());
+        await dynCache.put(url, response.clone());
         results.push({ url, success: true, status: "Cached" });
       } else {
         results.push({ url, success: false, error: `HTTP ${response.status}` });

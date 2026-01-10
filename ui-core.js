@@ -35,14 +35,13 @@
        TEXT NORMALIZATION
        ---------------------------------------- */
     UICore.prototype.normalizeText = function (s) {
-        return String(s || "")
-            .replace(/â€“/g, "-")
-            .replace(/â€”/g, "-")
-            .replace(/[–—]/g, "-")
-            .replace(/[·•]/g, "|")
-            .replace(/\u00A0/g, " ")
-            .trim();
+        if (window.TYF_UTILS && typeof window.TYF_UTILS.normalizeText === "function") {
+            return window.TYF_UTILS.normalizeText(s);
+        }
+        return String(s || "").trim();
     };
+
+
 
     /* ----------------------------------------
        LIFECYCLE
@@ -240,7 +239,7 @@
             "\n    </section>" +
 
             '\n    <div class="text-center mt-4 lg:mt-2 shrink-0">' +
-            '\n      <button id="view-stats-btn" type="button" class="text-gray-600 hover:text-gray-900 underline text-sm">' +
+            '\n      <button id="view-stats-btn" type="button">' +
             "\n        View your statistics and history" +
             "\n      </button>" +
             "\n    </div>" +
@@ -350,7 +349,7 @@
             this.generateNextActionButton(resultsData) +
             "\n    </div>" +
             '\n    <div class="mb-6">' +
-            '\n      <button id="toggle-details-btn" type="button" class="quiz-button">' +
+            '\n      <button id="toggle-details-btn" type="button">' +
             "View detailed analysis" +
             "</button>" +
             "\n    </div>" +
