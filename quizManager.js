@@ -57,16 +57,22 @@ QuizManager.prototype.resetQuizState = function () {
 
   // ⏱️ Reset time tracking
   this.totalTimeElapsed = 0;
-
   this.startTime = null;
   this.questionStartTime = null;
+
+  // IMPORTANT: reset badge baseline too (avoids stale comparisons later)
+  this.previousBadgeCount = 0;
 
   console.log("QuizManager: State reset");
 };
 
 
+
 QuizManager.prototype.normalizeText = function (s) {
-  return window.TYF_UTILS.normalizeText(s);
+  if (window.TYF_UTILS && typeof window.TYF_UTILS.normalizeText === "function") {
+    return window.TYF_UTILS.normalizeText(s);
+  }
+  return String(s || "").trim();
 };
 
 
@@ -108,15 +114,18 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
         : quizData.questions
     };
 
-    if (
-      typeof this.storageManager.isQuizCompleted === "function" &&
-      this.storageManager.isQuizCompleted(this.currentQuizId)
-    ) {
-
-      this.ui?.showFeedbackMessage?.(
-        "info",
-        "ℹ️ Revision mode: no French Points on replays (first completion only)"
+    if (typeof this.storageManager.isQuizCompleted === "function") {
+      const alreadyCompleted = this.storageManager.isQuizCompleted(
+        this.currentThemeId,
+        this.currentQuizId
       );
+
+      if (alreadyCompleted) {
+        this.ui?.showFeedbackMessage?.(
+          "info",
+          "ℹ️ Revision mode: no French Points on replays (first completion only)"
+        );
+      }
     }
 
     this.preprocessQuestions();
@@ -194,27 +203,34 @@ QuizManager.prototype.preprocessQuestions = function () {
   if (!this.currentQuiz || !this.currentQuiz.questions) return;
 
   this.currentQuiz.questions.forEach((question, index) => {
-    if (question.correctIndex === undefined && question.correctAnswer !== undefined) {
+    // Normaliser correctIndex si présent (évite "2" vs 2)
+    if (question.correctIndex !== undefined && question.correctIndex !== null) {
+      const n = Number(question.correctIndex);
+      if (Number.isFinite(n)) {
+        question.correctIndex = n;
+      } else {
+        console.error(`Question ${index + 1}: Invalid - correctIndex is not a number`);
+        question.isInvalid = true;
+        question.correctIndex = -1;
+      }
+      return;
+    }
+
+    // Sinon, fallback correctAnswer -> correctIndex
+    if (question.correctAnswer !== undefined && question.correctAnswer !== null) {
       if (!Array.isArray(question.options)) {
         console.error(`Question ${index + 1}: Invalid - options is not an array`);
         question.isInvalid = true;
         question.correctIndex = -1;
         return;
       }
-      // Helper local (même logique que côté UI)
-      const stripLabel = s =>
-        String(s || "").replace(/^[A-D]\s*[.)]\s*/i, "").trim();
 
+      const stripLabel = s => String(s || "").replace(/^[A-D]\s*[.)]\s*/i, "").trim();
       const normalizedCorrect = stripLabel(question.correctAnswer);
 
       const correctIndex = question.options.findIndex(option => {
-        return (
-          option === question.correctAnswer ||
-          stripLabel(option) === normalizedCorrect
-        );
+        return option === question.correctAnswer || stripLabel(option) === normalizedCorrect;
       });
-
-
 
       if (correctIndex !== -1) {
         question.correctIndex = correctIndex;
@@ -227,9 +243,15 @@ QuizManager.prototype.preprocessQuestions = function () {
           this.ui.showError(`Question ${index + 1} has invalid data`);
         }
       }
+    } else {
+      // Ni correctIndex ni correctAnswer: données invalides
+      console.error(`Question ${index + 1}: Invalid - missing correctIndex and correctAnswer`);
+      question.isInvalid = true;
+      question.correctIndex = -1;
     }
   });
 };
+
 
 QuizManager.prototype.displayQuiz = function () {
   if (this.ui && this.ui.showQuizScreen) {
@@ -268,19 +290,36 @@ QuizManager.prototype.selectAnswer = function (answerIndex) {
     console.warn("QuizManager: Invalid answer selection", {
       currentIndex: this.currentIndex,
       answerIndex,
-      questionOptions: question?.options
+      questionOptions: question && question.options
     });
     return;
   }
 
+  const prev = this.userAnswers[this.currentIndex];
   this.userAnswers[this.currentIndex] = answerIndex;
 
-  console.log(`QuizManager: Answer selected: ${answerIndex} for question ${this.currentIndex + 1}`);
+  // IMPORTANT: if user changes answer after validation, force “non validated” state first
+  if (prev !== null && prev !== undefined && prev !== answerIndex) {
+    if (this.questionStatus[this.currentIndex] !== null) {
+      this.questionStatus[this.currentIndex] = null;
+      this._lastValidatedQuestionIndex = null;
+      this._lastValidatedAnswerIndex = null;
+    }
+  }
 
   if (this.ui && this.ui.updateSelectedOption) {
     this.ui.updateSelectedOption(answerIndex);
   }
+
+  // Auto-validation on click (as per your Mode 2 rules)
+  this.validateCurrentAnswer();
+
+  // Keep nav buttons correct (Next locked/unlocked)
+  if (this.ui && this.ui.updateNavigationButtons) {
+    this.ui.updateNavigationButtons();
+  }
 };
+
 
 QuizManager.prototype.validateCurrentAnswer = function () {
   const answerIndex = this.userAnswers[this.currentIndex];
@@ -289,35 +328,44 @@ QuizManager.prototype.validateCurrentAnswer = function () {
     return;
   }
 
-  // If already validated and answer hasn't changed, do nothing
-  if (this.questionStatus[this.currentIndex] !== null &&
+  // If already validated for same question & same answer, do nothing
+  if (
+    this.questionStatus[this.currentIndex] !== null &&
     this._lastValidatedAnswerIndex === answerIndex &&
-    this._lastValidatedQuestionIndex === this.currentIndex) {
+    this._lastValidatedQuestionIndex === this.currentIndex
+  ) {
     return;
   }
 
   const question = this.getCurrentQuestion();
   const isCorrect = !!(question && question.correctIndex === answerIndex);
 
-  const wasCorrect = this.questionStatus[this.currentIndex] === "correct";
+  const prevStatus = this.questionStatus[this.currentIndex]; // null | "correct" | "incorrect"
+  const nextStatus = isCorrect ? "correct" : "incorrect";
 
-  if (!wasCorrect && isCorrect) this.score++;
-  if (wasCorrect && !isCorrect) this.score = Math.max(0, this.score - 1);
+  // Score transitions
+  if (prevStatus === null) {
+    if (nextStatus === "correct") this.score += 1;
+  } else if (prevStatus === "correct" && nextStatus === "incorrect") {
+    this.score = Math.max(0, this.score - 1);
+  } else if (prevStatus === "incorrect" && nextStatus === "correct") {
+    this.score += 1;
+  }
 
-  this.questionStatus[this.currentIndex] = isCorrect ? "correct" : "incorrect";
+  this.questionStatus[this.currentIndex] = nextStatus;
 
-  // track last validated selection
   this._lastValidatedQuestionIndex = this.currentIndex;
   this._lastValidatedAnswerIndex = answerIndex;
-
-  console.log(
-    `QuizManager: Validation - Question ${this.currentIndex + 1}, Correct: ${isCorrect}, Score: ${this.score}`
-  );
 
   if (this.ui && this.ui.showQuestionFeedback) {
     this.ui.showQuestionFeedback(question, answerIndex);
   }
+
+  console.log(
+    `QuizManager: Validation - Question ${this.currentIndex + 1}, Status: ${nextStatus}, Score: ${this.score}`
+  );
 };
+
 
 
 QuizManager.prototype.nextQuestion = function () {
@@ -344,7 +392,8 @@ QuizManager.prototype.nextQuestion = function () {
   }
 
   this.finishQuiz();
-  return false;
+  return true;
+
 };
 
 

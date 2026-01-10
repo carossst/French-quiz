@@ -1,4 +1,5 @@
-// ui-core.js v3.0 - UX Roadmap Modal + Refined flow (new user → quiz → results → stats)
+// ui-core.js v3.0 - UX Roadmap Modal + Refined flow (new user -> quiz -> results -> stats)
+
 (function (global) {
     function UICore(quizManager, appContainer, resourceManager, storageManager) {
         if (!quizManager || !appContainer || !resourceManager || !storageManager) {
@@ -40,6 +41,16 @@
         }
         return String(s || "").trim();
     };
+
+    UICore.prototype.escapeHTML = function (s) {
+        return String(s == null ? "" : s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    };
+
 
 
 
@@ -184,10 +195,11 @@
             '\n        <span class="text-2xl">✨</span>' +
             '\n      </div>' +
             '\n      <div class="space-y-2 text-sm text-gray-700">' +
-            '\n        <p><strong class="text-purple-700">1. Take quizzes</strong> → Earn French Points for each one you complete</p>' +
-            '\n        <p><strong class="text-purple-700">2. Unlock themes</strong> → Use your points to access new topics (or go Premium)</p>' +
-            '\n        <p><strong class="text-purple-700">3. Track progress</strong> → Build a visible history of your French level</p>' +
+            '\n        <p><strong class="text-purple-700">1. Take quizzes</strong> -> Earn French Points for each one you complete</p>' +
+            '\n        <p><strong class="text-purple-700">2. Unlock themes</strong> -> Use your points to access new topics (or go Premium)</p>' +
+            '\n        <p><strong class="text-purple-700">3. Track progress</strong> -> Build a visible history of your French level</p>' +
             '\n      </div>' +
+
             '\n      <div class="mt-3 pt-3 border-t border-purple-200">' +
             '\n        <p class="text-xs text-gray-600">🎯 <strong>Colors is free</strong> – perfect to start. More themes unlock as you progress.</p>' +
             '\n      </div>' +
@@ -308,6 +320,14 @@
 
         const mainIcon = isExcellent ? "🎉" : isGood ? "💪" : "✨";
 
+        // IMPORTANT: on sort la logique de classes conditionnelles (Tailwind) vers un choix unique
+        // et on met le feedback en "neutral" pour éviter le conflit text-white / couleurs héritées.
+        const titleClass = isExcellent
+            ? "text-green-600"
+            : isGood
+                ? "text-blue-600"
+                : "text-orange-600";
+
         return (
             '\n<div class="quiz-wrapper" role="main" aria-label="Quiz results">' +
             '\n  <div class="text-center">' +
@@ -316,11 +336,7 @@
             mainIcon +
             "</div>" +
             '\n      <h1 class="text-3xl md:text-4xl font-bold mb-4 ' +
-            (isExcellent
-                ? "text-green-600"
-                : isGood
-                    ? "text-blue-600"
-                    : "text-orange-600") +
+            titleClass +
             '">' +
             (isExcellent ? "Excellent result" : isGood ? "Well done" : "Good effort") +
             "</h1>" +
@@ -329,7 +345,7 @@
             "%" +
             "</div>" +
             (feedbackMsg
-                ? '\n      <div class="feedback-content correct mt-4 max-w-xl mx-auto text-gray-800 text-base">' +
+                ? '\n      <div class="feedback-content neutral mt-4 max-w-xl mx-auto">' +
                 feedbackMsg +
                 "</div>"
                 : "") +
@@ -340,7 +356,6 @@
                 ? this.features.getCompletionMessage(resultsData.percentage, resultsData.fpEarned)
                 : "+" + (Number(resultsData.fpEarned) || 0) + " French Points earned") +
             "</div>" +
-
             '\n      <p class="text-sm text-gray-700">' +
             "French Points help you unlock new themes and build a visible history of your level." +
             "</p>" +
@@ -384,6 +399,10 @@
         );
     };
 
+
+
+
+
     /* ----------------------------------------
        QUIZ SCREEN
        ---------------------------------------- */
@@ -406,33 +425,40 @@
 
         return (
             '\n<div class="quiz-wrapper" role="main" aria-label="Quiz screen">' +
-            '\n  <div class="flex items-center justify-between mb-4">' +
-            '\n    <div class="text-sm text-gray-600">' +
-            '<span id="quiz-progress-count">' +
-            progress.current +
-            "/" +
-            progress.total +
-            "</span>" +
-            "</div>" +
+
+            '\n  <div class="flex items-center justify-between gap-3 mb-4">' +
+            '\n    <div class="text-sm font-extrabold text-slate-700">' +
+            '      <span id="quiz-progress-count" class="inline-flex items-center gap-2">' +
+            '        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-100 border border-slate-200">' +
+            '          <span id="quiz-progress-value">' + progress.current + '/' + progress.total + '</span>' +
+            '        </span>' +
+            '      </span>' +
+            '    </div>' +
             '\n    <div class="flex items-center gap-2">' +
-            '<button id="go-themes-btn" type="button" class="quiz-button">' +
-            this.getBackToThemeLabel() +
-            '</button>' +
-            '<button id="home-quiz-btn" type="button" class="quiz-button">Home</button>' +
-            "</div>" +
-            "\n  </div>" +
-            '\n  <div class="w-full h-2 bg-gray-200 rounded-full mb-6" aria-hidden="true">' +
-            '<div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="h-2 bg-amber-400 rounded-full transition-all w-pct-0"></div>' +
-            "</div>" +
+            '      <button id="go-themes-btn" type="button">' + this.getBackToThemeLabel() + '</button>' +
+            '      <button id="home-quiz-btn" type="button">Home</button>' +
+            '    </div>' +
+            '\n  </div>' +
+
+            '\n  <div class="w-full h-2 bg-slate-200 rounded-full mb-5" aria-hidden="true">' +
+            '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="h-2 rounded-full transition-all w-pct-0"></div>' +
+            '  </div>' +
+
             '\n  <div id="question-container" class="space-y-4"></div>' +
-            '\n  <div id="feedback-container" class="mt-6" role="status" aria-live="polite"></div>' +
-            '\n  <div class="mt-6 flex items-center justify-between">' +
-            '<button id="prev-question-btn" type="button" class="quiz-button">Previous</button>' +
-            '<button id="next-question-btn" type="button" class="quiz-button">Next</button>' +
-            "</div>" +
+            '\n  <div id="feedback-container" class="mt-5" role="status" aria-live="polite"></div>' +
+
+            // IMPORTANT: aligne la structure avec ton CSS .tyf-quiz-actions
+            '\n  <div class="tyf-quiz-actions">' +
+            '    <button id="prev-question-btn" type="button" class="quiz-button">Previous</button>' +
+            '    <button id="next-question-btn" type="button" class="quiz-button">Next</button>' +
+            '  </div>' +
+
             "\n</div>"
         );
     };
+
+
+
 
     UICore.prototype.renderCurrentQuestion = function () {
         const question = this.quizManager.getCurrentQuestion();
@@ -464,7 +490,7 @@
             if (opt) {
                 opt.classList.add("selected");
                 opt.setAttribute("aria-checked", "true");
-                const indicator = opt.querySelector(".option-indicator div");
+                const indicator = opt.querySelector(".option-indicator-dot");
                 if (indicator) {
                     indicator.classList.remove("scale-0");
                     indicator.classList.add("scale-100");
@@ -478,7 +504,9 @@
 
 
     UICore.prototype.generateQuestionHTML = function (question) {
-        const questionText = question.question || question.text || "Question text missing";
+        const rawQuestionText = question.question || question.text || "Question text missing";
+        const questionText = this.escapeHTML(rawQuestionText);
+
         const hasAudio = !!question.audio;
         const questionNumber = (Number(this.quizManager && this.quizManager.currentIndex) || 0) + 1;
 
@@ -492,8 +520,10 @@
 
         const quizName =
             this.quizManager && this.quizManager.currentQuiz
-                ? this.normalizeText(this.quizManager.currentQuiz.name)
+                ? this.escapeHTML(this.normalizeText(this.quizManager.currentQuiz.name))
                 : "";
+
+        const hintHTML = question.hint ? this.escapeHTML(question.hint) : "";
 
         return (
             '\n<div class="question-content">' +
@@ -516,12 +546,12 @@
             '\n  <div class="options-container space-y-3" role="radiogroup" aria-label="Answer choices">' +
             (Array.isArray(question.options) ? question.options.map(this.generateOptionHTML.bind(this)).join("") : "") +
             "\n  </div>" +
-            (question.hint
+            (hintHTML
                 ? '\n  <div class="question-hint mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">' +
                 '\n    <div class="flex items-start">' +
                 '\n      <div class="font-medium text-blue-800 mr-2">Hint:</div>' +
                 '\n      <div class="text-blue-700 text-sm">' +
-                question.hint +
+                hintHTML +
                 "</div>" +
                 "\n    </div>" +
                 "\n  </div>"
@@ -529,6 +559,7 @@
             "\n</div>"
         );
     };
+
 
     UICore.prototype.generateAudioHTML = function (audioFilename) {
         const themeId = this.quizManager.currentThemeId;
@@ -539,20 +570,23 @@
             return "";
         }
 
+        // IMPORTANT: on utilise ton CSS (anti-purge) au lieu d’inline styles
         return (
-            '\n<div class="question-audio-container mb-6 text-center">' +
-            '\n  <div class="bg-blue-50 rounded-lg p-4 inline-block">' +
-            '\n    <audio class="question-audio hidden" preload="metadata">' +
-            '\n      <source src="' + audioPath + '" type="audio/mpeg">' +
+            '\n<div class="question-audio-container mb-5">' +
+            '\n  <div class="flex justify-center">' +
+            '\n    <div class="tyf-audio-panel">' +
+            '\n      <audio class="question-audio hidden" preload="metadata">' +
+            '\n        <source src="' + audioPath + '" type="audio/mpeg">' +
             "Your browser does not support audio." +
-            "\n    </audio>" +
-            '\n    <button type="button" class="audio-play-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">' +
-            "Listen" +
-            "</button>" +
+            "\n      </audio>" +
+            '\n      <button type="button" class="audio-play-btn quiz-button" aria-label="Play audio">Listen</button>' +
+            '\n      <span class="tyf-audio-meta">Audio</span>' +
+            "\n    </div>" +
             "\n  </div>" +
             "\n</div>"
         );
     };
+
 
 
     UICore.prototype._stripChoiceLabel = function (s) {
@@ -562,45 +596,39 @@
     UICore.prototype.generateOptionHTML = function (option, index) {
         const letters = ["A", "B", "C", "D"];
         const letter = letters[index] || String(index + 1);
-        const clean = this._stripChoiceLabel(option);
+
+        const safe = (option === null || option === undefined) ? "" : String(option);
+        const clean = this._stripChoiceLabel(safe);
+        const cleanEsc = this.escapeHTML(clean);
 
         return (
-            '\n<div class="option" data-option-index="' +
-            index +
-            '" role="radio" aria-checked="false" tabindex="0">' +
+            '\n<div class="option" data-option-index="' + index + '" role="radio" aria-checked="false" tabindex="0">' +
             '\n  <div class="flex items-center">' +
-            '\n    <div class="option-indicator w-5 h-5 border-2 border-gray-400 rounded-full mr-4 flex-shrink-0 transition-colors">' +
-            '\n      <div class="w-full h-full rounded-full bg-blue-600 transform scale-0 transition-transform"></div>' +
+            '\n    <div class="option-indicator w-5 h-5 rounded-full mr-4 flex-shrink-0" aria-hidden="true">' +
+            '\n      <div class="option-indicator-dot w-full h-full rounded-full transform scale-0 transition-transform"></div>' +
             "\n    </div>" +
-            '\n    <span class="option-letter text-lg font-bold text-gray-600 mr-3">' +
-            letter +
-            ".</span>" +
-            '\n    <span class="option-text text-gray-900 font-medium flex-1">' +
-            clean +
-            "</span>" +
+            '\n    <span class="option-letter text-lg font-bold text-gray-600 mr-3">' + letter + ".</span>" +
+            '\n    <span class="option-text text-gray-900 font-medium flex-1">' + (cleanEsc || "—") + "</span>" +
             "\n  </div>" +
             "\n</div>"
-        );
+        )
     };
-
 
     UICore.prototype.setupQuestionEvents = function () {
         const options = document.querySelectorAll(".option");
         const self = this;
 
-        options.forEach(function (option, index) {
-            option.addEventListener("click", function () {
-                self.selectOption(index, option);
+        options.forEach(function (optionEl, index) {
+            optionEl.addEventListener("click", function () {
+                self.selectOption(index, optionEl);
             });
-            option.addEventListener("keydown", function (e) {
-                // Sélection
+
+            optionEl.addEventListener("keydown", function (e) {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    self.selectOption(index, option);
+                    self.selectOption(index, optionEl);
                     return;
                 }
-
-                // PATCH 2: Navigation clavier type radio-group
                 if (e.key === "ArrowDown" || e.key === "ArrowRight") {
                     e.preventDefault();
                     const next = options[(index + 1) % options.length];
@@ -625,29 +653,25 @@
 
         const playNow = function () {
             audio.currentTime = 0;
-
-            audio
-                .play()
-                .then(function () {
-                    btn.textContent = "Replay";
+            audio.play().then(function () {
+                btn.textContent = "Replay";
+                btn.disabled = false;
+            }).catch(function (error) {
+                console.error("Audio playback failed:", error);
+                if (error && error.name === "NotAllowedError") {
+                    btn.textContent = "Click to allow audio";
                     btn.disabled = false;
-                })
-                .catch(function (error) {
-                    console.error("Audio playback failed:", error);
-                    if (error && error.name === "NotAllowedError") {
-                        btn.textContent = "Click to allow audio";
-                        btn.disabled = false;
-                    } else if (error && error.name === "NotSupportedError") {
-                        btn.textContent = "Format not supported";
-                        btn.disabled = true;
-                    } else if (audio.error && audio.error.code === 4) {
-                        btn.textContent = "Audio file not found";
-                        btn.disabled = true;
-                    } else {
-                        btn.textContent = "Audio error - try again";
-                        btn.disabled = false;
-                    }
-                });
+                } else if (error && error.name === "NotSupportedError") {
+                    btn.textContent = "Format not supported";
+                    btn.disabled = true;
+                } else if (audio.error && audio.error.code === 4) {
+                    btn.textContent = "Audio file not found";
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = "Audio error - try again";
+                    btn.disabled = false;
+                }
+            });
         };
 
         btn.addEventListener("click", function () {
@@ -685,20 +709,11 @@
         audio.addEventListener("error", function () {
             if (audio.error) {
                 switch (audio.error.code) {
-                    case 1:
-                        btn.textContent = "Audio loading cancelled";
-                        break;
-                    case 2:
-                        btn.textContent = "Network error";
-                        break;
-                    case 3:
-                        btn.textContent = "Audio format error";
-                        break;
-                    case 4:
-                        btn.textContent = "Audio file not found";
-                        break;
-                    default:
-                        btn.textContent = "Audio unavailable";
+                    case 1: btn.textContent = "Audio loading cancelled"; break;
+                    case 2: btn.textContent = "Network error"; break;
+                    case 3: btn.textContent = "Audio format error"; break;
+                    case 4: btn.textContent = "Audio file not found"; break;
+                    default: btn.textContent = "Audio unavailable";
                 }
             } else {
                 btn.textContent = "Audio unavailable";
@@ -712,12 +727,13 @@
         });
     };
 
+
     UICore.prototype.selectOption = function (index, optionElement) {
         try {
             document.querySelectorAll(".option").forEach(function (opt) {
                 opt.classList.remove("selected");
                 opt.setAttribute("aria-checked", "false");
-                const indicator = opt.querySelector(".option-indicator div");
+                const indicator = opt.querySelector(".option-indicator-dot");
                 if (indicator) {
                     indicator.classList.remove("scale-100");
                     indicator.classList.add("scale-0");
@@ -726,11 +742,12 @@
 
             optionElement.classList.add("selected");
             optionElement.setAttribute("aria-checked", "true");
-            const indicator = optionElement.querySelector(".option-indicator div");
+            const indicator = optionElement.querySelector(".option-indicator-dot");
             if (indicator) {
                 indicator.classList.remove("scale-0");
                 indicator.classList.add("scale-100");
             }
+
 
             this.quizManager.selectAnswer(index);
 
@@ -1331,12 +1348,16 @@
                         "quiz-item theme-card transition-all " +
                         (!isUnlocked ? "opacity-60" : "hover:shadow-lg cursor-pointer");
 
+                    const ariaDisabled = !isUnlocked ? ' aria-disabled="true"' : ' aria-disabled="false"';
+
                     return (
                         '\n<div class="' +
                         classes +
                         '" data-quiz-id="' +
                         quiz.id +
-                        '">' +
+                        '" role="button" tabindex="0"' +
+                        ariaDisabled +
+                        ">" +
                         '\n  <div class="flex items-center justify-between mb-4">' +
                         '\n    <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">' +
                         (idx + 1) +
@@ -1355,6 +1376,7 @@
                 })
                 .join("") || ""
         );
+
     };
 
     /* ----------------------------------------
@@ -1495,7 +1517,11 @@
                     return;
                 }
 
-                if (typeof self.storageManager.isQuizUnlocked === "function" && self.storageManager.isQuizUnlocked(quizId)) {
+                const unlocked =
+                    (typeof self.storageManager.isQuizUnlocked !== "function") ||
+                    self.storageManager.isQuizUnlocked(quizId);
+
+                if (unlocked) {
                     self.storageManager?.markQuizStarted?.({ themeId: Number(themeId), quizId: quizId });
 
                     self.quizManager.loadQuiz(themeId, quizId).catch(function (err) {
@@ -1505,6 +1531,7 @@
                 } else if (self.features && self.features.showPaywallModal) {
                     self.features.showPaywallModal("unlock-quiz-" + quizId);
                 }
+
             };
 
             card.addEventListener("click", activate);
@@ -1728,31 +1755,32 @@
 
             const bar = document.getElementById("quiz-progress-bar");
             if (bar) {
-                bar.setAttribute("aria-valuenow", String(Math.round(progress.percentage)));
+                const pctNum = Number(progress && progress.percentage);
+                const pct = Number.isFinite(pctNum) ? pctNum : 0;
+                const pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+
+                bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+
                 Array.prototype.slice
                     .call(bar.classList)
-                    .filter(function (c) {
-                        return c.indexOf("w-pct-") === 0;
-                    })
-                    .forEach(function (c) {
-                        bar.classList.remove(c);
-                    });
+                    .filter(function (c) { return c.indexOf("w-pct-") === 0; })
+                    .forEach(function (c) { bar.classList.remove(c); });
 
-                const pct = Number.isFinite(progress.percentage) ? progress.percentage : 0;
-                const pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
                 bar.classList.add("w-pct-" + pct5);
             }
 
-            const count = document.getElementById("quiz-progress-count");
-            if (count) count.textContent = progress.current + "/" + progress.total;
+            // ID stable: on update seulement la valeur
+            const value = document.getElementById("quiz-progress-value");
+            if (value) value.textContent = progress.current + "/" + progress.total;
 
-            if (this.updateNavigationButtons) {
+            if (typeof this.updateNavigationButtons === "function") {
                 this.updateNavigationButtons();
             }
         } catch (err) {
             console.error("Error updating quiz progress:", err);
         }
     };
+
 
     UICore.prototype.updateNavigationButtons = function () {
         var prevBtn = document.getElementById("prev-question-btn");
@@ -1816,10 +1844,12 @@
 
             const reviewHTML = questions
                 .map(function (question, index) {
-
                     const userAnswerIndex = userAnswers[index];
                     const isCorrect = questionStatus[index] === "correct";
                     const correctIndex = question.correctIndex;
+
+                    const qTextRaw = (question.question || question.text || "");
+                    const qText = self.escapeHTML(qTextRaw);
 
                     const userAnswerRaw = (question.options && typeof userAnswerIndex === "number")
                         ? question.options[userAnswerIndex]
@@ -1831,44 +1861,42 @@
                     const userAnswerClean = userAnswerRaw ? self._stripChoiceLabel(userAnswerRaw) : "Not answered";
                     const correctAnswerClean = correctAnswerRaw ? self._stripChoiceLabel(correctAnswerRaw) : "";
 
+                    const userAnswerHTML = self.escapeHTML(userAnswerClean);
+                    const correctAnswerHTML = self.escapeHTML(correctAnswerClean);
+
+                    const explanationHTML = question.explanation
+                        ? self.escapeHTML(String(question.explanation))
+                        : "";
+
                     return (
                         '\n<div class="review-question mb-4 p-4 border rounded-lg ' +
                         (isCorrect ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50") +
                         '">' +
                         '\n  <div class="flex items-start justify-between mb-3">' +
-                        '\n    <h4 class="font-medium text-gray-800">Question ' +
-                        (index + 1) +
-                        "</h4>" +
-                        '\n    <span class="text-sm font-bold ' +
-                        (isCorrect ? "text-green-600" : "text-red-600") +
-                        '">' +
+                        '\n    <h4 class="font-medium text-gray-800">Question ' + (index + 1) + "</h4>" +
+                        '\n    <span class="text-sm font-bold ' + (isCorrect ? "text-green-600" : "text-red-600") + '">' +
                         (isCorrect ? "Correct" : "Incorrect") +
                         "</span>" +
                         "\n  </div>" +
-                        '\n  <p class="text-gray-700 mb-3">' +
-                        (question.question || question.text) +
-                        "</p>" +
+                        '\n  <p class="text-gray-700 mb-3">' + qText + "</p>" +
                         '\n  <div class="space-y-2">' +
                         '\n    <div class="text-sm">' +
                         '\n      <span class="text-gray-600">Your answer:</span>' +
-                        '\n      <span class="ml-2 ' +
-                        (isCorrect ? "text-green-600" : "text-red-600") +
-                        ' font-medium">' +
-                        userAnswerClean +
+                        '\n      <span class="ml-2 ' + (isCorrect ? "text-green-600" : "text-red-600") + ' font-medium">' +
+                        userAnswerHTML +
                         "</span>" +
                         "\n    </div>" +
                         (!isCorrect
                             ? '\n    <div class="text-sm">' +
                             '\n      <span class="text-gray-600">Correct answer:</span>' +
                             '\n      <span class="ml-2 text-green-600 font-medium">' +
-                            correctAnswerClean +
+                            correctAnswerHTML +
                             "</span>" +
                             "\n    </div>"
                             : "") +
-                        (question.explanation
+                        (explanationHTML
                             ? '\n    <div class="text-sm text-gray-600 mt-2 p-2 bg-blue-50 rounded">' +
-                            "<strong>Explanation:</strong> " +
-                            question.explanation +
+                            "<strong>Explanation:</strong> " + explanationHTML +
                             "</div>"
                             : "") +
                         "\n  </div>" +
@@ -1882,6 +1910,7 @@
             console.error("Error generating detailed review:", error);
         }
     };
+
 
 
     /* ----------------------------------------
@@ -1935,18 +1964,21 @@
     UICore.prototype.generateNextActionButton = function (resultsData) {
         if (resultsData.percentage >= 70) {
             return (
-                '\n<button id="next-quiz-btn" class="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold text-xl py-4 px-12 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200">' +
+                '\n<button id="next-quiz-btn" type="button" class="quiz-button">' +
                 "Next quiz" +
                 "</button>"
             );
-        } else {
-            return (
-                '\n<button id="retry-quiz-primary-btn" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold text-xl py-4 px-12 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200">' +
-                "Retry quiz" +
-                "</button>"
-            );
         }
+
+        return (
+            '\n<button id="retry-quiz-primary-btn" type="button" class="quiz-button">' +
+            "Retry quiz" +
+            "</button>"
+        );
     };
+
+
+
 
     // These are "CEFR-flavored" but intentionally simple and motivational
     UICore.prototype.getCECRLevel = function (percentage) {
