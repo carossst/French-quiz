@@ -145,24 +145,25 @@
         <div class="text-6xl mb-4">⚠️</div>
         <h2 class="text-2xl font-bold text-gray-800 mb-4">JavaScript Required</h2>
         <p class="text-gray-600 mb-6">
-          Test Your French requires JavaScript to function.
-          Please enable JavaScript in your browser settings and refresh the page.
+          This app needs JavaScript to run. Open this page in Chrome/Safari and reload.
+          If you use an ad blocker or strict privacy mode, disable it for this site and reload.
         </p>
+
       </div>
     </div>
   </noscript>
 
   <!-- Scripts -->
   <script src="./config.js" defer></script>
-  <script src="./resourceManager.js" defer></script>
   <script src="./storage.js" defer></script>
+  <script src="./resourceManager.js" defer></script>
   <script src="./quizManager.js" defer></script>
   <script src="./ui-core.js" defer></script>
   <script src="./ui-features.js" defer></script>
   <script src="./ui-charts.js" defer></script>
   <script src="./email.js" defer></script>
-  <!-- referral.js removed - feature too complex for MVP v3.0 -->
   <script src="./main.js" defer></script>
+
 
 
 
@@ -173,18 +174,21 @@
 
   <!-- Footer - Amélioré pour mobile et accessibilité -->
   <footer class="text-xs text-gray-500 text-center py-6 mt-10">
+    <p class="mb-2 text-gray-600">
+      Written by Carole, a real French native from Paris. Not AI-generated.
+    </p>
+
     <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
-      <a href="./privacy.html" aria-label="Read privacy policy"
-        class="hover:text-blue-600 transition-colors">Privacy</a>
-      <span class="text-gray-400" aria-hidden="true">·</span>
-      <a href="./terms.html" aria-label="Read terms of service" class="hover:text-blue-600 transition-colors">Terms</a>
-      <span class="text-gray-400" aria-hidden="true">·</span>
-      <a id="contact-mail" data-user="bonjour" data-domain="testyourfrench.com" href="mailto:bonjour@testyourfrench.com"
-        class="hover:text-blue-600 transition-colors" aria-label="Send email to Test Your French support">Contact</a>
-      <span class="text-gray-400" aria-hidden="true">·</span>
+      <a href="./privacy.html">Privacy</a>
+      <span aria-hidden="true">·</span>
+      <a href="./terms.html">Terms</a>
+      <span aria-hidden="true">·</span>
+      <a id="contact-mail" ...>Contact</a>
+      <span aria-hidden="true">·</span>
       <span class="text-gray-400">v3.0</span>
     </div>
   </footer>
+
 </body>
 
 </html>

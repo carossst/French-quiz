@@ -166,19 +166,35 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
 
     // Tracking quiz_started géré par StorageManager (source de vérité)
 
+    // APRÈS (ne plus renvoyer à Home, revenir à la sélection si possible)
   } catch (error) {
     getLogger().error(`QuizManager: Error loading quiz ${quizId} for theme ${themeId}:`, error);
 
-    this.resetQuizState();
-
+    // Afficher l'erreur d'abord (avant reset, pour garder contexte si besoin)
     if (typeof window.showErrorMessage === "function") {
-      window.showErrorMessage(`Failed to load quiz: ${error.message}`);
+      window.showErrorMessage(`Failed to load quiz (Theme ${themeId}, Quiz ${quizId}).`);
     }
 
-    if (this.ui && this.ui.showWelcomeScreen) {
+    // Reset state
+    this.resetQuizState();
+
+    // Revenir à la sélection du thème si on peut (meilleur UX)
+    if (this.ui && typeof this.ui.showQuizSelection === "function") {
+      // restaurer le thème courant pour que la sélection sache quoi afficher
+      const tId = Number(themeId);
+      this.currentThemeId = Number.isFinite(tId) ? tId : themeId;
+
+      // ui-core lit quizManager.currentThemeId -> donc ça suffit
+      this.ui.showQuizSelection();
+      return;
+    }
+
+    // Fallback ultime: Home seulement si on n'a pas de selection screen
+    if (this.ui && typeof this.ui.showWelcomeScreen === "function") {
       this.ui.showWelcomeScreen();
     }
   }
+
 };
 
 QuizManager.prototype._now = function () {

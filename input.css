@@ -968,7 +968,6 @@
     :where(.quiz-button,
         #start-first-quiz-btn,
         #retry-quiz-primary-btn,
-        #next-quiz-btn,
         #back-to-themes-btn,
         #premium-code-btn,
         #premium-buy-btn,
@@ -995,7 +994,6 @@
     :where(.quiz-button,
         #start-first-quiz-btn,
         #retry-quiz-primary-btn,
-        #next-quiz-btn,
         #back-to-themes-btn,
         #premium-code-btn,
         #premium-buy-btn,
@@ -1014,7 +1012,6 @@
     :where(.quiz-button,
         #start-first-quiz-btn,
         #retry-quiz-primary-btn,
-        #next-quiz-btn,
         #back-to-themes-btn,
         #premium-code-btn,
         #premium-buy-btn,
@@ -1034,7 +1031,6 @@
     :where(.quiz-button,
         #start-first-quiz-btn,
         #retry-quiz-primary-btn,
-        #next-quiz-btn,
         #back-to-themes-btn,
         #premium-code-btn,
         #premium-buy-btn,
@@ -1049,6 +1045,43 @@
         opacity: 0.5;
         cursor: not-allowed;
         box-shadow: none;
+    }
+
+    /* Continue with a quick quiz = secondary CTA (smaller) */
+    #next-quiz-btn {
+        background: rgb(248 250 252);
+        color: rgb(15 23 42);
+        font-weight: 900;
+
+        padding: 0.55rem 0.9rem;
+        font-size: 0.95rem;
+        border-radius: 9999px;
+
+        border: 1px solid rgb(226 232 240);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+
+        cursor: pointer;
+        transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    #next-quiz-btn:hover:not(:disabled) {
+        background: rgb(241 245 249);
+        border-color: rgb(203 213 225);
+    }
+
+    #next-quiz-btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    #next-quiz-btn:focus-visible {
+        outline: none;
+        border-color: rgb(var(--color-primary));
+        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
+    }
+
+    #next-quiz-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
     }
 
     /* Quiz: Back button must be secondary (not CTA) */

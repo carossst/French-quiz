@@ -462,7 +462,7 @@
     return quizData.questions.every(function (q) {
       const hasText =
         typeof q.question === "string" || typeof q.text === "string";
-      const hasOptions = Array.isArray(q.options);
+      const hasOptions = Array.isArray(q.options) && q.options.length > 0;
       const hasCorrect =
         typeof q.correctAnswer === "string" ||
         typeof q.correctIndex === "number";
@@ -476,8 +476,10 @@
         if (q.options.indexOf(q.correctAnswer) === -1) return false;
       }
 
+      return true; // <-- IMPORTANT: valider explicitement la question
     });
   };
+
 
   ResourceManagerClass.prototype.enrichQuizWithAudio = function (
     quizData,
