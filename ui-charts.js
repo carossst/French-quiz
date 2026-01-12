@@ -219,7 +219,7 @@
         }
       } catch (e) { }
 
-      if (fpPerLevel == null) fpPerLevel = 100;
+      if (fpPerLevel == null) fpPerLevel = 50;
 
       var fpNum = Number(fp);
       if (!Number.isFinite(fpNum) || fpNum < 0) fpNum = 0;
@@ -314,14 +314,15 @@
   };
 
   // ----------------------------------------
-  // BADGES (FILTER STREAK)
+  // BADGES
   // ----------------------------------------
   UICharts.prototype._renderBadges = function (badgesArray) {
     var badgeListRaw = Array.isArray(badgesArray) ? badgesArray : [];
 
-    var badgeList = badgeListRaw.filter(function (id) {
-      return !/^streak-\d+$/i.test(String(id || ""));
-    });
+    // Keep all badges, including streak-* (milestones can be irregular)
+    var badgeList = badgeListRaw
+      .map(function (b) { return b; })
+      .filter(function (b) { return b != null && String(b) !== ""; });
 
     if (!badgeList || badgeList.length <= 0) return "";
 
@@ -358,12 +359,15 @@
       label = "Perfect score";
     } else if (/^fp-\d+$/i.test(id)) {
       icon = "✨";
-      label = "French Points milestone";
       var n = Number(id.split("-")[1]);
-      if (Number.isFinite(n)) label = String(n) + " French Points";
+      label = Number.isFinite(n) ? (String(n) + " French Points") : "French Points milestone";
     } else if (id === "first-quiz") {
       icon = "🎯";
       label = "First quiz completed";
+    } else if (/^streak-\d+$/i.test(id)) {
+      icon = "🔥";
+      var s = Number(id.split("-")[1]);
+      label = Number.isFinite(s) ? ("Streak: " + String(s) + " days") : "Streak milestone";
     }
 
     return (
@@ -377,7 +381,6 @@
       "\n  </div>"
     );
   };
-
   // ----------------------------------------
   // HISTORY
   // ----------------------------------------

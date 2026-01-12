@@ -7,16 +7,24 @@ const Logger = {
     window.TYF_CONFIG?.debug?.enabled &&
     window.TYF_CONFIG.debug.logLevel === "debug" &&
     console.log("[TYF Debug]", ...args),
+
   log: (...args) =>
     window.TYF_CONFIG?.debug?.enabled &&
     ["debug", "log"].includes(window.TYF_CONFIG.debug.logLevel) &&
     console.log("[TYF]", ...args),
 
   // WARNINGS: toujours visibles (prod incluse)
-  warn: (...args) => console.warn("[TYF Warning]", ...args),
+  warn: (...args) =>
+    (window.TYF_CONFIG?.debug?.enabled ||
+      window.TYF_CONFIG?.environment === "staging") &&
+    console.warn("[TYF Warning]", ...args),
 
   error: (...args) => console.error("[TYF Error]", ...args)
 };
+
+// Export global (utilisé par getLogger() dans les autres fichiers)
+window.Logger = Logger;
+
 
 
 
@@ -25,7 +33,7 @@ const Logger = {
  * CSP-safe (pas d'inline handler)
  */
 function showErrorMessage(message) {
-  Logger.error(message);
+
 
   const existing = document.querySelector(".tyf-error-message");
   if (existing) existing.remove();

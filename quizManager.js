@@ -1,9 +1,17 @@
 // quizManager.js - v3 (Option B - manual Next)
 
+
+function getLogger() {
+  return window.Logger && typeof window.Logger.debug === "function"
+    ? window.Logger
+    : console;
+}
+
 function QuizManager(resourceManager, storageManager, ui) {
   if (!resourceManager || !storageManager) {
     throw new Error("QuizManager: Missing dependencies (resourceManager, storageManager)");
   }
+
 
   this.resourceManager = resourceManager;
   this.storageManager = storageManager;
@@ -32,8 +40,9 @@ function QuizManager(resourceManager, storageManager, ui) {
 
 
 
-  console.log("QuizManager: Initialized with dependencies (v3)");
+  getLogger().log("QuizManager: Initialized with dependencies (v3)");
 }
+
 
 QuizManager.prototype._recordTime = function (finalize) {
   return this._recordTimeForCurrentQuestion(finalize);
@@ -63,8 +72,9 @@ QuizManager.prototype.resetQuizState = function () {
   // IMPORTANT: reset badge baseline too (avoids stale comparisons later)
   this.previousBadgeCount = 0;
 
-  console.log("QuizManager: State reset");
+  getLogger().log("QuizManager: State reset");
 };
+
 
 
 
@@ -78,7 +88,7 @@ QuizManager.prototype.normalizeText = function (s) {
 
 
 QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
-  console.log(`QuizManager: Loading quiz Theme ${themeId}, Quiz ${quizId}`);
+  getLogger().log(`QuizManager: Loading quiz Theme ${themeId}, Quiz ${quizId}`);
 
   try {
     const quizData = await this.resourceManager.getQuiz(themeId, quizId);
@@ -87,15 +97,20 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
       throw new Error("Invalid quiz data structure received from ResourceManager");
     }
 
+    this.resetQuizState();
+
     const badges = (typeof this.storageManager.getBadges === "function")
       ? this.storageManager.getBadges()
       : [];
     this.previousBadgeCount = Array.isArray(badges) ? badges.length : 0;
 
-    this.resetQuizState();
 
-    this.currentThemeId = themeId;
-    this.currentQuizId = quizId;
+    const tId = Number(themeId);
+    const qId = Number(quizId);
+
+    this.currentThemeId = Number.isFinite(tId) ? tId : themeId;
+    this.currentQuizId = Number.isFinite(qId) ? qId : quizId;
+
     this.currentQuiz = {
       ...quizData,
       name: this.normalizeText(quizData.name),
@@ -114,25 +129,25 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
         : quizData.questions
     };
 
-    if (typeof this.storageManager.isQuizCompleted === "function") {
-      const alreadyCompleted = this.storageManager.isQuizCompleted(
-        this.currentThemeId,
-        this.currentQuizId
-      );
+    const alreadyCompleted = this.storageManager.isQuizCompleted(this.currentQuizId);
 
-      if (alreadyCompleted) {
-        this.ui?.showFeedbackMessage?.(
-          "info",
-          "ℹ️ Revision mode: no French Points on replays (first completion only)"
-        );
-      }
+    if (alreadyCompleted) {
+      this.ui?.showFeedbackMessage?.(
+        "info",
+        "🔄 Practice mode: train freely. Points on first run only."
+      );
     }
 
     this.preprocessQuestions();
 
     const questionCount = this.currentQuiz.questions.length;
     this.userAnswers = new Array(questionCount).fill(null);
-    this.questionStatus = new Array(questionCount).fill(null);
+    this.questionStatus = new Array(questionCount).fill(null).map(() => ({
+      validated: false,
+      selectedIndex: null,
+      isCorrect: null
+    }));
+
     this.questionTimes = new Array(questionCount).fill(0);
 
     // ⏱️ INIT TIMING STATE (question timing starts when the question is rendered)
@@ -143,19 +158,17 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
     if (this.ui && this.ui.showQuizScreen) {
       this.ui.showQuizScreen();
     } else {
-      console.error("QuizManager: UI method not available");
+      getLogger().error("QuizManager: UI method not available");
     }
 
+    getLogger().log(`QuizManager: Quiz loaded successfully. ${questionCount} questions.`);
 
 
+    // Tracking quiz_started géré par StorageManager (source de vérité)
 
-    console.log(`QuizManager: Quiz loaded successfully. ${questionCount} questions.`);
-
-    if (typeof window.track === "function") {
-      window.track("quiz_started", { theme: themeId, quiz: quizId });
-    }
   } catch (error) {
-    console.error(`QuizManager: Error loading quiz ${quizId} for theme ${themeId}:`, error);
+    getLogger().error(`QuizManager: Error loading quiz ${quizId} for theme ${themeId}:`, error);
+
     this.resetQuizState();
 
     if (typeof window.showErrorMessage === "function") {
@@ -209,17 +222,19 @@ QuizManager.prototype.preprocessQuestions = function () {
       if (Number.isFinite(n)) {
         question.correctIndex = n;
       } else {
-        console.error(`Question ${index + 1}: Invalid - correctIndex is not a number`);
+        getLogger().error(`Question ${index + 1}: Invalid - correctIndex is not a number`);
         question.isInvalid = true;
         question.correctIndex = -1;
       }
       return;
+
     }
 
     // Sinon, fallback correctAnswer -> correctIndex
     if (question.correctAnswer !== undefined && question.correctAnswer !== null) {
       if (!Array.isArray(question.options)) {
-        console.error(`Question ${index + 1}: Invalid - options is not an array`);
+        getLogger().error(`Question ${index + 1}: Invalid - options is not an array`);
+
         question.isInvalid = true;
         question.correctIndex = -1;
         return;
@@ -235,7 +250,8 @@ QuizManager.prototype.preprocessQuestions = function () {
       if (correctIndex !== -1) {
         question.correctIndex = correctIndex;
       } else {
-        console.error(`Question ${index + 1}: Invalid - correct answer not in options`);
+        getLogger().error(`Question ${index + 1}: Invalid - correct answer not in options`);
+
         question.isInvalid = true;
         question.correctIndex = -1;
 
@@ -245,7 +261,8 @@ QuizManager.prototype.preprocessQuestions = function () {
       }
     } else {
       // Ni correctIndex ni correctAnswer: données invalides
-      console.error(`Question ${index + 1}: Invalid - missing correctIndex and correctAnswer`);
+      getLogger().error(`Question ${index + 1}: Invalid - missing correctIndex and correctAnswer`);
+
       question.isInvalid = true;
       question.correctIndex = -1;
     }
@@ -253,19 +270,15 @@ QuizManager.prototype.preprocessQuestions = function () {
 };
 
 
-QuizManager.prototype.displayQuiz = function () {
-  if (this.ui && this.ui.showQuizScreen) {
-    this.ui.showQuizScreen();
-  } else {
-    console.error("QuizManager: Modern UI not available, cannot display quiz");
-  }
-};
+// Deprecated: display handled by loadQuiz + renderCurrentQuestion
+
 
 QuizManager.prototype.renderCurrentQuestion = function () {
   if (!this.currentQuiz) {
-    console.error("QuizManager: Cannot render question - no quiz loaded");
+    getLogger().error("QuizManager: Cannot render question - no quiz loaded");
     return;
   }
+
 
   // ⏱️ (re)start timing at the moment the question is rendered
   this._startTiming();
@@ -273,8 +286,9 @@ QuizManager.prototype.renderCurrentQuestion = function () {
   if (this.ui && this.ui.renderCurrentQuestion) {
     this.ui.renderCurrentQuestion();
   } else {
-    console.error("QuizManager: UI method not available");
+    getLogger().error("QuizManager: UI method not available");
   }
+
 
   if (this.ui && this.ui.updateNavigationButtons) {
     this.ui.updateNavigationButtons();
@@ -287,50 +301,61 @@ QuizManager.prototype.renderCurrentQuestion = function () {
 QuizManager.prototype.selectAnswer = function (answerIndex) {
   const question = this.getCurrentQuestion();
   if (!question || !Array.isArray(question.options) || answerIndex < 0 || answerIndex >= question.options.length) {
-    console.warn("QuizManager: Invalid answer selection", {
+    getLogger().warn("QuizManager: Invalid answer selection", {
       currentIndex: this.currentIndex,
       answerIndex,
       questionOptions: question && question.options
     });
+
     return;
   }
 
   const prev = this.userAnswers[this.currentIndex];
   this.userAnswers[this.currentIndex] = answerIndex;
 
-  // IMPORTANT: if user changes answer after validation, force “non validated” state first
+  // Si l’utilisateur change de réponse après validation, on repasse par un état "non validé"
   if (prev !== null && prev !== undefined && prev !== answerIndex) {
-    if (this.questionStatus[this.currentIndex] !== null) {
-      this.questionStatus[this.currentIndex] = null;
-      this._lastValidatedQuestionIndex = null;
-      this._lastValidatedAnswerIndex = null;
+    const st = this.questionStatus[this.currentIndex];
+    if (st) {
+      st.validated = false;
+      st.selectedIndex = null;
+      st.isCorrect = null;
     }
+    this._lastValidatedQuestionIndex = null;
+    this._lastValidatedAnswerIndex = null;
   }
 
   if (this.ui && this.ui.updateSelectedOption) {
     this.ui.updateSelectedOption(answerIndex);
   }
 
-  // Auto-validation on click (as per your Mode 2 rules)
+  // Auto-validation au clic (Mode 2)
   this.validateCurrentAnswer();
 
-  // Keep nav buttons correct (Next locked/unlocked)
+  // Mettre à jour Next (bloqué/débloqué)
   if (this.ui && this.ui.updateNavigationButtons) {
     this.ui.updateNavigationButtons();
   }
 };
 
 
+
 QuizManager.prototype.validateCurrentAnswer = function () {
   const answerIndex = this.userAnswers[this.currentIndex];
   if (answerIndex === null || answerIndex === undefined) {
-    console.warn("QuizManager: No answer selected to validate");
+    getLogger().warn("QuizManager: No answer selected to validate");
     return;
   }
 
-  // If already validated for same question & same answer, do nothing
+
+
+  const st = this.questionStatus[this.currentIndex];
+  if (!st) return;
+
+  // Idempotent: si déjà validé avec la même réponse, ne rien faire
   if (
-    this.questionStatus[this.currentIndex] !== null &&
+    st.validated === true &&
+    st.selectedIndex === answerIndex &&
     this._lastValidatedAnswerIndex === answerIndex &&
     this._lastValidatedQuestionIndex === this.currentIndex
   ) {
@@ -340,19 +365,17 @@ QuizManager.prototype.validateCurrentAnswer = function () {
   const question = this.getCurrentQuestion();
   const isCorrect = !!(question && question.correctIndex === answerIndex);
 
-  const prevStatus = this.questionStatus[this.currentIndex]; // null | "correct" | "incorrect"
-  const nextStatus = isCorrect ? "correct" : "incorrect";
+  st.selectedIndex = answerIndex;
+  st.validated = true;
+  st.isCorrect = isCorrect;
 
-  // Score transitions
-  if (prevStatus === null) {
-    if (nextStatus === "correct") this.score += 1;
-  } else if (prevStatus === "correct" && nextStatus === "incorrect") {
-    this.score = Math.max(0, this.score - 1);
-  } else if (prevStatus === "incorrect" && nextStatus === "correct") {
-    this.score += 1;
+  // Recalcul KISS du score (robuste)
+  let newScore = 0;
+  for (let i = 0; i < this.questionStatus.length; i++) {
+    const s = this.questionStatus[i];
+    if (s && s.validated === true && s.isCorrect === true) newScore += 1;
   }
-
-  this.questionStatus[this.currentIndex] = nextStatus;
+  this.score = newScore;
 
   this._lastValidatedQuestionIndex = this.currentIndex;
   this._lastValidatedAnswerIndex = answerIndex;
@@ -361,28 +384,31 @@ QuizManager.prototype.validateCurrentAnswer = function () {
     this.ui.showQuestionFeedback(question, answerIndex);
   }
 
-  console.log(
-    `QuizManager: Validation - Question ${this.currentIndex + 1}, Status: ${nextStatus}, Score: ${this.score}`
+  getLogger().debug(
+    `QuizManager: Validation - Q${this.currentIndex + 1}, correct=${st.isCorrect}, score=${this.score}`
   );
+
 };
+
 
 
 
 QuizManager.prototype.nextQuestion = function () {
   if (!this.currentQuiz) return false;
 
-  if (this.questionStatus[this.currentIndex] === null) {
+  const st = this.questionStatus && this.questionStatus[this.currentIndex];
+  if (!st || st.validated !== true) {
     if (typeof this.ui?.showFeedbackMessage === "function") {
-      this.ui.showFeedbackMessage("warn", "Validate your answer to continue");
+      // compat: garder la clé historique si tu l’avais déjà câblée côté UI
+      this.ui.showFeedbackMessage("warn", "validation_required");
     } else if (typeof window.showErrorMessage === "function") {
-      window.showErrorMessage("Validate your answer to continue");
+      window.showErrorMessage("Select an answer to continue");
     }
     return false;
   }
 
   const isLast = this.currentIndex >= this.currentQuiz.questions.length - 1;
 
-  // Enregistrer le temps UNE SEULE FOIS
   this._recordTime(isLast);
 
   if (!isLast) {
@@ -393,8 +419,8 @@ QuizManager.prototype.nextQuestion = function () {
 
   this.finishQuiz();
   return true;
-
 };
+
 
 
 QuizManager.prototype.previousQuestion = function () {
@@ -412,10 +438,11 @@ QuizManager.prototype.previousQuestion = function () {
 
 
 QuizManager.prototype.submitAnswer = function (answerIndex) {
-  console.warn(
-    "QuizManager.submitAnswer() called. Current flow: selectAnswer handled via UICore. This method is kept for compatibility but is not used in the new flow."
-  );
+  // Compat: legacy callers.
+  // New flow uses selectAnswer() which auto-validates (Mode 2).
+  this.selectAnswer(answerIndex);
 };
+
 
 QuizManager.prototype.getCurrentQuestion = function () {
   if (
@@ -429,9 +456,10 @@ QuizManager.prototype.getCurrentQuestion = function () {
 };
 
 QuizManager.prototype.hasAnsweredCurrentQuestion = function () {
-  return this.userAnswers[this.currentIndex] !== null &&
-    this.userAnswers[this.currentIndex] !== undefined;
+  const st = this.questionStatus && this.questionStatus[this.currentIndex];
+  return !!(st && st.validated === true);
 };
+
 
 QuizManager.prototype.isLastQuestion = function () {
   return this.currentQuiz &&
@@ -460,9 +488,10 @@ QuizManager.prototype.getQuizProgress = function () {
 
 QuizManager.prototype.finishQuiz = function () {
   if (!this.currentQuiz || !this.storageManager) {
-    console.error("QuizManager: Cannot finish quiz - missing currentQuiz or storageManager");
+    getLogger().error("QuizManager: Cannot finish quiz - missing currentQuiz or storageManager");
     return;
   }
+
 
   // plus aucun appel à _recordTime ici
 
@@ -492,7 +521,7 @@ QuizManager.prototype.finishQuiz = function () {
   const fpBefore = this.storageManager.getFrenchPoints?.() ?? 0;
 
   if (typeof this.storageManager.markQuizCompleted !== "function") {
-    console.error("QuizManager: storageManager.markQuizCompleted is missing");
+    getLogger().error("QuizManager: storageManager.markQuizCompleted is missing");
     // Fallback: afficher les résultats sans enregistrer
     if (this.ui && this.ui.showResults) this.ui.showResults(resultsData);
     return;
@@ -520,8 +549,9 @@ QuizManager.prototype.finishQuiz = function () {
   if (this.ui && this.ui.showResults) {
     this.ui.showResults(resultsData);
   } else {
-    console.error("QuizManager: ui.showResults not available");
+    getLogger().error("QuizManager: ui.showResults not available");
   }
+
 
   if (
     this.currentThemeId === 1 &&

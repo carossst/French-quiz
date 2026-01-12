@@ -18,8 +18,10 @@
         this.charts = null;
 
         this._roadmapListenerAttached = false;
-    }
 
+        this._xpSystemInitialized = false;
+
+    }
     /* ----------------------------------------
        GENERIC ERROR HANDLING
        ---------------------------------------- */
@@ -29,6 +31,34 @@
         } else {
             console.error("UICore Error:", message);
         }
+    };
+
+    /* ----------------------------------------
+       FEEDBACK TOASTS (KISS)
+       ---------------------------------------- */
+    UICore.prototype.showFeedbackMessage = function (type, message) {
+        const container = document.getElementById("toast-container");
+
+        // Fallback: if no toast UI exists, don't crash
+        if (!container) {
+            console.log("[TYF]", type, message);
+            return;
+        }
+
+        const safeType = String(type || "info");
+        const safeMsg = String(message == null ? "" : message);
+
+        const toast = document.createElement("div");
+        toast.className = "tyf-toast tyf-toast--" + safeType;
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "polite");
+        toast.textContent = safeMsg;
+
+        container.appendChild(toast);
+
+        setTimeout(function () {
+            if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 3000);
     };
 
 
@@ -50,6 +80,114 @@
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
     };
+
+    /* ----------------------------------------
+       TRACKING + DATE HELPERS (KISS)
+       ---------------------------------------- */
+    UICore.prototype._track = function (eventName, payload) {
+        try {
+            if (typeof window.trackMicroConversion === "function") {
+                window.trackMicroConversion(eventName, payload || {});
+            }
+        } catch (e) {
+            // silent fail
+        }
+    };
+
+    UICore.prototype._todayKey = function () {
+        try {
+            return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        } catch (e) {
+            return "";
+        }
+    };
+
+    UICore.prototype._isSameDay = function (a, b) {
+        return String(a || "").slice(0, 10) === String(b || "").slice(0, 10);
+    };
+
+    UICore.prototype._getLastActiveDateFromUIState = function (uiState) {
+        // compatible with likely shapes: uiState.streak.lastActiveDate OR uiState.lastActiveDate
+        if (!uiState) return null;
+        if (uiState.streak && uiState.streak.lastActiveDate) return uiState.streak.lastActiveDate;
+        if (uiState.lastActiveDate) return uiState.lastActiveDate;
+        return null;
+    };
+
+    UICore.prototype._hasLockedThemes = function () {
+        try {
+            if (!this.themeIndexCache || !this.themeIndexCache.length) return false;
+            if (!this.storageManager || typeof this.storageManager.isThemeUnlocked !== "function") return false;
+
+            const isPremium = !!(this.storageManager.isPremiumUser && this.storageManager.isPremiumUser());
+            if (isPremium) return false;
+
+            for (let i = 0; i < this.themeIndexCache.length; i++) {
+                const t = this.themeIndexCache[i];
+                const id = Number(t && t.id);
+                if (!Number.isFinite(id) || id === 1) continue;
+                const unlocked = !!this.storageManager.isThemeUnlocked(id);
+                if (!unlocked) return true;
+            }
+            return false;
+        } catch (e) {
+            return false;
+        }
+    };
+
+    UICore.prototype._getThemeIdForQuickStart = function () {
+        const sm = this.storageManager;
+        const themes = (this.themeIndexCache || [])
+            .map(t => Number(t && t.id))
+            .filter(id => Number.isFinite(id))
+            .sort((a, b) => a - b);
+
+        const isPremium = !!sm?.isPremiumUser?.();
+
+        // Premium: reprendre le thème courant si valide, sinon 1
+        if (isPremium) {
+            const current = Number(this.quizManager?.currentThemeId);
+            return Number.isFinite(current) ? current : 1;
+        }
+
+        // Non-premium: si thème courant est déjà débloqué (ou Colors), on le garde
+        const current = Number(this.quizManager?.currentThemeId);
+        if (Number.isFinite(current)) {
+            if (current === 1) return 1;
+            if (typeof sm?.isThemeUnlocked === "function" && sm.isThemeUnlocked(current)) return current;
+        }
+
+        // Sinon: prendre le premier thème débloqué (>1)
+        if (typeof sm?.isThemeUnlocked === "function") {
+            for (let i = 0; i < themes.length; i++) {
+                const id = themes[i];
+                if (id > 1 && sm.isThemeUnlocked(id)) return id;
+            }
+        }
+
+        // Fallback strict: Colors (seul free)
+        return 1;
+    };
+
+    UICore.prototype._getPremiumPrice = function () {
+        try {
+            const pd = (window.UIFeatures && window.UIFeatures.PRICE_DISPLAY) ? window.UIFeatures.PRICE_DISPLAY : null;
+            const current = (pd && pd.current) ? String(pd.current) : "$12";
+            // FIX: PRICE_DISPLAY uses "regular" (not "anchor")
+            const anchor = (pd && (pd.regular || pd.anchor)) ? String(pd.regular || pd.anchor) : "$99";
+            return { current: current, anchor: anchor };
+        } catch (e) {
+            return { current: "$12", anchor: "$99" };
+        }
+    };
+
+
+    UICore.prototype._getPremiumPriceHTML = function () {
+        const p = this._getPremiumPrice();
+        return '<span class="line-through">' + this.escapeHTML(p.anchor) + '</span> ' + this.escapeHTML(p.current);
+    };
+
+
 
 
 
@@ -142,36 +280,58 @@
         switch (screenId) {
             case "welcome":
                 this.setupWelcomeEvents();
-                if (this.features) {
-                    // 1) Injecte le header
-                    this.features.showXPHeader && this.features.showXPHeader();
 
-                    // 2) Bind des listeners (si la fonction existe)
-                    //    IMPORTANT: à faire après showXPHeader(), sinon les IDs n’existent pas.
-                    this.features.initializeXPSystem && this.features.initializeXPSystem();
+                var isReturningWelcome = !!document.getElementById("themes-grid");
 
-                    // 3) Tooltips chest (si séparé)
-                    this.features.setupChestTooltip && this.features.setupChestTooltip();
+                // XP header uniquement si returning screen (themes grid present)
+                if (this.features && isReturningWelcome) {
+                    if (typeof this.features.showXPHeader === "function") {
+                        this.features.showXPHeader();
+                    }
 
-                    // 4) Sync UI
-                    this.features.updateXPHeader && this.features.updateXPHeader();
+                    // Après showXPHeader(): ne pas relier 2x les listeners
+                    if (!this._xpSystemInitialized) {
+                        // initializeXPSystem() doit être l’unique point d’entrée (il gère les sous-setup internes)
+                        if (typeof this.features.initializeXPSystem === "function") this.features.initializeXPSystem();
+                        this._xpSystemInitialized = true;
+                    }
+
+                    if (typeof this.features.updateXPHeader === "function") {
+                        this.features.updateXPHeader();
+                    }
+                }
+
+                if (typeof this.renderDailyGoalNudge === "function") {
+                    this.renderDailyGoalNudge();
+                }
+
+                if (typeof this.renderPrimaryCTA === "function") {
+                    this.renderPrimaryCTA();
                 }
                 break;
 
             case "quiz-selection":
                 this.setupQuizSelectionEvents();
                 break;
+
             case "quiz":
                 this.setupQuizEvents();
                 break;
+
             case "results":
                 this.setupResultsEvents();
                 break;
+
             case "stats":
                 this.setupStatsEvents();
                 break;
         }
     };
+
+
+
+
+
 
     /* ----------------------------------------
        WELCOME (NEW VS RETURNING USER)
@@ -183,100 +343,213 @@
 
 
 
-    // New visitor: clear hero focused on Colors
-    UICore.prototype.generateNewUserWelcome = function () {
-        return (
-            '\n<section class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center" role="main" aria-label="Welcome screen">' +
-            '\n  <div class="max-w-3xl text-center px-6 py-12">' +
-            '\n    <h1 class="text-3xl md:text-4xl font-bold text-blue-700 mb-4">' +
-            "\n      Discover your real French level" +
-            "\n    </h1>" +
-            '\n    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg text-left md:text-center">' +
-            '\n      <p class="text-blue-800 font-medium">' +
-            "\n        Try a short, authentic quiz based on real-life situations in France." +
-            "\n        Start with the free <strong>Colors</strong> theme and see where you stand today." +
-            "\n      </p>" +
-            "\n    </div>" +
-
-            // NOUVEAU: Annonce système French Points (UX améliorée)
-            '\n    <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-5 mb-6">' +
-            '\n      <div class="flex items-center justify-center gap-2 mb-3">' +
-            '\n        <span class="text-2xl">✨</span>' +
-            '\n        <h2 class="text-lg font-bold text-gray-900">How it works</h2>' +
-            '\n        <span class="text-2xl">✨</span>' +
-            '\n      </div>' +
-            '\n      <div class="space-y-2 text-sm text-gray-700">' +
-            '\n        <p><strong class="text-purple-700">1. Take quizzes</strong> -> Earn French Points for each one you complete</p>' +
-            '\n        <p><strong class="text-purple-700">2. Unlock themes</strong> -> Use your points to access new topics (or go Premium)</p>' +
-            '\n        <p><strong class="text-purple-700">3. Track progress</strong> -> Build a visible history of your French level</p>' +
-            '\n      </div>' +
-
-            '\n      <div class="mt-3 pt-3 border-t border-purple-200">' +
-            '\n        <p class="text-xs text-gray-600">🎯 <strong>Colors is free</strong> – perfect to start. More themes unlock as you progress.</p>' +
-            '\n      </div>' +
-            '\n    </div>' +
-
-            '\n    <p class="text-lg text-gray-700 mb-6">' +
-            "\n      No signup. No account. Just answer the questions and get an honest snapshot of your level." +
-            "\n    </p>" +
-            '\n    <button id="start-first-quiz-btn" type="button" class="quiz-button w-full sm:w-auto">' +
-            "\n      Start the free Colors quiz" +
-            "\n    </button>" +
-            '\n    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10 text-center text-sm text-gray-700">' +
-            '\n      <div>' +
-            "\n        <p class=\"font-semibold\">Authentic audio</p>" +
-            "\n        <p>Short real-life sentences spoken at natural speed.</p>" +
-            "\n      </div>" +
-            '\n      <div>' +
-            "\n        <p class=\"font-semibold\">Real assessment</p>" +
-            "\n        <p>Designed to reveal your practical level, not textbook theory.</p>" +
-            "\n      </div>" +
-            '\n      <div>' +
-            "\n        <p class=\"font-semibold\">Unlock as you learn</p>" +
-            "\n        <p>Complete quizzes to earn points and access new themes.</p>" +
-            "\n      </div>" +
-            "\n    </div>" +
-            "\n  </div>" +
-            "\n</section>\n"
-        );
-    };
     // Returning visitor: direct access to themes + stats
     UICore.prototype.generateReturningUserWelcome = function (uiState) {
-        const progressText = this.getProgressText(uiState);
+        const progressTextRaw = this.getProgressText(uiState);
+        const progressText = this.escapeHTML(progressTextRaw);
 
         return (
             '\n<div class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen lg:h-screen lg:flex lg:flex-col" role="main" aria-label="Themes screen">' +
             '\n  <div class="max-w-6xl mx-auto px-4 pt-4 pb-6 lg:pt-2 lg:pb-4 lg:flex-1 lg:flex lg:flex-col">' +
+
             '\n    <div class="text-center mb-4 lg:mb-2">' +
             '\n      <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>' +
             '\n      <p class="text-sm text-gray-700">' +
             progressText +
-            "</p>" +
-            "\n    </div>" +
+            '</p>' +
+            '\n      <p class="text-xs text-gray-600 mt-2">' +
+            '\n        Written by Carole, a real French native from Paris. Not AI-generated.' +
+            '\n      </p>' +
+
+            '\n    </div>' +
+
+            // CTA principal (piloté par renderPrimaryCTA)
+            '\n    <div id="primary-cta-slot" class="mb-4"></div>' +
 
             '\n    <section id="themes-section" aria-label="Available themes" class="lg:flex-1">' +
             '\n      <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-2 text-center">Choose your next theme</h2>' +
             '\n      <div id="themes-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-2">' +
             this.generateSimpleThemesGrid() +
-            "\n      </div>" +
-            "\n    </section>" +
+            '\n      </div>' +
+            '\n    </section>' +
 
             '\n    <div class="text-center mt-4 lg:mt-2 shrink-0">' +
             '\n      <button id="view-stats-btn" type="button">' +
-            "\n        View your statistics and history" +
-            "\n      </button>" +
-            "\n    </div>" +
+            'View your statistics and history' +
+            '</button>' +
+            '\n    </div>' +
+
+            // Daily goal nudge (piloté par renderDailyGoalNudge)
+            '\n    <div id="daily-goal-slot" class="mt-3 lg:mt-2 shrink-0"></div>' +
 
             '\n    <div class="text-center mt-3 shrink-0">' +
             '\n      <button id="show-roadmap-btn" type="button" class="text-xs text-gray-500 hover:text-gray-800 underline">' +
-            '\n        Why are some themes locked?' +
-            '\n      </button>' +
+            'How unlocking improves your progress' +
+            '</button>' +
             '\n    </div>' +
 
-            "\n  </div>" +
-            "\n</div>\n"
+            '\n  </div>' +
+            '\n</div>\n'
         );
     };
+
+
+
+    UICore.prototype.generateResultsHTML = function (resultsData) {
+        resultsData = resultsData || {};
+
+        var pctNum = Number(resultsData.percentage);
+        var pct = Number.isFinite(pctNum) ? pctNum : 0;
+
+        var scoreNum = Number(resultsData.score);
+        var score = Number.isFinite(scoreNum) ? scoreNum : null;
+
+        var totalNum = Number(resultsData.total);
+        var total = Number.isFinite(totalNum) ? totalNum : null;
+
+        var scoreLine = "";
+        if (score != null && total != null) scoreLine = score + " / " + total;
+        else scoreLine = Math.round(pct) + "%";
+
+        // Theme name (robuste)
+        var titleTheme =
+            this.getCurrentThemeName && this.getCurrentThemeName()
+                ? this.getCurrentThemeName()
+                : (resultsData.themeName ? this.normalizeText(resultsData.themeName) : "This theme");
+
+        // Level box (CEFR-flavored)
+        var levelLabel = this.getCECRLevel ? this.getCECRLevel(pct) : "Your level";
+        var levelMsg = this.getCECRMessage ? this.getCECRMessage(pct) : "Keep practicing to progress.";
+        var levelClass = this.getCECRColorClass ? this.getCECRColorClass(pct) : "bg-gray-50 border-gray-200 text-gray-800";
+
+        // Insight + action (Duolingo-like guidance)
+        var insight = this.getResultsInsight ? this.getResultsInsight(resultsData) : "This quiz gives an honest snapshot.";
+        var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Next step: replay once and focus on the pattern.";
+
+        // Premium nudge: hidden by default; revealed in setupResultsEvents()
+        var premiumNudgeHiddenClass = " hidden";
+
+        // Effort validation (Plan 2.A.1)
+        var effortLine = (pct >= 80)
+            ? "Strong result. This is real, usable French."
+            : (pct >= 60)
+                ? "Solid work. You are building reliable reflexes."
+                : (pct >= 40)
+                    ? "Good diagnostic. Now you know what to replay."
+                    : "Good starting point. Authentic French is hard and this is the right way to train.";
+
+        return (
+            '\n<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" role="main" aria-label="Results screen">' +
+            '\n  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">' +
+
+            '\n    <div class="flex items-center justify-between gap-2 mb-4">' +
+            '\n      <button id="back-to-theme-btn" type="button">' + this.getBackToThemeLabel() + '</button>' +
+            '\n    </div>' +
+
+
+            '\n    <div class="text-center mb-5">' +
+            '\n      <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Results</h1>' +
+            '\n      <p class="text-sm text-gray-700 mt-1">Theme: <strong>' + this.escapeHTML(titleTheme) + '</strong></p>' +
+            '\n    </div>' +
+
+            // 2.A.1 Validation de l’effort (court, non jugeant)
+            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Effort validation">' +
+            '\n      <div class="tyf-nudge-inner">' +
+            '\n        <div>' +
+            '\n          <div class="tyf-nudge-title">Honest diagnostic</div>' +
+            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(effortLine) + '</div>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            // 2.A.2 Lecture simple du résultat (score + accuracy)
+            '\n    <div class="theme-card mb-4">' +
+            '\n      <div class="flex items-start justify-between gap-4">' +
+            '\n        <div>' +
+            '\n          <div class="text-sm text-gray-600">Your score</div>' +
+            '\n          <div class="text-3xl font-extrabold text-gray-900 mt-1">' + this.escapeHTML(scoreLine) + '</div>' +
+            '\n        </div>' +
+            '\n        <div class="text-right">' +
+            '\n          <div class="text-sm text-gray-600">Accuracy</div>' +
+            '\n          <div class="text-2xl font-extrabold text-gray-900 mt-1">' + Math.round(pct) + '%</div>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            '\n    <div class="p-4 border rounded-lg mb-4 ' + levelClass + '">' +
+            '\n      <div class="font-bold text-base">' + this.escapeHTML(levelLabel) + '</div>' +
+            '\n      <div class="text-sm mt-1">' + this.escapeHTML(levelMsg) + '</div>' +
+            '\n    </div>' +
+
+            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Your key insight">' +
+            '\n      <div class="tyf-nudge-inner">' +
+            '\n        <div>' +
+            '\n          <div class="tyf-nudge-title">Your key insight</div>' +
+            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(insight) + '</div>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Next step">' +
+            '\n      <div class="tyf-nudge-inner">' +
+            '\n        <div>' +
+            '\n          <div class="tyf-nudge-title">Next step</div>' +
+            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(action) + '</div>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            // 2.A.3 Une action principale (1 CTA)
+            '\n    <div class="flex justify-center mb-4">' +
+            this.generateNextActionButton(resultsData) +
+            '\n    </div>' +
+
+            // 2.A.4 Projection : raison de revenir (demain)
+            '\n    <div class="tyf-stats-card tyf-nudge mb-5" aria-label="Come back tomorrow">' +
+            '\n      <div class="tyf-nudge-inner">' +
+            '\n        <div>' +
+            '\n          <div class="tyf-nudge-title">Come back tomorrow</div>' +
+            '\n          <div class="tyf-nudge-sub">One short quiz a day is enough to make progress.</div>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            '\n    <div id="next-unlock-slot" class="mb-4"></div>' +
+
+            '\n    <div id="premium-success-nudge" class="tyf-stats-card tyf-nudge mb-4' + premiumNudgeHiddenClass + '" aria-label="Premium success nudge">' +
+            '\n      <div class="tyf-nudge-inner">' +
+            '\n        <div>' +
+            '\n          <div class="tyf-nudge-title">Keep momentum</div>' +
+            '\n          <div class="tyf-nudge-sub">Premium unlocks all themes instantly and keeps your progress structured.</div>' +
+            '\n        </div>' +
+            '\n        <div class="shrink-0">' +
+            '\n          <button id="results-premium-nudge-btn" type="button" class="text-sm underline font-semibold text-purple-700 hover:text-purple-900">' +
+            '\n            Unlock all themes - ' + this._getPremiumPriceHTML() + ' one-time' +
+            '\n          </button>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            // Detailed analysis toggle (IDs utilisés par setupResultsEvents)
+            '\n    <div class="mt-3">' +
+            '\n      <button id="toggle-details-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">View detailed analysis</button>' +
+            '\n    </div>' +
+
+            '\n    <div id="secondary-actions" class="hidden mt-4 text-center">' +
+            '\n      <button id="retry-quiz-btn" type="button" class="text-sm underline">Retry this quiz</button>' +
+            '\n    </div>' +
+
+            '\n    <div id="detailed-stats" class="hidden mt-3">' +
+            '\n      <div id="questions-review"></div>' +
+            '\n    </div>' +
+
+            '\n  </div>' +
+            '\n</div>\n'
+        );
+    };
+
+
+
 
 
     /* ----------------------------------------
@@ -293,18 +566,14 @@
                 }
             }, 200);
 
-            // Micro-conversion tracking (if available)
-            try {
-                if (typeof window.trackMicroConversion === "function") {
-                    window.trackMicroConversion("quiz_completed", {
-                        themeId: resultsData.themeId,
-                        quizId: resultsData.quizId,
-                        percentage: resultsData.percentage
-                    });
-                }
-            } catch (e) {
-                console.warn("Micro-conversion tracking failed:", e);
-            }
+
+            // Micro-conversion tracking (single entrypoint)
+            this._track("quiz_completed", {
+                themeId: resultsData.themeId,
+                quizId: resultsData.quizId,
+                percentage: resultsData.percentage
+            });
+
 
             return html;
         });
@@ -314,101 +583,63 @@
         }
     };
 
-    UICore.prototype.generateResultsHTML = function (resultsData) {
-        const isExcellent = resultsData.percentage >= 80;
-        const isGood = resultsData.percentage >= 60;
-
-        let feedbackMsg = "";
-        if (resultsData.score === 0) {
-            feedbackMsg =
-                "You showed up, and that already counts. Try the same quiz again to get familiar with the format.";
-        } else if (this.features && this.features.getRotatedFeedbackMessage) {
-            feedbackMsg = this.features.getRotatedFeedbackMessage(
-                resultsData.percentage,
-                resultsData.themeId
-            );
-        }
-
-        const mainIcon = isExcellent ? "🎉" : isGood ? "💪" : "✨";
-
-        // IMPORTANT: on sort la logique de classes conditionnelles (Tailwind) vers un choix unique
-        // et on met le feedback en "neutral" pour éviter le conflit text-white / couleurs héritées.
-        const titleClass = isExcellent
-            ? "text-green-600"
-            : isGood
-                ? "text-blue-600"
-                : "text-orange-600";
-
+    UICore.prototype.generateNewUserWelcome = function () {
         return (
-            '\n<div class="quiz-wrapper" role="main" aria-label="Quiz results">' +
-            '\n  <div class="text-center">' +
-            '\n    <div class="mb-8">' +
-            '\n      <div class="text-5xl mb-4">' +
-            mainIcon +
-            "</div>" +
-            '\n      <h1 class="text-3xl md:text-4xl font-bold mb-4 ' +
-            titleClass +
-            '">' +
-            (isExcellent ? "Excellent result" : isGood ? "Well done" : "Good effort") +
-            "</h1>" +
-            '\n      <div class="text-6xl font-bold text-gray-900 mb-4">' +
-            resultsData.percentage +
-            "%" +
-            "</div>" +
-            (feedbackMsg
-                ? '\n      <div class="feedback-content neutral mt-4 max-w-xl mx-auto">' +
-                feedbackMsg +
-                "</div>"
-                : "") +
+            '\n<section class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center" role="main" aria-label="Welcome screen">' +
+            '\n  <div class="max-w-3xl text-center px-6 py-12">' +
+            '\n    <h1 class="text-3xl md:text-4xl font-bold text-blue-700 mb-3">' +
+            "\n      Honest snapshot of your real French" +
+            "\n    </h1>" +
+
+            '\n    <p class="text-sm text-gray-700 mb-4">' +
+            '\n      Written by Carole, a real French native from Paris. Not AI-generated.' +
+            '\n    </p>' +
+
+
+            '\n    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-5 rounded-r-lg text-left md:text-center">' +
+            '\n      <p class="text-blue-800 font-medium">' +
+            "\n        Take one short quiz based on real-life situations in France." +
+            "\n        Start with the free <strong>Colors</strong> theme and learn what trips you up." +
+            "\n      </p>" +
             "\n    </div>" +
-            '\n    <div class="fp-display mb-6">' +
-            '\n      <div class="text-lg font-bold text-purple-800 mb-1 whitespace-pre-line">' +
-            (this.features && this.features.getCompletionMessage
-                ? this.features.getCompletionMessage(resultsData.percentage, resultsData.fpEarned)
-                : "+" + (Number(resultsData.fpEarned) || 0) + " French Points earned") +
-            "</div>" +
-            '\n      <p class="text-sm text-gray-700">' +
-            "French Points help you unlock new themes and build a visible history of your level." +
-            "</p>" +
-            "\n    </div>" +
-            '\n    <div class="mb-6">' +
-            this.generateNextActionButton(resultsData) +
-            "\n    </div>" +
-            '\n    <div class="mb-6">' +
-            '\n      <button id="toggle-details-btn" type="button">' +
-            "View detailed analysis" +
-            "</button>" +
-            "\n    </div>" +
-            '\n    <div id="detailed-stats" class="hidden max-w-3xl mx-auto text-left">' +
-            '\n      <h3 class="text-lg font-bold text-gray-800 mb-4">Performance analysis</h3>' +
-            '\n      <div class="mb-4 p-4 rounded-lg ' +
-            this.getCECRColorClass(resultsData.percentage) +
-            '">' +
-            '\n        <div class="font-bold mb-2">Estimated range</div>' +
-            '\n        <div class="text-lg font-bold mb-1">' +
-            this.getCECRLevel(resultsData.percentage) +
-            "</div>" +
-            '\n        <div class="text-sm">' +
-            this.getCECRMessage(resultsData.percentage) +
-            "</div>" +
-            "\n      </div>" +
-            '\n      <div id="questions-review">' +
-            '\n        <h4 class="font-bold text-gray-800 mb-3">Question review</h4>' +
-            '\n        <div class="text-sm text-gray-600">Loading detailed review...</div>' +
-            "\n      </div>" +
-            "\n    </div>" +
-            '\n    <div class="flex flex-col md:flex-row gap-3 justify-center mt-8">' +
-            '\n      <button id="back-to-theme-btn" type="button" class="quiz-button">' +
-            this.getBackToThemeLabel() +
-            "</button>" +
-            '\n      <button id="back-to-home-btn" type="button" class="quiz-button">' +
-            "Home" +
-            "</button>" +
-            "\n    </div>" +
+
+            '\n    <div class="tyf-stats-card tyf-nudge mb-5" aria-label="What you will learn">' +
+            '\n      <div class="tyf-nudge-inner">' +
+            '\n        <div>' +
+            '\n          <div class="tyf-nudge-title">What you will learn in 2 minutes</div>' +
+            '\n          <ul class="text-sm text-gray-700 mt-2 space-y-1">' +
+            '\n            <li>Speed vs vocabulary: which one blocks you first</li>' +
+            '\n            <li>The pattern you should replay to improve fast</li>' +
+            '\n          </ul>' +
+            '\n        </div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            '\n    <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-5 mb-5">' +
+            '\n      <div class="flex items-center justify-center gap-2 mb-2">' +
+            '\n        <span class="text-2xl">✨</span>' +
+            '\n        <h2 class="text-lg font-bold text-gray-900">How it works</h2>' +
+            '\n        <span class="text-2xl">✨</span>' +
+            '\n      </div>' +
+            '\n      <div class="text-sm text-gray-700 space-y-1">' +
+            '\n        <p><strong class="text-purple-700">Quizzes</strong> -> earn French Points</p>' +
+            '\n        <p><strong class="text-purple-700">Unlock</strong> -> access new themes (or go Premium)</p>' +
+            '\n        <p><strong class="text-purple-700">Progress</strong> -> see your level history</p>' +
+            '\n      </div>' +
+            '\n    </div>' +
+
+            '\n    <p class="text-base text-gray-700 mb-6">' +
+            "\n      No signup. No account. Just a real diagnostic." +
+            "\n    </p>" +
+
+            '\n    <button id="start-first-quiz-btn" type="button" class="quiz-button w-full sm:w-auto">' +
+            "\n      Start the free Colors quiz" +
+            "\n    </button>" +
             "\n  </div>" +
-            "\n</div>\n"
+            "\n</section>\n"
         );
     };
+
 
 
 
@@ -434,6 +665,10 @@
                 percentage: 0
             };
 
+        var pctNum = Number(progress && progress.percentage);
+        var pct = Number.isFinite(pctNum) ? pctNum : 0;
+        var pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+
         return (
             '\n<div class="quiz-wrapper" role="main" aria-label="Quiz screen">' +
 
@@ -452,13 +687,14 @@
             '\n  </div>' +
 
             '\n  <div class="w-full h-2 bg-slate-200 rounded-full mb-5" aria-hidden="true">' +
-            '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="h-2 rounded-full transition-all w-pct-0"></div>' +
+            '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '" class="h-2 rounded-full transition-all w-pct-' + pct5 + '"></div>' +
             '  </div>' +
 
             '\n  <div id="question-container" class="space-y-4"></div>' +
             '\n  <div id="feedback-container" class="mt-5" role="status" aria-live="polite"></div>' +
 
-            // IMPORTANT: aligne la structure avec ton CSS .tyf-quiz-actions
+            '\n  <div id="nav-hint" class="mt-3 text-sm text-gray-600 hidden" role="status" aria-live="polite"></div>' +
+
             '\n  <div class="tyf-quiz-actions">' +
             '    <button id="prev-question-btn" type="button" class="quiz-button">Previous</button>' +
             '    <button id="next-question-btn" type="button" class="quiz-button">Next</button>' +
@@ -470,6 +706,94 @@
 
 
 
+
+    UICore.prototype.getCurrentIndexSafe = function () {
+        var qm = this.quizManager;
+        var idx = Number(qm && qm.currentIndex);
+        return Number.isFinite(idx) ? idx : 0;
+    };
+
+    UICore.prototype.getAnswerAt = function (index) {
+        var qm = this.quizManager;
+        var arr = (qm && Array.isArray(qm.userAnswers)) ? qm.userAnswers : [];
+        return arr[index];
+    };
+
+    UICore.prototype.getStatusAt = function (index) {
+        var qm = this.quizManager;
+        var arr = (qm && Array.isArray(qm.questionStatus)) ? qm.questionStatus : [];
+        return arr[index];
+    };
+
+    UICore.prototype.getResultsInsight = function (resultsData) {
+        try {
+            var qm = this.quizManager;
+            var quiz = qm && qm.currentQuiz;
+            var questions = quiz && Array.isArray(quiz.questions) ? quiz.questions : [];
+            var statusArr = qm && Array.isArray(qm.questionStatus) ? qm.questionStatus : [];
+
+            var total = questions.length;
+            if (!total || !statusArr.length) {
+                return "This quiz gives an honest snapshot. Repeat it once to see what trips you up most.";
+            }
+
+            var audioTotal = 0, audioIncorrect = 0, nonAudioTotal = 0, nonAudioIncorrect = 0;
+
+            for (var i = 0; i < total; i++) {
+                var q = questions[i] || {};
+                var st = statusArr[i] || null;
+
+                // NEW SHAPE: { validated, selectedIndex, isCorrect }
+                var validated = !!(st && st.validated === true);
+                var isCorrect = validated && (st.isCorrect === true);
+                var isIncorrect = validated && (st.isCorrect === false);
+
+                var hasAudio = !!q.audio;
+
+                if (hasAudio) {
+                    audioTotal++;
+                    if (isIncorrect) audioIncorrect++;
+                } else {
+                    nonAudioTotal++;
+                    if (isIncorrect) nonAudioIncorrect++;
+                }
+            }
+
+            var audioErrRate = audioTotal ? (audioIncorrect / audioTotal) : 0;
+            var nonAudioErrRate = nonAudioTotal ? (nonAudioIncorrect / nonAudioTotal) : 0;
+
+            var pct = Number(resultsData && resultsData.percentage);
+            pct = Number.isFinite(pct) ? pct : 0;
+
+            if (audioTotal > 0 && audioErrRate >= Math.max(0.34, nonAudioErrRate + 0.20)) {
+                return "You perform better without audio. Speed and listening cues are the main blocker here.";
+            }
+
+            if (audioTotal > 0 && pct >= 50 && pct < 80 && audioIncorrect > 0) {
+                return "You have the right reflexes, but natural-speed audio makes your accuracy drop.";
+            }
+
+            return "Your mistakes look spread out. This is mostly about vocabulary nuance and close choices.";
+        } catch (e) {
+            return "This quiz gives an honest snapshot. Repeat it once to see what trips you up most.";
+        }
+    };
+
+
+    UICore.prototype.getResultsAction = function (resultsData) {
+        try {
+            var insight = this.getResultsInsight(resultsData) || "";
+            if (insight.indexOf("without audio") !== -1 || insight.indexOf("listening") !== -1) {
+                return "Next step: replay this quiz and focus on 2 key words you catch in the audio before choosing.";
+            }
+            if (insight.indexOf("natural-speed audio") !== -1) {
+                return "Next step: replay and aim for 1 clean listen, then decide fast. Do not overthink.";
+            }
+            return "Next step: replay and use the explanations to spot the exact word that changes the meaning.";
+        } catch (e) {
+            return "Next step: replay this quiz once to reinforce the pattern.";
+        }
+    };
 
     UICore.prototype.renderCurrentQuestion = function () {
         const question = this.quizManager.getCurrentQuestion();
@@ -494,8 +818,9 @@
         this.setupQuestionEvents();
 
         // Re-appliquer la sélection précédente (si existante)
-        const idx = Number(this.quizManager && this.quizManager.currentIndex) || 0;
-        const ans = Array.isArray(this.quizManager.userAnswers) ? this.quizManager.userAnswers[idx] : null;
+        const idx = this.getCurrentIndexSafe ? this.getCurrentIndexSafe() : 0;
+        const ans = this.getAnswerAt ? this.getAnswerAt(idx) : null;
+
         if (typeof ans === "number") {
             const opt = document.querySelector('.option[data-option-index="' + ans + '"]');
             if (opt) {
@@ -508,6 +833,7 @@
                 }
             }
         }
+
 
         this.updateQuizProgress();
 
@@ -619,11 +945,12 @@
             '\n      <div class="option-indicator-dot w-full h-full rounded-full transform scale-0 transition-transform"></div>' +
             "\n    </div>" +
             '\n    <span class="option-letter text-lg font-bold text-gray-600 mr-3">' + letter + ".</span>" +
-            '\n    <span class="option-text text-gray-900 font-medium flex-1">' + (cleanEsc || "—") + "</span>" +
+            '\n    <span class="option-text text-gray-900 font-medium flex-1">' + (cleanEsc || "-") + "</span>" +
             "\n  </div>" +
             "\n</div>"
         )
     };
+
 
     UICore.prototype.setupQuestionEvents = function () {
         const options = document.querySelectorAll(".option");
@@ -759,24 +1086,11 @@
                 indicator.classList.add("scale-100");
             }
 
-
+            // Source de vérité: QuizManager gère la sélection + l’auto-validation + le score.
+            // IMPORTANT: ne PAS reset questionStatus ici, ne PAS re-valider ici.
             this.quizManager.selectAnswer(index);
 
-            // Repartir d'un état propre : sélection = on revalide
-            if (Array.isArray(this.quizManager.questionStatus)) {
-                this.quizManager.questionStatus[this.quizManager.currentIndex] = null;
-            }
-
-            // Important: casser le cache "déjà validé" si l'utilisateur clique plusieurs fois
-            if ("_lastValidatedQuestionIndex" in this.quizManager) {
-                this.quizManager._lastValidatedQuestionIndex = null;
-                this.quizManager._lastValidatedAnswerIndex = null;
-            }
-
-            // Auto-validation immédiate (robuste)
-            if (this.quizManager && typeof this.quizManager.validateCurrentAnswer === "function") {
-                this.quizManager.validateCurrentAnswer();
-            }
+            // Next lock/unlock
             this.updateNavigationButtons();
 
             // Focus sur Next uniquement si réellement débloqué
@@ -787,6 +1101,7 @@
             console.error("Error selecting option:", error);
         }
     };
+
 
     UICore.prototype.showQuestionFeedback = function (question, selectedIndex) {
         const feedbackContainer = document.getElementById("feedback-container");
@@ -804,12 +1119,14 @@
        THEME GRID & THEME STATE
        ---------------------------------------- */
     UICore.prototype.getThemeStateClass = function (theme) {
-        if (theme.id === 1) return "section-theme-free";
+        const id = Number(theme && theme.id);
+
+        if (id === 1) return "section-theme-free";
 
         const isPremium = !!this.storageManager.isPremiumUser?.();
         if (isPremium) return "section-theme-premium";
 
-        const isUnlocked = !!this.storageManager.isThemeUnlocked?.(theme.id);
+        const isUnlocked = !!this.storageManager.isThemeUnlocked?.(id);
         if (isUnlocked) return "section-theme-unlocked";
 
         return "section-theme-locked";
@@ -822,39 +1139,54 @@
         }
 
         var self = this;
+
         return this.themeIndexCache
             .map(function (theme) {
-                var isLocked = self.getThemeStateClass(theme) === 'section-theme-locked';
-                var ariaLabel = self.normalizeText(theme.name) + (isLocked ? " (locked)" : "");
-                var ariaDisabled = isLocked ? ' aria-disabled="true"' : ' aria-disabled="false"';
-                // A11Y: un élément "aria-disabled" ne doit pas être focusable au clavier
-                var tabIndexAttr = isLocked ? ' tabindex="-1"' : ' tabindex="0"';
+                const id = Number(theme && theme.id);
+                const name = self.normalizeText(theme && theme.name);
+                const desc = self.normalizeText((theme && theme.description) || "");
+
+                const stateClass = self.getThemeStateClass(theme);
+                const isLocked = stateClass === "section-theme-locked";
+
+                // Accessibilité + clavier
+                // IMPORTANT: même verrouillé, le tile doit rester activable (pour ouvrir paywall/roadmap)
+                const tabIndexAttr = ' tabindex="0"';
+                const ariaDisabled = isLocked ? ' aria-disabled="true"' : ' aria-disabled="false"';
+
+                // Label lisible (pas de HTML)
+                const ariaLabel =
+                    (name ? name : "Theme") +
+                    (isLocked ? " (locked, opens unlock options)" : "");
+
+                // Visuel (NE PAS bloquer les events: paywall + "See roadmap" doivent rester cliquables)
+                const lockedClass = isLocked ? " select-none opacity-80" : "";
 
                 return (
                     '\n<div class="theme-item ' +
-                    self.getThemeStateClass(theme) +
+                    stateClass +
+                    lockedClass +
                     '" data-theme-id="' +
-                    theme.id +
+                    id +
                     '" role="button"' +
                     tabIndexAttr +
                     ' aria-label="' +
-                    ariaLabel +
-                    '"' + ariaDisabled +
+                    self.escapeHTML(ariaLabel) +
+                    '"' +
+                    ariaDisabled +
                     '>' +
-
-
                     '\n  <div class="text-center">' +
                     '\n    <div class="text-2xl mb-2">' +
                     (theme.icon || "") +
                     "</div>" +
                     '\n    <h3 class="text-sm font-bold mb-1">' +
-                    self.normalizeText(theme.name) +
+                    name +
                     "</h3>" +
                     '\n    <p class="text-xs text-gray-600 line-clamp-2">' +
-                    self.normalizeText(theme.description || "") +
+                    desc +
                     "</p>" +
                     "\n    " +
-                    self.getThemeProgressDisplay(theme.id) +
+                    self.getThemeProgressDisplay(id) +
                     "\n  </div>" +
                     "\n</div>"
                 );
@@ -863,22 +1195,34 @@
     };
 
     UICore.prototype.getThemeProgressDisplay = function (themeId) {
-        if (themeId === 1) {
+        const idNum = Number(themeId);
+        if (!Number.isFinite(idNum)) {
+            return '<div class="text-xs text-gray-500 mt-2"></div>';
+        }
+
+        // Theme gratuit (Colors)
+        if (idNum === 1) {
             return '<div class="text-xs text-green-600 mt-2">Free</div>';
         }
 
-        // Cas 1 : thème déjà débloqué → on affiche juste la progression
+        // Premium = tout débloqué
+        const isPremium = !!this.storageManager.isPremiumUser?.();
+        if (isPremium) {
+            return '<div class="text-xs text-blue-600 mt-2">Unlocked</div>';
+        }
+
+        // Thème déjà débloqué
         if (this.storageManager.isThemeUnlocked &&
-            this.storageManager.isThemeUnlocked(themeId)) {
-
-
+            this.storageManager.isThemeUnlocked(idNum)) {
 
             if (typeof this.storageManager.getThemeProgress === "function") {
-                const progress = this.storageManager.getThemeProgress(themeId) || {
+                const progress = this.storageManager.getThemeProgress(idNum) || {
                     completedCount: 0,
                     total: 0
                 };
-                const colorClass = progress.completedCount > 0 ? "text-green-600" : "text-blue-600";
+
+                const colorClass =
+                    progress.completedCount > 0 ? "text-green-600" : "text-blue-600";
 
                 return (
                     '<div class="text-xs ' +
@@ -889,18 +1233,17 @@
                     progress.total +
                     "</div>"
                 );
-
             }
 
-            return '<div class="text-xs text-green-600 mt-2">Theme unlocked.</div>';
+            return '<div class="text-xs text-blue-600 mt-2">Unlocked</div>';
         }
 
-        // Cas 2 : pas de logique de déverrouillage par points → fallback premium
+        // Si pas de logique French Points → fallback premium
         if (typeof this.storageManager.canUnlockTheme !== "function") {
             return '<div class="text-xs text-gray-500 mt-2">Premium theme – unlock via purchase.</div>';
         }
 
-        // Déterminer le prochain thème atteignable (game loop)
+        // Déterminer le prochain thème atteignable (ordre par id)
         const themeData = this.themeIndexCache || [];
         const self = this;
 
@@ -921,68 +1264,69 @@
 
                 if (!unlocked && prevUnlocked) return t.id;
             }
-            return 2;
+            return null;
         })();
 
-        // Logique French Points disponible
-        const unlockStatus = this.storageManager.canUnlockTheme(themeId) || {};
+        const unlockStatus = this.storageManager.canUnlockTheme(idNum) || {};
 
-        // Si bloqué par progression: guidance uniquement (pas de coût, pas de FP)
+        // Bloqué par progression (thème précédent non complété)
         if (unlockStatus.reason === "PREVIOUS_LOCKED") {
-            // Déterminer le thème précédent (ordre par id, robuste si ids sont strings)
             const list = (this.themeIndexCache || [])
                 .filter(t => t && t.id != null)
                 .map(t => ({ ...t, id: Number(t.id) }))
                 .filter(t => Number.isFinite(t.id))
                 .sort((a, b) => a.id - b.id);
 
-            const idx = list.findIndex(t => t.id === Number(themeId));
+            const idx = list.findIndex(t => t.id === idNum);
             const prev = idx > 0 ? list[idx - 1] : null;
             const previousTheme = prev ? this.normalizeText(prev.name) : "the previous theme";
+            const previousThemeSafe = this.escapeHTML(previousTheme);
 
             return (
                 '<div class="text-xs text-gray-400 mt-2">' +
-                '🔒 Complete <strong>' + previousTheme + '</strong> first | ' +
-                '<button type="button" class="text-purple-600 hover:underline" data-action="show-roadmap">See roadmap</button>' +
+                '🔒 Complete <strong>' + previousThemeSafe + '</strong> first | ' +
+                '<button type="button" class="text-purple-600 hover:underline" data-action="show-roadmap">' +
+                'See roadmap</button>' +
                 '</div>'
             );
+
+
         }
 
-
-
-        // Game master: n’afficher “needed FP” QUE pour le prochain thème atteignable
-        if (themeId === nextThemeId && unlockStatus.reason === "INSUFFICIENT_FP") {
+        // Thème atteignable mais pas assez de FP
+        if (idNum === nextThemeId && unlockStatus.reason === "INSUFFICIENT_FP") {
             const fp = typeof this.storageManager.getFrenchPoints === "function"
-                ? this.storageManager.getFrenchPoints()
+                ? Number(this.storageManager.getFrenchPoints()) || 0
                 : 0;
 
             const themeCost = typeof this.storageManager.getThemeCost === "function"
-                ? this.storageManager.getThemeCost(themeId)
-                : unlockStatus.cost;
+                ? Number(this.storageManager.getThemeCost(idNum))
+                : Number(unlockStatus.cost);
 
-            if (typeof themeCost === "number") {
+            if (Number.isFinite(themeCost)) {
                 const needed = Math.max(0, themeCost - fp);
 
                 return (
                     '<div class="text-xs text-gray-500 mt-2">' +
                     needed +
-                    " more French Points needed or purchase premium access.</div>"
+                    ' more French Points needed or go Premium.</div>'
                 );
             }
         }
 
-        // Message “Ready to unlock” uniquement pour le prochain thème atteignable
-        if (themeId === nextThemeId && unlockStatus.canUnlock && typeof unlockStatus.cost === "number") {
+        // Thème atteignable et prêt à être débloqué
+        if (idNum === nextThemeId && unlockStatus.canUnlock && Number.isFinite(unlockStatus.cost)) {
             return (
-                '<div class="text-xs text-blue-600 mt-2">Unlock with ' +
-                unlockStatus.cost +
-                " French Points or purchase premium access.</div>"
+                '<div class="text-xs text-blue-600 mt-2">' +
+                'Unlock with ' + unlockStatus.cost + ' French Points or go Premium.' +
+                '</div>'
             );
         }
 
-        // Sinon: rien (évite d’empiler des objectifs)
+        // Sinon: ne rien afficher (évite le bruit cognitif)
         return '<div class="text-xs text-gray-500 mt-2"></div>';
     };
+
 
 
     UICore.prototype.showUnlockRoadmap = function () {
@@ -1237,16 +1581,16 @@
             '<button id="close-roadmap-btn" type="button" aria-label="Close roadmap" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>' +
             '</div>' +
             '<div class="text-sm text-gray-600 mt-1 mb-3">' +
-            'Learn at your own pace, or unlock everything instantly.' +
+            'Unlocking keeps the quizzes meaningful and progressive. Premium gives the full diagnostic instantly.' +
             '</div>' +
             '<div class="text-sm text-gray-600 mb-3">You have <strong>' + currentFP + ' FP</strong>' +
             (isPremium ? ' • <span class="text-purple-600 font-semibold">Premium ✨</span>' : '') +
             '</div>' +
             (isPremium || !stripeUrl ? '' :
-                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" ' +
-                'class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-4 rounded-lg text-center transition-colors shadow-sm mb-3">' +
-                'Unlock all themes instantly - $12' +
+                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" class="quiz-button" style="display:block;width:100%;text-align:center;margin-bottom:0.75rem;">' +
+                'Unlock all themes instantly - ' + this._getPremiumPriceHTML() +
                 '</a>'
+
             ) +
             '</div>' +
 
@@ -1272,7 +1616,8 @@
             (isPremium || !stripeUrl ? '' :
                 '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" ' +
                 'class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors">' +
-                '🚀 Get Premium - $12</a>'
+                '🚀 Get Premium - ' + this._getPremiumPriceHTML() + '</a>'
+
             ) +
             (isPremium ? '' :
                 '<div class="text-xs text-gray-500 text-center mt-4">' +
@@ -1300,94 +1645,118 @@
             return Number(t.id) === Number(themeId);
         });
 
-
         if (!theme) {
             return this.generateErrorHTML("Theme not found");
         }
 
-        // FIX BUG: theme.quizzes peut être undefined
+        // Sécurisation stricte des données venant du metadata.json
+        const themeNameSafe = this.escapeHTML(this.normalizeText(theme.name));
+        const themeDescSafe = this.escapeHTML(this.normalizeText(theme.description || ""));
+
+        // FIX: quizzes peut être undefined
         const quizzes = Array.isArray(theme.quizzes) ? theme.quizzes : [];
 
         return (
             '\n<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" role="main" aria-label="Quiz selection">' +
             '\n  <div class="max-w-4xl mx-auto px-4 pt-6 pb-10">' +
+
             '\n    <div class="flex gap-4 mb-6">' +
             '\n      <button id="back-to-home-btn" class="text-blue-600 hover:text-blue-800 font-medium py-2 px-6 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">' +
-            "Home" +
-            "</button>" +
-            "\n    </div>" +
+            'Home' +
+            '</button>' +
+            '\n    </div>' +
+
             '\n    <div class="text-center mb-8">' +
             '\n      <div class="text-4xl mb-4">' +
             (theme.icon || "") +
-            "</div>" +
+            '</div>' +
             '\n      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">' +
-            this.normalizeText(theme.name) +
-            "</h1>" +
+            themeNameSafe +
+            '</h1>' +
             '\n      <p class="text-lg text-gray-700">' +
-            this.normalizeText(theme.description || "") +
-            "</p>" +
-            "\n    </div>" +
+            themeDescSafe +
+            '</p>' +
+            '\n    </div>' +
+
             '\n    <div id="quizzes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="Quizzes in this theme">' +
             (quizzes.length
                 ? this.generateQuizCards(quizzes)
-                : '<div class="col-span-full text-center text-gray-600 p-8">No quizzes found for this theme. Check metadata structure.</div>'
+                : '<div class="col-span-full text-center text-gray-600 p-8">No quizzes found for this theme.</div>'
             ) +
-            "\n    </div>" +
-            "\n  </div>" +
-            "\n</div>"
+            '\n    </div>' +
+
+            '\n  </div>' +
+            '\n</div>'
         );
     };
+
+
 
     UICore.prototype.generateQuizCards = function (quizzes) {
         const self = this;
 
-        // FIX BUG: Toujours garantir un tableau
+        // Sécurité absolue : garantir un tableau
         quizzes = Array.isArray(quizzes) ? quizzes : [];
 
-        return (
-            quizzes
-                .map(function (quiz, idx) {
-                    const isUnlocked = typeof self.storageManager.isQuizUnlocked === "function"
-                        ? self.storageManager.isQuizUnlocked(quiz.id)
+        if (!quizzes.length) return "";
+
+        return quizzes
+            .map(function (quiz, idx) {
+                const quizId = Number(quiz && quiz.id);
+                if (!Number.isFinite(quizId)) return "";
+
+                const quizNameSafe = self.escapeHTML(self.normalizeText(quiz.name || "Quiz"));
+                const quizDescSafe = self.escapeHTML(self.normalizeText(quiz.description || ""));
+
+                const isUnlocked =
+                    typeof self.storageManager.isQuizUnlocked === "function"
+                        ? self.storageManager.isQuizUnlocked(quizId)
                         : true;
 
-                    const isCompleted = typeof self.storageManager.isQuizCompleted === "function"
-                        ? self.storageManager.isQuizCompleted(quiz.id)
+                const isCompleted =
+                    typeof self.storageManager.isQuizCompleted === "function"
+                        ? self.storageManager.isQuizCompleted(quizId)
                         : false;
 
-                    const classes =
-                        "quiz-item theme-card transition-all " +
-                        (!isUnlocked ? "opacity-60" : "hover:shadow-lg cursor-pointer");
+                const classes =
+                    "quiz-item theme-card transition-all " +
+                    (isUnlocked ? "hover:shadow-lg cursor-pointer" : "opacity-60 cursor-not-allowed");
 
-                    const ariaDisabled = !isUnlocked ? ' aria-disabled="true"' : ' aria-disabled="false"';
+                const ariaDisabled = isUnlocked ? "false" : "true";
 
-                    return (
-                        '\n<div class="' +
-                        classes +
-                        '" data-quiz-id="' +
-                        quiz.id +
-                        '" role="button" tabindex="0"' +
-                        ariaDisabled +
-                        ">" +
-                        '\n  <div class="flex items-center justify-between mb-4">' +
-                        '\n    <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">' +
-                        (idx + 1) +
-                        "</span>" +
-                        (isCompleted ? '\n    <span class="text-green-600 text-sm">Done</span>' : "") +
-                        (!isUnlocked ? '\n    <span class="text-gray-400 text-sm">Locked</span>' : "") +
-                        "\n  </div>" +
-                        '\n  <h3 class="font-bold text-lg mb-2">' +
-                        self.normalizeText(quiz.name) +
-                        "</h3>" +
-                        '\n  <p class="text-gray-600 text-sm">' +
-                        self.normalizeText(quiz.description || "") +
-                        "</p>" +
-                        "\n</div>"
-                    );
-                })
-                .join("") || ""
-        );
+                return (
+                    '\n<div class="' +
+                    classes +
+                    '" data-quiz-id="' +
+                    quizId +
+                    '" role="button" tabindex="0" aria-disabled="' +
+                    ariaDisabled +
+                    '">' +
 
+                    '\n  <div class="flex items-center justify-between mb-4">' +
+                    '\n    <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">' +
+                    (idx + 1) +
+                    '</span>' +
+                    (isCompleted
+                        ? '\n    <span class="text-green-600 text-sm font-medium">Done</span>'
+                        : '') +
+                    (!isUnlocked
+                        ? '\n    <span class="text-gray-400 text-sm font-medium">Locked</span>'
+                        : '') +
+                    '\n  </div>' +
+
+                    '\n  <h3 class="font-bold text-lg mb-2">' +
+                    quizNameSafe +
+                    '</h3>' +
+
+                    '\n  <p class="text-gray-600 text-sm">' +
+                    quizDescSafe +
+                    '</p>' +
+
+                    '\n</div>'
+                );
+            })
+            .join("");
     };
 
     /* ----------------------------------------
@@ -1437,6 +1806,92 @@
             setTimeout(this.charts.loadDetailedStats.bind(this.charts), 100);
         }
     };
+
+    UICore.prototype.renderDailyGoalNudge = function () {
+        const slot = document.getElementById("daily-goal-slot");
+        if (!slot) return;
+
+        let uiState = {};
+        try {
+            uiState = this.storageManager.getUIState?.() || {};
+        } catch (e) {
+            uiState = {};
+        }
+
+        const today = this._todayKey();
+        const lastActive = this._getLastActiveDateFromUIState(uiState);
+        const activeToday = this._isSameDay(lastActive, today);
+
+        // Si déjà actif aujourd'hui, on n'affiche rien (nudge = friction inutile)
+        if (activeToday) {
+            slot.innerHTML = "";
+            return;
+        }
+
+        slot.innerHTML =
+            '\n<div class="tyf-stats-card tyf-nudge">' +
+            '\n  <div class="tyf-nudge-inner">' +
+            '\n    <div>' +
+            '\n      <div class="tyf-nudge-title">Daily goal: 1 quiz today</div>' +
+            '\n      <div class="tyf-nudge-sub">One quick quiz. No pressure. Keep momentum.</div>' +
+            '\n    </div>' +
+            '\n    <div class="shrink-0">' +
+            '\n      <button id="daily-goal-start-btn" type="button" class="quiz-button">Choose a quiz</button>' +
+            '\n    </div>' +
+            '\n  </div>' +
+            '\n</div>';
+
+        const btn = document.getElementById("daily-goal-start-btn");
+        const self = this;
+
+        if (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                self._track("daily_goal_start_clicked", { source: "welcome" });
+
+                const themeId = self._getThemeIdForQuickStart();
+                self.quizManager.currentThemeId = themeId;
+                self.showQuizSelection();
+            });
+        }
+    };
+
+
+    UICore.prototype.renderPrimaryCTA = function () {
+        const slot = document.getElementById("primary-cta-slot");
+        if (!slot) return;
+
+        let uiState = null;
+        try {
+            uiState = this.storageManager.getUIState?.() || {};
+        } catch (e) {
+            uiState = {};
+        }
+
+        // Returning user screen only.
+        // Keep CTA simple and safe: open Colors quiz selection (theme 1).
+        slot.innerHTML =
+            '<div class="tyf-stats-card tyf-nudge">' +
+            '<div class="tyf-nudge-inner">' +
+            '<div>' +
+            '<div class="tyf-nudge-title">Continue with a quick quiz</div>' +
+            '<div class="tyf-nudge-sub">Pick a quiz and keep momentum.</div>' +
+            '</div>' +
+            '<div class="shrink-0">' +
+            '<button id="primary-cta-continue-btn" type="button" class="quiz-button">Choose a quiz</button>' +
+            '</div>' +
+            '</div></div>';
+
+        this.addClickHandler("primary-cta-continue-btn", () => {
+            const themeId = this._getThemeIdForQuickStart();
+            this.quizManager.currentThemeId = themeId;
+            this.showQuizSelection();
+
+        });
+    };
+
+
 
     UICore.prototype.setupWelcomeEvents = function () {
         const self = this;
@@ -1507,7 +1962,7 @@
         const quizCards = document.querySelectorAll(".quiz-item[data-quiz-id]");
         quizCards.forEach(function (card) {
             card.setAttribute("role", "button");
-            card.setAttribute("tabindex", "0");
+            // Ne pas forcer tabindex ici: il est déjà correct dans le HTML (0 ou -1)
 
             const activate = function (e) {
                 if (e) {
@@ -1611,14 +2066,13 @@
     UICore.prototype.setupResultsEvents = function () {
         const self = this;
 
-        // QuizManager.loadQuiz() appelle déjà showQuizScreen() en interne
         this.addClickHandler("next-quiz-btn", function () {
             const nextQuiz =
                 self.features && self.features.getNextQuizInTheme
                     ? self.features.getNextQuizInTheme()
                     : null;
+
             if (nextQuiz) {
-                // Track "attempt" at quiz start (not completion)
                 self.storageManager?.markQuizStarted?.({ themeId: nextQuiz.themeId, quizId: nextQuiz.quizId });
 
                 self.quizManager.loadQuiz(nextQuiz.themeId, nextQuiz.quizId).catch(function (e) {
@@ -1628,24 +2082,131 @@
             } else {
                 self.showQuizSelection();
             }
-
         });
 
-        // QuizManager.loadQuiz() appelle déjà showQuizScreen() en interne
+        // 🔒 PREMIUM NUDGE OU PROGRESSION (EXCLUSIF)
+        const canComputeNextUnlock =
+            (typeof self.storageManager.canUnlockTheme === "function") &&
+            (typeof self.storageManager.getFrenchPoints === "function") &&
+            (typeof self.storageManager.getThemeCost === "function");
+
+        const showPremiumOnly =
+            !self.storageManager.isPremiumUser?.() &&
+            self._hasLockedThemes?.() &&
+            !canComputeNextUnlock;
+
+
+        if (showPremiumOnly) {
+            const nudge = document.getElementById("premium-success-nudge");
+            if (nudge) {
+                nudge.classList.remove("hidden");
+                self._track("premium_nudge_visible", { source: "results" });
+
+                const btn = document.getElementById("results-premium-nudge-btn");
+                if (btn) {
+                    btn.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
+                        if (stripeUrl) {
+                            window.open(stripeUrl, "_blank", "noopener,noreferrer");
+                        } else if (self.features?.showPaywallModal) {
+                            self.features.showPaywallModal("results-success");
+                        }
+                    });
+                }
+            }
+        } else {
+            const slot = document.getElementById("next-unlock-slot");
+
+            if (slot) {
+                // Toujours laisser les autres bindings Results se faire
+                slot.innerHTML = "";
+
+                const canCompute =
+                    (typeof self.storageManager.canUnlockTheme === "function") &&
+                    (typeof self.storageManager.getFrenchPoints === "function") &&
+                    (typeof self.storageManager.getThemeCost === "function");
+
+                if (canCompute) {
+                    const themes = (self.themeIndexCache || [])
+                        .filter(t => t && t.id != null)
+                        .map(t => ({ ...t, id: Number(t.id) }))
+                        .filter(t => Number.isFinite(t.id))
+                        .sort((a, b) => a.id - b.id);
+
+                    let nextId = null;
+                    for (let i = 0; i < themes.length; i++) {
+                        const t = themes[i];
+                        if (t.id === 1) continue;
+
+                        const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
+                        const prev = themes[i - 1];
+                        const prevUnlocked = prev ? !!self.storageManager.isThemeUnlocked?.(prev.id) : true;
+
+                        if (!unlocked && prevUnlocked) {
+                            nextId = t.id;
+                            break;
+                        }
+                    }
+
+                    if (nextId) {
+                        const fp = Number(self.storageManager.getFrenchPoints()) || 0;
+                        const cost = Number(self.storageManager.getThemeCost(nextId));
+
+                        if (Number.isFinite(cost)) {
+                            const needed = Math.max(0, cost - fp);
+
+                            if (needed <= 0) {
+                                slot.innerHTML =
+                                    '<div class="tyf-stats-card tyf-nudge">' +
+                                    '<div class="tyf-nudge-inner">' +
+                                    '<div>' +
+                                    '<div class="tyf-nudge-title">Ready to unlock your next theme</div>' +
+                                    '<div class="tyf-nudge-sub">You have enough French Points. Go back and unlock it.</div>' +
+                                    '</div>' +
+                                    '<div class="shrink-0">' +
+                                    '<button id="results-back-unlock-btn" type="button" class="quiz-button">Back to themes</button>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>';
+
+                                self.addClickHandler("results-back-unlock-btn", function () {
+                                    self.showWelcomeScreen();
+                                });
+                            } else {
+                                slot.innerHTML =
+                                    '<div class="tyf-stats-card">' +
+                                    '<div class="tyf-row">' +
+                                    '<div class="tyf-row-title">Next unlock</div>' +
+                                    '<div class="tyf-row-meta">' + needed + ' FP to go</div>' +
+                                    '</div>' +
+                                    '<div class="tyf-caption">Complete a few more quizzes, or unlock everything with Premium.</div>' +
+                                    '</div>';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         ["retry-quiz-primary-btn", "retry-quiz-btn"].forEach(function (id) {
             self.addClickHandler(id, function () {
                 const currentThemeId = self.quizManager.currentThemeId;
                 const currentQuizId = self.quizManager.currentQuizId;
-                if (currentThemeId && currentQuizId) {
-                    // Track "attempt" at quiz start (not completion)
-                    self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
 
-                    self.quizManager.loadQuiz(currentThemeId, currentQuizId).catch(function (e) {
-                        console.error("Failed to reload quiz:", e);
-                        self.showError("Unable to reload quiz.");
-                    });
+                if (!currentThemeId || !currentQuizId) {
+                    self.showQuizSelection();
+                    return;
                 }
 
+                self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
+
+                self.quizManager.loadQuiz(currentThemeId, currentQuizId).catch(function (e) {
+                    console.error("Failed to reload quiz:", e);
+                    self.showError("Unable to reload quiz.");
+                });
             });
         });
 
@@ -1653,9 +2214,7 @@
             self.showQuizSelection();
         });
 
-        this.addClickHandler("back-to-home-btn", function () {
-            self.showWelcomeScreen();
-        });
+        // (removed) back-to-home-btn no longer exists on Results header
 
 
         this.addClickHandler("toggle-details-btn", function () {
@@ -1664,14 +2223,24 @@
             if (detailsDiv) {
                 const isHidden = detailsDiv.classList.contains("hidden");
                 detailsDiv.classList.toggle("hidden");
-                if (isHidden) {
+                if (isHidden && !detailsDiv.dataset.loaded) {
                     self.generateDetailedReview();
+                    detailsDiv.dataset.loaded = "1";
                 }
+
                 if (btn) {
                     btn.textContent = detailsDiv.classList.contains("hidden")
                         ? "View detailed analysis"
                         : "Hide detailed analysis";
                 }
+
+                // Afficher Retry en action secondaire uniquement si CTA principal = Next quiz
+                if (!detailsDiv.classList.contains("hidden")) {
+                    const hasNext = !!document.getElementById("next-quiz-btn");
+                    const sec = document.getElementById("secondary-actions");
+                    if (sec && hasNext) sec.classList.remove("hidden");
+                }
+
             }
         });
     };
@@ -1689,7 +2258,8 @@
 
         // AMÉLIORATION 1: Fonction partagée pour clic ET clavier
         var handleThemeActivate = function (tile) {
-            if (tile.getAttribute("aria-disabled") === "true") return;
+            // IMPORTANT: aria-disabled="true" ne doit PAS bloquer ici.
+            // Un thème verrouillé doit rester activable pour ouvrir le paywall/roadmap.
 
             const id = Number(tile.dataset.themeId || "0");
 
@@ -1712,7 +2282,6 @@
                 return;
             }
 
-            // FIX BUG CRITIQUE: Vérifier unlock status avant paywall
             const isFree = id === 1;
             const isPremium = !!self.storageManager.isPremiumUser?.();
             const isUnlocked = !!self.storageManager.isThemeUnlocked?.(id);
@@ -1723,11 +2292,12 @@
                 return;
             }
 
-            // Sinon: paywall
+            self._track("theme_locked_clicked", { themeId: id, source: "themes_grid" });
+            self._track("paywall_shown", { source: "locked_theme_click", themeId: id });
+
             if (self.features && typeof self.features.showPaywallModal === "function") {
                 self.features.showPaywallModal("unlock-theme-" + id);
             } else {
-                // PATCH 1: Inline styles = immune au purge Tailwind
                 var msg = document.createElement("div");
                 msg.style.cssText =
                     "position:fixed;top:16px;left:50%;transform:translateX(-50%);" +
@@ -1740,6 +2310,7 @@
             }
         };
 
+
         // Listener clic
         themesGrid.addEventListener("click", function (e) {
             const tile = e.target.closest(".theme-item[data-theme-id]");
@@ -1747,7 +2318,7 @@
             handleThemeActivate(tile);
         });
 
-        // AMÉLIORATION 1: Listener clavier (Enter/Espace)
+        // Listener clavier (Enter/Espace)
         themesGrid.addEventListener("keydown", function (e) {
             if (e.key !== "Enter" && e.key !== " ") return;
             const tile = e.target.closest(".theme-item[data-theme-id]");
@@ -1755,6 +2326,7 @@
             e.preventDefault();
             handleThemeActivate(tile);
         });
+
     };
 
     /* ----------------------------------------
@@ -1793,134 +2365,187 @@
     };
 
 
+    /* ----------------------------------------
+   PROGRESS / NAVIGATION
+   ---------------------------------------- */
     UICore.prototype.updateNavigationButtons = function () {
         var prevBtn = document.getElementById("prev-question-btn");
         var nextBtn = document.getElementById("next-question-btn");
         var qm = this.quizManager;
 
+        // Previous
         if (prevBtn) {
             var prevDisabled =
                 qm && typeof qm.isFirstQuestion === "function"
                     ? !!qm.isFirstQuestion()
                     : false;
+
             prevBtn.disabled = prevDisabled;
             prevBtn.setAttribute("aria-disabled", prevDisabled ? "true" : "false");
         }
 
+        // Next
         if (nextBtn) {
-            var idx = Number.isFinite(Number(qm && qm.currentIndex))
-                ? Number(qm.currentIndex)
-                : 0;
+            var idx = (this.getCurrentIndexSafe ? this.getCurrentIndexSafe() : 0);
+            var status = (this.getStatusAt ? this.getStatusAt(idx) : null);
 
-            var statusArr = Array.isArray(qm && qm.questionStatus)
-                ? qm.questionStatus
-                : [];
-            var status = statusArr[idx];
+            // NEW SHAPE: { validated, selectedIndex, isCorrect }
+            var isValidated = !!(status && status.validated === true);
 
-            var isValidated = status === "correct" || status === "incorrect";
-            var isLast =
-                qm && typeof qm.isLastQuestion === "function"
-                    ? !!qm.isLastQuestion()
-                    : false;
+            // Invalid state: no quiz / no question / options missing
+            var currentQuestion =
+                (qm && typeof qm.getCurrentQuestion === "function" && qm.getCurrentQuestion()) || null;
 
-            var q =
-                qm && typeof qm.getCurrentQuestion === "function"
-                    ? qm.getCurrentQuestion()
-                    : null;
-            var isInvalid = !!(q && q.isInvalid);
+            var optionsOk =
+                !!(currentQuestion && Array.isArray(currentQuestion.options) && currentQuestion.options.length > 0);
+
+            var isInvalid = !qm || !optionsOk;
+
+            // Last question?
+            var total = 0;
+            try {
+                total =
+                    qm && qm.currentQuiz && Array.isArray(qm.currentQuiz.questions)
+                        ? qm.currentQuiz.questions.length
+                        : 0;
+            } catch (e) {
+                total = 0;
+            }
+
+            var isLast = total ? (idx >= total - 1) : false;
 
             var nextDisabled = !isValidated || isInvalid;
             nextBtn.disabled = nextDisabled;
             nextBtn.setAttribute("aria-disabled", nextDisabled ? "true" : "false");
             nextBtn.textContent = isLast ? "Finish quiz" : "Next";
+
+            // Micro-hint a11y/UX : zone dédiée (ne doit pas écraser le feedback correct/incorrect)
+            var nh = document.getElementById("nav-hint");
+            if (nh) {
+                if (!isValidated && !isInvalid) {
+                    nh.dataset.hint = "1";
+                    nh.classList.remove("hidden");
+                    nh.textContent = "Select an answer to continue.";
+                } else if (nh.dataset.hint === "1") {
+                    nh.dataset.hint = "0";
+                    nh.classList.add("hidden");
+                    nh.textContent = "";
+                }
+            }
         }
     };
-
 
     /* ----------------------------------------
        DETAILED REVIEW
        ---------------------------------------- */
     UICore.prototype.generateDetailedReview = function () {
         try {
-            const reviewContainer = document.getElementById("questions-review");
-            if (!reviewContainer || !this.quizManager.currentQuiz) return;
+            var reviewContainer = document.getElementById("questions-review");
+            if (!reviewContainer || !this.quizManager || !this.quizManager.currentQuiz) {
+                if (reviewContainer) {
+                    reviewContainer.innerHTML =
+                        '<h4 class="font-bold text-gray-800 mb-3">Question review</h4>' +
+                        '<div class="text-sm text-gray-600">Detailed review unavailable for this quiz.</div>';
+                }
+                return;
+            }
 
-            const self = this;
-            const questions = Array.isArray(this.quizManager.currentQuiz.questions)
+            var self = this;
+
+            var questions = Array.isArray(this.quizManager.currentQuiz.questions)
                 ? this.quizManager.currentQuiz.questions
                 : [];
 
-            const userAnswers = Array.isArray(this.quizManager.userAnswers) ? this.quizManager.userAnswers : [];
-            const questionStatus = Array.isArray(this.quizManager.questionStatus) ? this.quizManager.questionStatus : [];
+            var userAnswers = Array.isArray(this.quizManager.userAnswers) ? this.quizManager.userAnswers : [];
+            var questionStatus = Array.isArray(this.quizManager.questionStatus) ? this.quizManager.questionStatus : [];
 
-            const reviewHTML = questions
+            var reviewHTML = questions
                 .map(function (question, index) {
-                    const userAnswerIndex = userAnswers[index];
-                    const isCorrect = questionStatus[index] === "correct";
-                    const correctIndex = question.correctIndex;
+                    var userAnswerIndex = userAnswers[index];
+                    var st = questionStatus[index] || null;
 
-                    const qTextRaw = (question.question || question.text || "");
-                    const qText = self.escapeHTML(qTextRaw);
+                    // NEW SHAPE: { validated, selectedIndex, isCorrect }
+                    var validated = !!(st && st.validated === true);
+                    var isCorrect = validated && (st.isCorrect === true);
+                    var isIncorrect = validated && (st.isCorrect === false);
 
-                    const userAnswerRaw = (question.options && typeof userAnswerIndex === "number")
-                        ? question.options[userAnswerIndex]
-                        : null;
-                    const correctAnswerRaw = (question.options && typeof correctIndex === "number")
-                        ? question.options[correctIndex]
-                        : null;
+                    // Supporte "correctIndex" (ton format) + fallback "answerIndex"
+                    var correctIndex =
+                        (typeof question.correctIndex === "number")
+                            ? question.correctIndex
+                            : ((typeof question.answerIndex === "number") ? question.answerIndex : null);
 
-                    const userAnswerClean = userAnswerRaw ? self._stripChoiceLabel(userAnswerRaw) : "Not answered";
-                    const correctAnswerClean = correctAnswerRaw ? self._stripChoiceLabel(correctAnswerRaw) : "";
+                    var qTextRaw = (question.question || question.text || "");
+                    var qText = self.escapeHTML(qTextRaw);
 
-                    const userAnswerHTML = self.escapeHTML(userAnswerClean);
-                    const correctAnswerHTML = self.escapeHTML(correctAnswerClean);
+                    var userAnswerRaw =
+                        (question.options && typeof userAnswerIndex === "number")
+                            ? question.options[userAnswerIndex]
+                            : null;
 
-                    const explanationHTML = question.explanation
+                    var correctAnswerRaw =
+                        (question.options && typeof correctIndex === "number")
+                            ? question.options[correctIndex]
+                            : null;
+
+                    var userAnswerClean = userAnswerRaw ? self._stripChoiceLabel(userAnswerRaw) : (validated ? "Not answered" : "Not validated");
+                    var correctAnswerClean = correctAnswerRaw ? self._stripChoiceLabel(correctAnswerRaw) : "";
+
+                    var userAnswerHTML = self.escapeHTML(userAnswerClean);
+                    var correctAnswerHTML = self.escapeHTML(correctAnswerClean);
+
+                    var explanationHTML = question.explanation
                         ? self.escapeHTML(String(question.explanation))
                         : "";
 
+                    // État (inclut validated=false)
+                    var stateLabel = isCorrect ? "Correct" : (isIncorrect ? "Incorrect" : "Not validated");
+                    var stateClass = isCorrect ? "text-green-600" : (isIncorrect ? "text-red-600" : "text-gray-600");
+                    var cardClass = isCorrect
+                        ? "border-green-200 bg-green-50"
+                        : (isIncorrect ? "border-red-200 bg-red-50" : "border-gray-200 bg-white");
+
                     return (
-                        '\n<div class="review-question mb-4 p-4 border rounded-lg ' +
-                        (isCorrect ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50") +
-                        '">' +
+                        '\n<div class="review-question mb-4 p-4 border rounded-lg ' + cardClass + '">' +
                         '\n  <div class="flex items-start justify-between mb-3">' +
-                        '\n    <h4 class="font-medium text-gray-800">Question ' + (index + 1) + "</h4>" +
-                        '\n    <span class="text-sm font-bold ' + (isCorrect ? "text-green-600" : "text-red-600") + '">' +
-                        (isCorrect ? "Correct" : "Incorrect") +
-                        "</span>" +
-                        "\n  </div>" +
-                        '\n  <p class="text-gray-700 mb-3">' + qText + "</p>" +
+                        '\n    <h4 class="font-medium text-gray-800">Question ' + (index + 1) + '</h4>' +
+                        '\n    <span class="text-sm font-bold ' + stateClass + '">' + stateLabel + '</span>' +
+                        '\n  </div>' +
+                        '\n  <p class="text-gray-700 mb-3">' + qText + '</p>' +
                         '\n  <div class="space-y-2">' +
                         '\n    <div class="text-sm">' +
                         '\n      <span class="text-gray-600">Your answer:</span>' +
-                        '\n      <span class="ml-2 ' + (isCorrect ? "text-green-600" : "text-red-600") + ' font-medium">' +
+                        '\n      <span class="ml-2 ' + (isCorrect ? "text-green-600" : (isIncorrect ? "text-red-600" : "text-gray-700")) + ' font-medium">' +
                         userAnswerHTML +
-                        "</span>" +
-                        "\n    </div>" +
-                        (!isCorrect
+                        '</span>' +
+                        '\n    </div>' +
+                        (isIncorrect && correctAnswerClean
                             ? '\n    <div class="text-sm">' +
                             '\n      <span class="text-gray-600">Correct answer:</span>' +
                             '\n      <span class="ml-2 text-green-600 font-medium">' +
                             correctAnswerHTML +
-                            "</span>" +
-                            "\n    </div>"
+                            '</span>' +
+                            '\n    </div>'
                             : "") +
                         (explanationHTML
                             ? '\n    <div class="text-sm text-gray-600 mt-2 p-2 bg-blue-50 rounded">' +
-                            "<strong>Explanation:</strong> " + explanationHTML +
-                            "</div>"
+                            '<strong>Explanation:</strong> ' + explanationHTML +
+                            '</div>'
                             : "") +
-                        "\n  </div>" +
-                        "\n</div>"
+                        '\n  </div>' +
+                        '\n</div>'
                     );
                 })
                 .join("");
 
-            reviewContainer.innerHTML = reviewHTML;
+            var headerHTML = '<h4 class="font-bold text-gray-800 mb-3">Question review</h4>';
+            reviewContainer.innerHTML = headerHTML + (reviewHTML || "");
+
         } catch (error) {
             console.error("Error generating detailed review:", error);
         }
     };
+
 
 
 
@@ -1947,30 +2572,24 @@
     };
 
     UICore.prototype.getProgressText = function (uiState) {
-        if (uiState.completedQuizzes < 1) {
+        const n = Math.max(0, Number(uiState && uiState.completedQuizzes) || 0);
+
+        if (n < 1) {
             return "Start with a first quiz to see where you stand.";
-        } else if (uiState.completedQuizzes < 5) {
+        } else if (n < 5) {
             return (
                 "You have completed " +
-                uiState.completedQuizzes +
+                n +
                 " assessment" +
-                (uiState.completedQuizzes > 1 ? "s." : ".") +
+                (n > 1 ? "s." : ".") +
                 " Keep testing your French level."
             );
-        } else if (uiState.completedQuizzes < 20) {
-            return (
-                "Great progress so far — " +
-                uiState.completedQuizzes +
-                " assessments completed."
-            );
-        } else {
-            return (
-                "Impressive history — " +
-                uiState.completedQuizzes +
-                " assessments completed."
-            );
+        } else if (n < 20) {
+            return "Great progress so far - " + n + " assessments completed.";
         }
+        return "Impressive history - " + n + " assessments completed.";
     };
+
 
     UICore.prototype.generateNextActionButton = function (resultsData) {
         if (resultsData.percentage >= 70) {

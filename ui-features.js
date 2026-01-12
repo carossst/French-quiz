@@ -79,15 +79,30 @@ UIFeatures.prototype.escapeHTML = function (str) {
 
 // Feedback toast fallback (delegates to uiCore if available)
 UIFeatures.prototype.showFeedbackMessage = function (type, message) {
+    // ✅ Translate known keys to human text (KISS, UI-only)
+    const keyMap = {
+        validation_required: "Select an answer to continue.",
+        premium_unlocked: "Premium unlocked.",
+        daily_reward_locked: "Daily chest locked. One chest per calendar day.",
+        DAILY_LOCKED: "Daily chest locked. One chest per calendar day."
+    };
+
+    const resolved =
+        (typeof message === "string" && keyMap[message])
+            ? keyMap[message]
+            : message;
+
     if (this.uiCore && typeof this.uiCore.showFeedbackMessage === "function") {
-        return this.uiCore.showFeedbackMessage(type, message);
+        return this.uiCore.showFeedbackMessage(type, resolved);
     }
-    // Minimal fallback: console + optional alert for errors
+
+    // Minimal fallback: console
     try {
         const fn = type === "error" ? "error" : (type === "warn" ? "warn" : "log");
-        console[fn]("[TYF]", message);
+        console[fn]("[TYF]", resolved);
     } catch { }
 };
+
 
 // APRÈS
 // (SUPPRIMÉ) XP progress indicator: on a "Level" au début, pas besoin de barre/progress ici.
@@ -101,11 +116,21 @@ UIFeatures.prototype.initializeNotifications = function () {
 // Storage events binding (safe)
 UIFeatures.prototype.setupStorageEvents = function () {
     if (this._onStorageUpdated) return;
+
     this._onStorageUpdated = () => {
+        // 1) Header numbers
         try { this.updateXPHeader(); } catch { }
+
+        // 2) Chest state (opacity, aria-label) – addChestIconToHeader() is idempotent
+        try { this.addChestIconToHeader(); } catch { }
+
+        // 3) If tooltip is open, close it (avoids stale ETA text)
+        try { this._closeChestTooltip?.(); } catch { }
     };
+
     window.addEventListener("storage-updated", this._onStorageUpdated);
 };
+
 
 //================================================================================
 // ROTATING FEEDBACK SYSTEM
@@ -114,24 +139,23 @@ UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) 
     const pct = Number(percentage) || 0;
     const category = pct >= 60 ? "strongPerformance" : (pct >= 40 ? "goodPerformance" : "lowPerformance");
     const messages = this.feedbackMessages?.[category] || [];
-    if (!messages.length) return "Keep going!";
+    if (!messages.length) return "Keep going - you're building authentic French skills.";
+
+
 
     const key = "tyf-feedback-index";
     const safeThemeId = themeId ?? "global";
     const themeKey = `${safeThemeId}_${category}`;
-    this._feedbackIndexMap = this._feedbackIndexMap || {};
 
     let indexMap;
-    try { indexMap = JSON.parse(localStorage.getItem(key) || "{}") || {}; }
-    catch { indexMap = this._feedbackIndexMap; }
+    try { indexMap = JSON.parse(localStorage.getItem(key) || "{}"); }
+    catch { indexMap = {}; }
 
     const currentIndex = Number(indexMap[themeKey]) || 0;
     const message = messages[currentIndex % messages.length];
     indexMap[themeKey] = currentIndex + 1;
 
-    try { localStorage.setItem(key, JSON.stringify(indexMap)); }
-    catch { this._feedbackIndexMap = indexMap; }
-
+    try { localStorage.setItem(key, JSON.stringify(indexMap)); } catch { }
     return message;
 };
 
@@ -140,85 +164,43 @@ UIFeatures.prototype.getRotatedFeedbackMessage = function (percentage, themeId) 
 //================================================================================
 UIFeatures.prototype.initializeXPSystem = function () {
     this.showXPHeader();
-    this.addChestIconToHeader();   // ✅ bind click collect + state aria + wrapper dataset
-    this.setupChestTooltip();      // ✅ tooltip hover/focus + mobile toggle quand locked
-    this.updateXPHeader();
-    this.bindHeaderPremiumCodeEntry(); // ✅ DOM prêt ici
+
+    // Bind events first (then render once)
     this.setupStorageEvents();
-    this.initializeNotifications();
-    this.startConversionTimer(); // démarrage contrôlé ici
-
-    // Notifications désactivées pour MVP v3.0
-    // TODO v3.1: implémenter startNotificationArmingLoop si notifications push activées
-
-
-    // écouter les gains FP réels (StorageManager.addFrenchPoints)
     this.setupFPEvents();
     this.setupGamificationUXEvents();
+
+    // UI elements
+    this.addChestIconToHeader();
+    this.setupChestTooltip();
+
+    // Initial paint
+    this.updateXPHeader();
+
+    this.initializeNotifications();
+    this.startConversionTimer();
 };
 
 
+
 UIFeatures.prototype.updateXPHeader = function () {
-    // Elements
+    // ✅ IDs réels dans index.html
     const fpEl = document.getElementById("user-fp");
     const levelEl = document.getElementById("user-level");
-    const premiumBtn = document.getElementById("premium-unlock-btn");
-    const chestWrapper = document.getElementById("daily-chest-wrapper");
 
-    // ---------- FP ----------
     const fp = Number(this.storageManager?.getFrenchPoints?.() ?? 0);
     const safeFP = Number.isFinite(fp) && fp >= 0 ? fp : 0;
 
+    // Header UI: format "0 FP"
     if (fpEl) fpEl.textContent = `${safeFP} FP`;
 
-    // ---------- LEVEL ----------
-    let level =
-        Number(this.storageManager?.getUserLevel?.() ?? this.storageManager?.getLevel?.() ?? NaN);
-
+    let level = Number(this.storageManager?.getUserLevel?.() ?? NaN);
     if (!Number.isFinite(level) || level <= 0) {
-        level = 1 + Math.floor(safeFP / 25);
+        // Fallback cohérent avec StorageManager (FP_PER_LEVEL = 50)
+        level = 1 + Math.floor(safeFP / 50);
     }
+
     if (levelEl) levelEl.textContent = String(level);
-
-    // ---------- CHEST (visual state only; collect logic ailleurs) ----------
-    if (chestWrapper) {
-        try {
-            const info = this.getChestInfo?.() || { available: false, points: 1, etaText: "" };
-            const available = !!info.available;
-
-            chestWrapper.classList.toggle("chest-icon--available", available);
-            chestWrapper.style.opacity = available ? "1" : "0.5";
-            chestWrapper.dataset.state = available ? "available" : "locked";
-        } catch { }
-    }
-
-    // ---------- PREMIUM CTA (Stripe link) ----------
-    if (premiumBtn) {
-        const isPremium = !!this.storageManager?.isPremiumUser?.();
-
-        if (!premiumBtn.dataset.originalHref) {
-            premiumBtn.dataset.originalHref = premiumBtn.getAttribute("href") || "";
-        }
-
-        if (isPremium) {
-            premiumBtn.setAttribute("aria-disabled", "true");
-            premiumBtn.setAttribute("tabindex", "-1");
-            premiumBtn.classList.add("opacity-50", "pointer-events-none", "cursor-default");
-            premiumBtn.setAttribute("title", "Premium active");
-            premiumBtn.setAttribute("href", "#");
-            premiumBtn.setAttribute("aria-label", "Premium already unlocked");
-        } else {
-            premiumBtn.setAttribute("aria-disabled", "false");
-            premiumBtn.removeAttribute("tabindex");
-            premiumBtn.classList.remove("opacity-50", "pointer-events-none", "cursor-default");
-            premiumBtn.removeAttribute("title");
-            premiumBtn.setAttribute("href", premiumBtn.dataset.originalHref || "");
-            premiumBtn.setAttribute(
-                "aria-label",
-                `Unlock premium access for ${UIFeatures.PRICE_DISPLAY.current}. Launch price. Regular price ${UIFeatures.PRICE_DISPLAY.regular}.`
-            );
-        }
-    }
 };
 
 UIFeatures.prototype.setupFPEvents = function () {
@@ -235,16 +217,8 @@ UIFeatures.prototype.setupFPEvents = function () {
     window.addEventListener("fp-gained", this._onFPGained);
 };
 
-UIFeatures.prototype.bindHeaderPremiumCodeEntry = function () {
-    const btn = document.getElementById("premium-unlock-btn");
-    if (!btn) return;
+// (SUPPRIMÉ) UIFeatures.prototype.bindHeaderPremiumCodeEntry
 
-    if (btn.dataset.premiumBound === "1") return;
-    btn.dataset.premiumBound = "1";
-
-    if (!this._premiumBtnHandlers) this._premiumBtnHandlers = {};
-    this._premiumBtnHandlers.node = btn;
-};
 
 UIFeatures.prototype.setupGamificationUXEvents = function () {
     if (this._gamificationUXBound) return;
@@ -260,9 +234,16 @@ UIFeatures.prototype.setupGamificationUXEvents = function () {
     };
 
     this._onLevelUp = (e) => {
-        const lvl = e?.detail?.newLevel ?? e?.detail?.level ?? null;
-        const label = (lvl !== null && lvl !== undefined) ? `Level up: ${lvl}` : "Level up";
-        this.showFeedbackMessage("success", label);
+        const lvl = e?.detail?.newLevel ?? null;
+        if (!Number.isFinite(lvl)) return;
+
+        const info = this.getLevelNarrative(lvl);
+
+        this.showFeedbackMessage(
+            "success",
+            `Level ${lvl} — ${info.stage}\n${info.message}\nNext: ${info.next}`
+        );
+
         try { this.updateXPHeader(); } catch { }
     };
 
@@ -293,29 +274,23 @@ UIFeatures.prototype.addChestIconToHeader = function () {
             ? this.getChestInfo()
             : { available: false, points: 1, etaText: "" };
 
-        const available = (typeof this.storageManager.isDailyRewardAvailable === "function")
-            ? !!this.storageManager.isDailyRewardAvailable()
-            : !!info.available;
-
-        wrapper.classList.add("chest-icon");
-        wrapper.classList.toggle("chest-icon--available", available);
-
-        wrapper.style.opacity = available ? "1" : "0.5";
-        wrapper.dataset.state = available ? "available" : "locked";
+        const available = !!info.available;
 
         const points = Number.isFinite(info.points) && info.points > 0 ? info.points : 1;
         const label = points === 1 ? "French Point" : "French Points";
 
-        // APRÈS (addChestIconToHeader → updateState aria-label, calendar-based + ETA)
-        const eta = info.etaText ? ` Available in ${info.etaText}.` : "";
+        const eta = available
+            ? ""
+            : (info.etaText ? ` Available in ${info.etaText}.` : " Available tomorrow.");
+
         wrapper.setAttribute(
             "aria-label",
             available
-                ? `Collect your daily chest (+${points} ${label})`
-                : `Daily chest locked. One chest per calendar day. Reward: +${points} ${label}.${eta}`
+                ? `Collect your daily chest (+${points} ${label}).`
+                : `Daily chest locked. One chest per calendar day.${eta}`
         );
-
     };
+
 
     if (!this._chestHeaderHandlers) this._chestHeaderHandlers = {};
     const h = this._chestHeaderHandlers;
@@ -342,13 +317,14 @@ UIFeatures.prototype.addChestIconToHeader = function () {
 
         // Locked: mobile toggle tooltip (click reserved for collect when available)
         if (!availableNow) {
-            try { this.setupChestTooltip?.(); } catch { }
+            // Tooltip already initialized by initializeXPSystem()
             try { this._toggleChestTooltip?.(); } catch { }
             event.preventDefault?.();
             event.stopPropagation?.();
             updateState();
             return;
         }
+
 
         if (typeof this.collectDailyReward !== "function") return;
 
@@ -389,12 +365,10 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
 
 
     // Toast enfant (si container), sinon toast positionné
-    toast.className = (container ? "" : "fixed top-4 right-4 z-50 ") + "tyf-toast tyf-message";
-    toast.style.background = "rgb(22 163 74)";
-    toast.style.color = "#fff";
-    toast.style.padding = window.innerWidth < 640 ? "0.5rem 0.75rem" : "0.5rem 1rem";
-    toast.style.borderRadius = "0.75rem";
-    toast.style.boxShadow = "var(--shadow-2)";
+    toast.className =
+        (container ? "" : "tyf-toast--floating ") +
+        "tyf-toast tyf-toast--success";
+
 
     const amount = Number(points) || 0;
     const label = amount === 1 ? "French Point" : "French Points";
@@ -419,52 +393,27 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
 //================================================================================
 // CONVERSION SYSTEM (PAYWALL)
 //================================================================================
-// APRÈS — startConversionTimer() complet (fix TDZ: stop défini avant usage)
 UIFeatures.prototype.startConversionTimer = function () {
-    const stop = () => {
-        if (this.paywallTimer) {
-            clearInterval(this.paywallTimer);
-            this.paywallTimer = null;
+    if (this.paywallTimer) return; // guard
+    if (this.storageManager.isPremiumUser?.()) return;
+
+    this.paywallTimer = setInterval(() => {
+        if (document.hidden) return;
+
+        // Jamais avant un premier résultat (valeur perçue)
+        const completed = Number(this.storageManager.getCompletedQuizzesCount?.() ?? 0);
+        if (!Number.isFinite(completed) || completed < 1) return;
+
+        // Anti-spam UI (10 min)
+        if (this._lastPaywallAt && (Date.now() - this._lastPaywallAt) < 10 * 60 * 1000) return;
+
+        if (this.storageManager.shouldTriggerPaywall?.()) {
+            this._lastPaywallAt = Date.now();
+            this.showSophiePaywall();
+            this.storageManager.markPaywallShown?.("timer");
         }
-    };
-
-    const start = () => {
-        if (this.paywallTimer || document.hidden) return;
-
-        this.paywallTimer = setInterval(() => {
-            if (document.hidden) return;
-            if (document.getElementById("sophie-paywall-modal")) return;
-
-            if (this.storageManager.isPremiumUser?.()) {
-                stop();
-                return;
-            }
-
-            const shouldTrigger = this.storageManager.shouldTriggerPaywall?.();
-
-            const hasUnplayedFreeQuizzes =
-                (typeof this.storageManager.hasUnplayedFreeQuizzes === "function")
-                    ? !!this.storageManager.hasUnplayedFreeQuizzes()
-                    : true;
-
-            if (shouldTrigger && !hasUnplayedFreeQuizzes) {
-                this.showSophiePaywall();
-                this.storageManager.markPaywallShown?.();
-                stop();
-            }
-        }, 30000);
-    };
-
-    if (!this._onVisibilityChange) {
-        this._onVisibilityChange = () => {
-            document.hidden ? stop() : start();
-        };
-        document.addEventListener("visibilitychange", this._onVisibilityChange);
-    }
-
-    start();
+    }, 30000);
 };
-
 
 
 
@@ -473,9 +422,12 @@ UIFeatures.prototype.showSophiePaywall = function () {
     if (document.getElementById("sophie-paywall-modal")) return;
 
     const modal = this.createPaywallModal();
+    if (!modal) return;
+
+    // ✅ The paywall must be attached to the DOM
     document.body.appendChild(modal);
 
-    // Focus trap: ici, parce que le modal est garanti dans le DOM
+    // ✅ Focus trap owned by this modal (like the others)
     this._applyFocusTrap?.(modal);
 
     setTimeout(() => {
@@ -490,7 +442,7 @@ UIFeatures.prototype.showSophiePaywall = function () {
 
 
 
-// APRÈS — createPaywallModal()
+
 UIFeatures.prototype.createPaywallModal = function () {
     const modal = document.createElement("div");
     modal.id = "sophie-paywall-modal";
@@ -525,6 +477,8 @@ UIFeatures.prototype.createPaywallModal = function () {
 UIFeatures.prototype.setupPaywallEvents = function (modal) {
     const previouslyFocused = document.activeElement;
 
+    const onEsc = (e) => { if (e.key === "Escape") close(); };
+
     const cleanup = () => {
         document.removeEventListener("keydown", onEsc);
         this._removeFocusTrap?.(modal);
@@ -539,15 +493,13 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
     modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener("click", close));
     modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 
-    const onEsc = (e) => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", onEsc);
-
-    // ⛔️ SUPPRIMÉ: le modal est append ailleurs (showSophiePaywall)
-    // document.body.appendChild(modal);
+    modal._tyfEscHandler = onEsc;
 
     const buyBtn = modal.querySelector("#paywall-buy-btn");
     if (buyBtn) {
         buyBtn.addEventListener("click", () => {
+            try { this.storageManager?.track?.("paywall_click_buy", { source: "sophie_modal" }); } catch { }
             const url = window?.TYF_CONFIG?.stripePaymentUrl;
             if (url) window.location.href = url;
         });
@@ -556,25 +508,26 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
     const codeBtn = modal.querySelector("#paywall-code-btn");
     if (codeBtn) {
         codeBtn.addEventListener("click", () => {
+            try { this.storageManager?.track?.("paywall_click_code", { source: "sophie_modal" }); } catch { }
             close();
             this.showPremiumCodeModal();
         });
     }
 };
 
-
 UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitDays, waitDaysLabel) {
     const freePaceLine = waitDaysLabel
-        ? `• At free pace: ${waitDaysLabel} waiting`
-        : `• At free pace: keep playing for free`;
+        ? `• Free pace: about ${waitDaysLabel} to unlock the next theme`
+        : `• Free pace: keep playing for free`;
 
     const continueFreeText = waitDaysLabel
-        ? `Continue free (${waitDaysLabel})`
-        : `Continue free`;
+        ? `Keep playing free (about ${waitDaysLabel})`
+        : `Keep playing free`;
+
 
     return `
     <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
-      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">×</button>
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close" data-action="close">×</button>
 
       <div class="text-5xl mb-4">📊</div>
       <h2 id="sophie-paywall-title" class="text-xl font-bold text-gray-800 mb-4">Want to assess all French domains?</h2>
@@ -619,10 +572,12 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
 </button>
 
 <button
+  id="paywall-continue-free-btn"
   data-action="close"
-  class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+  class="paywall-continue-free">
   ${continueFreeText}
 </button>
+
 
     </div>
   `;
@@ -762,91 +717,54 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
 // 3) Tu fixes la fermeture de la fonction (pas de "};" fantôme).
 
 UIFeatures.prototype.handleThemeClick = function (theme) {
-    const unlockStatus = this.storageManager.canUnlockTheme?.(theme.id) || { canUnlock: false, reason: "UNKNOWN" };
+    if (!theme || !theme.id) return;
 
     const goTheme = () => {
         if (this.uiCore?.quizManager) this.uiCore.quizManager.currentThemeId = theme.id;
-        if (this.uiCore?.showQuizSelection) this.uiCore.showQuizSelection();
+        this.uiCore?.showQuizSelection?.();
     };
 
-    if (this.storageManager.isThemeUnlocked?.(theme.id) || this.storageManager.isPremiumUser?.()) {
+    // Accessible
+    if (this.storageManager?.isThemeUnlocked?.(theme.id) || this.storageManager?.isPremiumUser?.()) {
         goTheme();
         return;
     }
 
-    if (unlockStatus.reason === "PREVIOUS_LOCKED") {
-        this.showThemePreviewModal(theme);
+    // Ask StorageManager if unlock is possible (FP gating / prerequisites)
+    const unlockStatus =
+        (typeof this.storageManager?.canUnlockTheme === "function")
+            ? this.storageManager.canUnlockTheme(theme.id)
+            : null;
+
+    // If unlockable with FP AND an unlock method exists, show a modal that offers FP unlock
+    const canUnlockWithFP =
+        unlockStatus && (unlockStatus.canUnlock === true || unlockStatus.allowed === true || unlockStatus.ok === true);
+
+    const hasUnlockMethod =
+        (typeof this.storageManager?.unlockTheme === "function");
+
+
+    if (canUnlockWithFP && hasUnlockMethod) {
+        this.showThemePreviewModal?.(theme, { mode: "fp", unlockStatus });
         return;
     }
 
-    if (unlockStatus.reason === "INSUFFICIENT_FP") {
-        const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
-        const needed = Math.max(0, Number(unlockStatus.cost ?? 0) - currentFP);
-
-        const chestInfo = this.getChestInfo?.() || { points: 1 };
-        const chestPoints = Number.isFinite(chestInfo.points) && chestInfo.points > 0 ? chestInfo.points : 1;
-        const chestLabel = chestPoints === 1 ? "French Point" : "French Points";
-
-        let message = `${theme.name} needs ${unlockStatus.cost} French Points\n\n` +
-            `You have: ${currentFP} French Points\n` +
-            `Missing: ${needed} French Points\n\n`;
-
-        if (needed <= 5) {
-            message += `So close! Take a few more quizzes or collect tomorrow's chest (+${chestPoints} ${chestLabel}).\n\n`;
-            message += `Or get instant access to all themes ($12) - click header link`;
-        } else if (needed <= 15) {
-            message += `A few more quizzes + your daily chest (+${chestPoints} ${chestLabel}).\n\n`;
-            message += `Or get instant access to all themes ($12) - click header link\n\n`;
-            message += `Daily chest: 1 per day (resets at midnight, no accumulation).`;
-        } else {
-            message += `Or get instant access to all themes ($12) - click header link\n\n`;
-            message += `Free path: quizzes + one daily chest (+${chestPoints} ${chestLabel}, resets at midnight, no accumulation)`;
-        }
-
-        this.showFeedbackMessage("info", message);
+    // Not enough FP (or blocked): show preview with correct message
+    if (unlockStatus?.reason === "INSUFFICIENT_FP") {
+        this.showThemePreviewModal?.(theme, { mode: "insufficient_fp", unlockStatus });
         return;
     }
 
-    if (unlockStatus.canUnlock) {
-        const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
-        const cost = Number(unlockStatus.cost ?? 0);
-
-        const confirmMessage = `Unlock "${theme.name}" for ${cost} FP?\n\n` +
-            `You have ${currentFP} FP\n` +
-            `After unlock: ${Math.max(0, currentFP - cost)} FP remaining\n\n` +
-            `This unlocks 5 authentic French quizzes`;
-
-        if (!confirm(confirmMessage)) return;
-
-        if (typeof this.storageManager.unlockTheme !== "function") {
-            this.showFeedbackMessage("error", "Unlock failed (missing storage method)");
-            return;
-        }
-
-        const res = this.storageManager.unlockTheme(theme.id, cost);
-
-        if (res && res.success) {
-            const remaining = Number(res.remainingFP ?? this.storageManager.getFrenchPoints?.() ?? 0);
-
-            this.showFeedbackMessage(
-                "success",
-                `Unlocked "${theme.name}"! 5 new authentic French quizzes available. ${remaining} FP remaining.`
-            );
-
-            try { this.updateXPHeader(); } catch { }
-
-            setTimeout(() => {
-                if (this.uiCore?.showWelcomeScreen) this.uiCore.showWelcomeScreen();
-                else window.location.reload();
-            }, 100);
-        } else {
-            this.showFeedbackMessage("error", "Unlock failed - please try again");
-        }
+    if (unlockStatus?.reason === "LOCKED" || unlockStatus?.reason === "PREREQUISITE") {
+        this.showFeedbackMessage?.("warn", "Keep progressing to unlock this theme.");
         return;
     }
 
-    this.showThemePreviewModal(theme);
+    // Default: premium preview
+    this.showThemePreviewModal?.(theme, { mode: "premium", unlockStatus });
 };
+
+
 
 
 UIFeatures.prototype.getNextQuizInTheme = function () {
@@ -891,11 +809,34 @@ UIFeatures.prototype.getNextQuizInTheme = function () {
     return null;
 };
 
-UIFeatures.prototype.showThemePreviewModal = function (theme) {
-    const modal = this.createThemePreviewModal?.(theme);
+// APRÈS — showThemePreviewModal (BLOC ENTIER)
+UIFeatures.prototype.showThemePreviewModal = function (theme, opts) {
+    // Guard: single instance
+    try {
+        const existing = document.getElementById("theme-preview-modal");
+        if (existing) existing.remove();
+    } catch { }
+
+    const modal = this.createThemePreviewModal?.(theme, opts);
     if (!modal) return;
+
     document.body.appendChild(modal);
+
+    // Focus trap is owned here (single source of truth)
     this._applyFocusTrap?.(modal);
+
+    // Put focus inside (first actionable)
+    setTimeout(() => {
+        try {
+            const primary =
+                modal.querySelector("#fp-unlock-btn:not([disabled])")
+                || modal.querySelector("#premium-buy-btn")
+                || modal.querySelector("#premium-code-btn")
+                || modal.querySelector('[data-action="close"]')
+                || modal;
+            primary?.focus?.();
+        } catch { }
+    }, 0);
 };
 
 
@@ -947,8 +888,6 @@ UIFeatures.prototype.handlePurchase = function () {
     } catch { /* no-op */ }
 };
 
-// Supprimé: closePaywall (inutile et dangereux car ne fait pas cleanup / focus restore)
-
 
 //================================================================================
 // COMPLETION MESSAGES
@@ -961,6 +900,12 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
 
     if (percentage >= 90) {
         message = isMobile ? `Excellent! (${score}/20)` : `Excellent! Near-native level (${score}/20)`;
+
+        if (percentage < 100) {
+            message += isMobile
+                ? `\nSo close to 100%. Try once more?`
+                : `\nSo close to perfect. One more try for 100%?`;
+        }
     } else if (percentage >= 70) {
         message = isMobile ? `Fantastic! (${score}/20)` : `Fantastic work! Real skills developing (${score}/20)`;
     } else if (percentage >= 50) {
@@ -968,6 +913,7 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
     } else {
         message = isMobile ? `Great start! (${score}/20)` : `Great start! Real French progress (${score}/20)`;
     }
+
 
     message += `\n+${fpEarned} French Points earned`;
 
@@ -982,10 +928,14 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
     } else if (currentFP < 10) {
 
         message += `\n🌟 You're building authentic skills!`;
-        message += isMobile ?
-            `\n✨ Love this? All themes $12` :
-            `\n✨ Love the progress? Get all themes instantly $12`;
+        const price = UIFeatures.PRICE_DISPLAY?.current || "$12";
+
+        message += isMobile
+            ? `\nLove this? All themes ${price}`
+            : `\nLove the progress? Unlock all themes instantly for ${price}`;
+
     } else if (currentFP < 25) {
+
         message += `\n🔥 Your French breakthrough is happening!`;
         message += isMobile ?
             `\n✨ Ready to accelerate? All themes $12` :
@@ -1004,14 +954,50 @@ UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
 // THEME PREVIEW MODAL
 //================================================================================
 
-// APRÈS — createThemePreviewModal()
-UIFeatures.prototype.createThemePreviewModal = function (theme) {
-    const modal = document.createElement('div');
-    modal.id = 'theme-preview-modal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-labelledby', 'theme-preview-title');
+UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
+    const mode = opts?.mode || "premium";
+    const unlockStatus = opts?.unlockStatus || null;
+
+    const modal = document.createElement("div");
+    modal.id = "theme-preview-modal";
+    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "theme-preview-title");
+
+    // Best-effort cost display (don’t invent logic: only show if we can derive a number)
+    const currentFP = Number(this.storageManager?.getFrenchPoints?.() ?? 0);
+    const safeFP = Number.isFinite(currentFP) && currentFP >= 0 ? currentFP : 0;
+
+    const costCandidate =
+        Number(unlockStatus?.cost) ||
+        Number(unlockStatus?.requiredFP) ||
+        Number(unlockStatus?.requiredPoints) ||
+        Number(this.storageManager?.getNextThemeUnlockCost?.()) ||
+        NaN;
+
+
+    const hasCost = Number.isFinite(costCandidate) && costCandidate > 0;
+    const costText = hasCost ? `${costCandidate} French Points` : "";
+
+    const headerLine =
+        mode === "fp"
+            ? `You can unlock this theme with French Points.`
+            : (mode === "insufficient_fp"
+                ? `Not enough French Points yet.`
+                : `This theme is part of Premium access.`);
+
+    const fpLine =
+        mode === "fp"
+            ? (hasCost ? `Cost: ${costText}. You have ${safeFP}.` : `Use French Points to unlock.`)
+            : (mode === "insufficient_fp"
+                ? (hasCost ? `Cost: ${costText}. You have ${safeFP}.` : `Keep earning French Points.`)
+                : "");
+
+    const showFPButton = (mode === "fp" || mode === "insufficient_fp")
+        && (typeof this.storageManager?.unlockTheme === "function");
+
+    const fpDisabled = (mode === "insufficient_fp");
 
     modal.innerHTML = `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
@@ -1019,93 +1005,132 @@ UIFeatures.prototype.createThemePreviewModal = function (theme) {
                 <span aria-hidden="true" class="text-lg">✕</span>
             </button>
 
-            <div class="text-4xl mb-4">${theme.icon}</div>
-            <h2 id="theme-preview-title" class="text-xl font-bold text-gray-800 mb-4">
-  Unlock ${theme.name}?
-</h2>
+            <div class="text-4xl mb-4">${theme.icon || "🔒"}</div>
 
-<p class="text-gray-600 mb-2">
-  This theme is part of Premium access.
-</p>
+            <h2 id="theme-preview-title" class="text-xl font-bold text-gray-800 mb-3">
+                Unlock ${theme.name || "this theme"}?
+            </h2>
 
-<div class="text-sm text-gray-500 mb-6">
-  Launch price: <strong>${UIFeatures.PRICE_DISPLAY.current}</strong>
-  (regular <span class="line-through">${UIFeatures.PRICE_DISPLAY.regular}</span>)
-</div>
+            <p class="text-gray-600 mb-2">${headerLine}</p>
+            ${fpLine ? `<p class="text-sm text-gray-500 mb-4">${fpLine}</p>` : ""}
 
+            <div class="text-sm text-gray-500 mb-6">
+                Launch price: <strong>${UIFeatures.PRICE_DISPLAY.current}</strong>
+                (regular <span class="line-through">${UIFeatures.PRICE_DISPLAY.regular}</span>)
+            </div>
 
-<div class="space-y-3">
-  <button
-    id="premium-code-btn"
-    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
-    Enter premium code
-  </button>
+            <div class="space-y-3">
+                ${showFPButton ? `
+                <button
+                    id="fp-unlock-btn"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg ${fpDisabled ? "opacity-50 cursor-not-allowed" : ""}"
+                    ${fpDisabled ? "disabled" : ""}>
+                    Unlock with French Points${hasCost ? ` – ${costCandidate}` : ""}
+                </button>` : ""}
 
-  <button
-  id="premium-buy-btn"
-  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
-  Unlock all themes – ${UIFeatures.PRICE_DISPLAY.current}
-</button>
+                <button
+                    id="premium-code-btn"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
+                    Enter premium code
+                </button>
 
+                <button
+                    id="premium-buy-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+                    Unlock all themes – ${UIFeatures.PRICE_DISPLAY.current}
+                </button>
 
-  <button
-    id="colors-first-btn"
-    class="w-full text-gray-600 hover:text-gray-800 py-2">
-    Continue with free Colors theme
-  </button>
-</div>
-
-    
+                <button
+                    id="colors-first-btn"
+                    class="w-full text-gray-600 hover:text-gray-800 py-2">
+                    Continue with free Colors theme
+                </button>
+            </div>
         </div>`;
 
-    this.setupThemePreviewEvents(modal, theme);
+    this.setupThemePreviewEvents(modal, theme, { mode, unlockStatus });
     return modal;
 };
 
 
 
-UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme) {
+// APRÈS — setupThemePreviewEvents (BLOC ENTIER)
+UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme, opts) {
     const previouslyFocused = document.activeElement;
 
+    const onEsc = (e) => {
+        if (e.key === "Escape") close();
+    };
+
     const cleanup = () => {
-        document.removeEventListener('keydown', onEsc);
-        this._removeFocusTrap?.(modal);
+        document.removeEventListener("keydown", onEsc);
+        // Focus trap is owned here on close (but applied in showThemePreviewModal)
+        try { this._removeFocusTrap?.(modal); } catch { }
     };
 
     const close = () => {
         cleanup();
-        modal.remove();
+        try { modal.remove(); } catch { }
         try { previouslyFocused?.focus?.(); } catch { }
     };
 
-    modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener('click', close));
-    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    modal.querySelectorAll('[data-action="close"], [data-action="cancel"]').forEach(btn =>
+        btn.addEventListener("click", close)
+    );
+    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 
-    const onEsc = (e) => { if (e.key === 'Escape') close(); };
-    document.addEventListener('keydown', onEsc);
+    document.addEventListener("keydown", onEsc);
+    modal._tyfEscHandler = onEsc;
 
-    // ⛔️ SUPPRIMÉ: déjà append dans showThemePreviewModal()
-    // document.body.appendChild(modal);
+    // FP unlock button
+    const fpBtn = modal.querySelector("#fp-unlock-btn");
+    if (fpBtn) {
+        fpBtn.addEventListener("click", () => {
+            if (fpBtn.disabled) return;
 
-    // ✅ Focus trap: déjà géré dans showThemePreviewModal()
+            let result = { success: false };
+            try {
+                if (typeof this.storageManager?.unlockTheme === "function") {
+                    result = this.storageManager.unlockTheme(theme.id);
+                }
+            } catch { result = { success: false }; }
+
+            if (result && result.success) {
+                this.showFeedbackMessage?.("success", "Theme unlocked.");
+                try { this.updateXPHeader?.(); } catch { }
+                close();
+
+                if (this.uiCore?.quizManager) this.uiCore.quizManager.currentThemeId = theme.id;
+                this.uiCore?.showQuizSelection?.();
+                return;
+            }
+
+            const r = result?.reason;
+            if (r === "PREVIOUS_LOCKED") this.showFeedbackMessage?.("warn", "Unlock the previous theme first.");
+            else if (r === "INSUFFICIENT_FP") this.showFeedbackMessage?.("warn", "Not enough French Points yet.");
+            else this.showFeedbackMessage?.("warn", "Locked for now.");
+        });
+    }
 
 
-    const codeBtn = modal.querySelector('#premium-code-btn');
-    if (codeBtn) codeBtn.addEventListener('click', () => { close(); this.showPremiumCodeModal(); });
+    const codeBtn = modal.querySelector("#premium-code-btn");
+    if (codeBtn) codeBtn.addEventListener("click", () => { close(); this.showPremiumCodeModal(); });
 
-    const buyBtn = modal.querySelector('#premium-buy-btn');
-    if (buyBtn) buyBtn.addEventListener('click', () => {
+    const buyBtn = modal.querySelector("#premium-buy-btn");
+    if (buyBtn) buyBtn.addEventListener("click", () => {
         const url = window?.TYF_CONFIG?.stripePaymentUrl;
         if (url) window.location.href = url;
     });
 
-    const colorsBtn = modal.querySelector('#colors-first-btn');
-    if (colorsBtn) colorsBtn.addEventListener('click', () => {
+    const colorsBtn = modal.querySelector("#colors-first-btn");
+    if (colorsBtn) colorsBtn.addEventListener("click", () => {
         close();
         if (this.uiCore?.quizManager) this.uiCore.quizManager.currentThemeId = 1;
-        if (this.uiCore?.showQuizSelection) this.uiCore.showQuizSelection();
+        this.uiCore?.showQuizSelection?.();
     });
 };
+
+
 
 //================================================================================
 // PREMIUM CODE MODAL
@@ -1128,9 +1153,16 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
       </button>
      <h2 id="premium-code-title" class="text-xl font-bold text-gray-800 mb-4">Enter Premium Code</h2>
       <div class="mb-4">
-       <input id="premium-code-input" type="text"
-         class="w-full"
-         placeholder="Enter your code">
+      <input
+  id="premium-code-input"
+  type="text"
+  inputmode="text"
+  autocomplete="off"
+  autocapitalize="characters"
+  spellcheck="false"
+  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+  placeholder="Enter your code">
+
       </div>
       <div class="space-y-3">
         <button id="validate-code-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">Validate Code</button>
@@ -1161,6 +1193,9 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
     const onEsc = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onEsc);
+
+    // ✅ store for destroy() emergency cleanup
+    modal._tyfEscHandler = onEsc;
 
     const input = modal.querySelector('#premium-code-input');
 
@@ -1207,10 +1242,19 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
                     window.location.reload();
                 }
             } else {
-                input.classList.add("border-red-400");
+                input.classList.add("tyf-input-error");
                 input.value = "";
                 input.placeholder = "Invalid code - try again";
+
+                // Remove error style as soon as user edits again
+                const clearError = () => {
+                    input.classList.remove("tyf-input-error");
+                    input.removeEventListener("input", clearError);
+                };
+                input.addEventListener("input", clearError);
+
             }
+
 
 
         });
@@ -1232,10 +1276,13 @@ UIFeatures.prototype.showUserProfileModal = function () {
     if (!this.storageManager?.shouldShowProfileModal?.()) return;
 
     const modal =
-        this.createUserProfileModal?.()
-        || this.uiCore?.createUserProfileModal?.();
+        this.uiCore?.createUserProfileModal?.()
+        || this.createUserProfileModal?.();
 
-    if (!modal) return;
+    if (!modal) {
+        this.showFeedbackMessage?.("warn", "Profile modal unavailable.");
+        return;
+    }
 
     document.body.appendChild(modal);
 
@@ -1502,7 +1549,8 @@ UIFeatures.prototype._removeFocusTrap = function (modal) {
 };
 
 UIFeatures.prototype.formatDuration = function (ms) {
-    if (!Number.isFinite(ms) || ms <= 0) return 'now';
+    // Return empty string when already due (prevents "in now")
+    if (!Number.isFinite(ms) || ms <= 0) return '';
     const h = Math.floor(ms / 3600000);
     const m = Math.ceil((ms % 3600000) / 60000);
     if (h <= 0) return `${m} min`;
@@ -1510,46 +1558,32 @@ UIFeatures.prototype.formatDuration = function (ms) {
     return `${h} h ${m} min`;
 };
 
-// APRÈS — getChestInfo()
-// Aucun accès direct à localStorage: fallback local en mémoire (mis à jour à la collecte).
-// APRÈS
+
+
+
 UIFeatures.prototype.getChestInfo = function () {
-    const points = Number(this.storageManager?.getDailyRewardPoints?.());
-    const safePoints = Number.isFinite(points) && points > 0 ? points : 1;
+    const points = Number(
+        (typeof this.storageManager?.getTodayDailyRewardAmount === "function")
+            ? this.storageManager.getTodayDailyRewardAmount()
+            : this.storageManager?.getDailyRewardPoints?.()
+    ) || 1;
 
-    const isSameLocalDay = (a, b) => {
-        const da = new Date(a);
-        const db = new Date(b);
-        return da.getFullYear() === db.getFullYear()
-            && da.getMonth() === db.getMonth()
-            && da.getDate() === db.getDate();
-    };
+    // Source of truth: StorageManager (calendar-based)
+    const available = (typeof this.storageManager?.isDailyRewardAvailable === "function")
+        ? !!this.storageManager.isDailyRewardAvailable()
+        : false;
 
-    // Availability: StorageManager is source of truth when available (calendar-based)
-    let available;
-    if (typeof this.storageManager?.isDailyRewardAvailable === "function") {
-        available = !!this.storageManager.isDailyRewardAvailable();
-    } else {
-        const lastTs = Number(this.storageManager?.getLastDailyRewardTimestamp?.()) || 0;
-        available = !lastTs ? true : !isSameLocalDay(lastTs, Date.now());
-    }
+    const nextReadyTs = (typeof this.storageManager?.getNextDailyRewardTime === "function")
+        ? Number(this.storageManager.getNextDailyRewardTime())
+        : 0;
 
-    // Next ready time: StorageManager is source of truth when available
-    let nextReadyTs;
-    if (typeof this.storageManager?.getNextDailyRewardTime === "function") {
-        nextReadyTs = Number(this.storageManager.getNextDailyRewardTime());
-    } else {
-        const now = new Date();
-        const next = new Date(now);
-        next.setHours(24, 0, 0, 0); // next local midnight
-        nextReadyTs = next.getTime();
-    }
+    const safeNext = Number.isFinite(nextReadyTs) ? nextReadyTs : 0;
+    const etaText = available ? "" : this.formatDuration(safeNext - Date.now());
 
-    const msLeft = Number.isFinite(nextReadyTs) ? (nextReadyTs - Date.now()) : 0;
-    const etaText = available ? "" : this.formatDuration(msLeft);
-
-    return { available, points: safePoints, etaText };
+    return { available, points, etaText };
 };
+
+
 
 
 
@@ -1598,6 +1632,8 @@ UIFeatures.prototype.setupChestTooltip = function () {
             h.node.removeEventListener("pointerleave", h.onPointerLeave);
             h.node.removeEventListener("focus", h.onFocus);
             h.node.removeEventListener("blur", h.onBlur);
+            h.node.removeEventListener("keydown", h.onKeydown); // ✅ AJOUT
+
             delete h.node.dataset.chestTooltipBound;
         } catch { }
 
@@ -1619,6 +1655,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
                 trigger.removeEventListener("pointerleave", h.onPointerLeave);
                 trigger.removeEventListener("focus", h.onFocus);
                 trigger.removeEventListener("blur", h.onBlur);
+                trigger.removeEventListener("keydown", h.onKeydown); // ✅ AJOUT
             } catch { }
 
             try {
@@ -1649,14 +1686,19 @@ UIFeatures.prototype.setupChestTooltip = function () {
         }
     };
 
+
     const buildText = () => {
         const info = this.getChestInfo();
         const label = info.points === 1 ? "French Point" : "French Points";
+
         const etaLine = info.available
-            ? "Available now."
+            ? "Available now. Click to collect."
             : (info.etaText ? `Available in ${info.etaText}.` : "Available tomorrow.");
+
         return `🎁 One chest per calendar day.\nReward: +${info.points} ${label}.\nNo accumulation.\n${etaLine}`;
     };
+
+
 
     // ✅ Position tooltip near the trigger (fixed tooltip)
     const position = () => {
@@ -1664,12 +1706,21 @@ UIFeatures.prototype.setupChestTooltip = function () {
             const r = trigger.getBoundingClientRect();
             const top = Math.round(r.bottom + 8);
             const centerX = r.left + (r.width / 2);
+
+            // Center horizontally on the trigger
+            tip.style.transform = "translateX(-50%)";
+
+            // Keep the tooltip anchor point inside the viewport
             const left = Math.round(Math.min(window.innerWidth - 16, Math.max(16, centerX)));
             tip.style.top = `${top}px`;
             tip.style.left = `${left}px`;
 
+            // Ensure true centering even with "fixed"
+            tip.style.transform = "translateX(-50%)";
+
         } catch { }
     };
+
 
     const open = () => {
         tipText.textContent = buildText();
@@ -1748,11 +1799,43 @@ UIFeatures.prototype.setupChestTooltip = function () {
 };
 
 
+UIFeatures.prototype.getLevelNarrative = function (level) {
+    if (level <= 5) {
+        return {
+            stage: "Survival French",
+            message: "You can handle basic, predictable spoken French.",
+            next: "More variety, less context."
+        };
+    }
+
+    if (level <= 10) {
+        return {
+            stage: "Everyday French",
+            message: "You follow everyday conversations without translating every word.",
+            next: "Faster speech and informal expressions."
+        };
+    }
+
+    if (level <= 15) {
+        return {
+            stage: "Fast Native Speech",
+            message: "You're exposed to fast, natural French.",
+            next: "Unfiltered conversations and ambiguity."
+        };
+    }
+
+    return {
+        stage: "Unfiltered French",
+        message: "You can handle real-world French without simplification.",
+        next: "Nuance, precision, edge cases."
+    };
+};
 
 
 //================================================================================
 // CLEANUP
 //================================================================================
+// APRÈS — destroy (BLOC ENTIER)
 UIFeatures.prototype.destroy = function () {
     if (this.paywallTimer) {
         clearInterval(this.paywallTimer);
@@ -1762,15 +1845,8 @@ UIFeatures.prototype.destroy = function () {
     // Notifications désactivées pour MVP v3.0
     // this.stopNotificationArmingLoop?.();
 
-    // Premium button cleanup
-    const pb = this._premiumBtnHandlers;
-    if (pb?.node) {
-        try { if (pb.onClick) pb.node.removeEventListener("click", pb.onClick); } catch { }
-        try { if (pb.onKeyDown) pb.node.removeEventListener("keydown", pb.onKeyDown); } catch { }
-        try { delete pb.node.dataset.premiumBound; } catch { }
-    }
-    this._premiumBtnHandlers = null;
-
+    // (SUPPRIMÉ) Premium button cleanup (_premiumBtnHandlers)
+    // Rien à nettoyer ici: pas de handlers premium installés dans UIFeatures.
 
     if (this._onStorageUpdated) {
         window.removeEventListener("storage-updated", this._onStorageUpdated);
@@ -1816,7 +1892,7 @@ UIFeatures.prototype.destroy = function () {
             try { node.removeEventListener("pointerleave", th.onPointerLeave); } catch { }
             try { node.removeEventListener("focus", th.onFocus); } catch { }
             try { node.removeEventListener("blur", th.onBlur); } catch { }
-            try { node.removeEventListener("keydown", th.onKeydown); } catch { } // ✅ AJOUT
+            try { node.removeEventListener("keydown", th.onKeydown); } catch { }
 
             try { delete node.dataset.chestTooltipBound; } catch { }
             try { node.removeAttribute("aria-controls"); } catch { }
@@ -1827,22 +1903,19 @@ UIFeatures.prototype.destroy = function () {
         try { document.removeEventListener("keydown", th.onDocKeydown); } catch { }
         try { window.removeEventListener("resize", th.onResize); } catch { }
 
-        // ✅ remove scroll avec les mêmes options que addEventListener
+        // remove scroll with same options
         try { window.removeEventListener("scroll", th.onScroll, th._scrollOptions || false); } catch { }
 
-        // ✅ ferme visuellement le tooltip si encore présent
+        // close tooltip visually if still present
         try { document.getElementById("daily-chest-tooltip")?.classList.add("hidden"); } catch { }
 
         this._chestTooltipHandlers = null;
     }
 
-
-    // ✅ Désarme les helpers exposés (évite appels après destroy)
+    // Disarm exposed helpers (avoid calls after destroy)
     this._openChestTooltip = null;
     this._closeChestTooltip = null;
     this._toggleChestTooltip = null;
-
-
 
     // Chest header cleanup
     const hh = this._chestHeaderHandlers;
@@ -1855,10 +1928,29 @@ UIFeatures.prototype.destroy = function () {
     }
     this._chestHeaderHandlers = null;
 
+    // Modal cleanup (consistent: remove Esc handler + focus trap + node)
+    // Modal cleanup (consistent: remove Esc handler + focus trap + node)
+    const cleanupModal = (id) => {
+        try {
+            const m = document.getElementById(id);
+            if (!m) return;
 
-    try { document.getElementById("sophie-paywall-modal")?.remove?.(); } catch { }
-    try { document.getElementById("premium-code-modal")?.remove?.(); } catch { }
-    try { document.getElementById("theme-preview-modal")?.remove?.(); } catch { }
+            // Esc handler (registered on document)
+            try {
+                if (m._tyfEscHandler) document.removeEventListener("keydown", m._tyfEscHandler);
+                m._tyfEscHandler = null;
+            } catch { }
+
+            // Focus trap (registered on modal)
+            try { this._removeFocusTrap?.(m); } catch { }
+
+            try { m.remove(); } catch { }
+        } catch { }
+    };
+
+    cleanupModal("sophie-paywall-modal");
+    cleanupModal("premium-code-modal");
+    cleanupModal("theme-preview-modal");
 };
 
 // ===================================================

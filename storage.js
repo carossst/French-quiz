@@ -1,11 +1,14 @@
 // storage.js - Version 3.0
 
-// Daily reward: 1 FP par jour (système calendaire depuis v3.0)
-const DAILY_REWARD_MIN = 1;
+// Daily reward: base + streak bonus (système calendaire depuis v3.0)
+const DAILY_REWARD_BASE = 3;
+const DAILY_STREAK_MULTIPLIER = 0.5; // +0.5 FP par jour de streak (max +5)
+const DAILY_REWARD_STREAK_BONUS_MAX = 5;
 
-// Bonus (désactivé par défaut) — évite ReferenceError dans collectDailyReward()
+// Bonus (désactivé par défaut) - évite ReferenceError dans collectDailyReward()
 const DAILY_REWARD_BONUS_AMOUNT = 0;
 const DAILY_REWARD_BONUS_CHANCE = 0;
+
 
 
 //================================================================================
@@ -42,14 +45,20 @@ function StorageManager() {
       dailyRewardsCount: 0,
       streakDays: 0
     },
+    // Dans defaultData (conversionTracking)
     conversionTracking: {
       sessionStart: 0,
       premiumQuizCompleted: 0,
       paywallShown: false,
+      paywallShownCount: 0,
+      lastPaywallShownAt: null,
+      lastPaywallSource: null,
       totalQuizAttempted: 0,
       conversionClickedAt: null,
-      lastQuizAttempt: { themeId: null, quizId: null, at: 0 }
+      lastQuizAttempt: { themeId: null, quizId: null, at: 0 },
+      events: []
     },
+
 
 
     userProfile: {
@@ -210,6 +219,7 @@ StorageManager.prototype.ensureDataStructure = function () {
     this.data.conversionTracking = JSON.parse(JSON.stringify(this.defaultData.conversionTracking));
   }
 
+  // Dans ensureDataStructure() (conversionTracking)
   const ct = this.data.conversionTracking;
 
   // Durcir booleans/numbers
@@ -226,6 +236,20 @@ StorageManager.prototype.ensureDataStructure = function () {
 
   if (ct.conversionClickedAt === undefined) ct.conversionClickedAt = null;
 
+  ct.paywallShownCount = Number(ct.paywallShownCount);
+  if (!Number.isFinite(ct.paywallShownCount)) ct.paywallShownCount = 0;
+
+  if (ct.lastPaywallShownAt === undefined) ct.lastPaywallShownAt = null;
+  if (ct.lastPaywallShownAt !== null) {
+    const ts = Number(ct.lastPaywallShownAt);
+    ct.lastPaywallShownAt = Number.isFinite(ts) ? ts : null;
+  }
+
+  if (ct.lastPaywallSource === undefined) ct.lastPaywallSource = null;
+  if (ct.lastPaywallSource !== null && typeof ct.lastPaywallSource !== "string") ct.lastPaywallSource = null;
+
+  if (!Array.isArray(ct.events)) ct.events = [];
+
   if (!ct.lastQuizAttempt || typeof ct.lastQuizAttempt !== "object") {
     ct.lastQuizAttempt = JSON.parse(JSON.stringify(this.defaultData.conversionTracking.lastQuizAttempt));
   }
@@ -236,7 +260,6 @@ StorageManager.prototype.ensureDataStructure = function () {
   if (ct.lastQuizAttempt.themeId !== null && !Number.isFinite(ct.lastQuizAttempt.themeId)) ct.lastQuizAttempt.themeId = null;
   if (ct.lastQuizAttempt.quizId !== null && !Number.isFinite(ct.lastQuizAttempt.quizId)) ct.lastQuizAttempt.quizId = null;
   if (!Number.isFinite(ct.lastQuizAttempt.at)) ct.lastQuizAttempt.at = 0;
-
 
 
 };
@@ -379,8 +402,64 @@ StorageManager.prototype.getFrenchPoints = function () {
 };
 
 
+
 // Source unique: FP par niveau
 const FP_PER_LEVEL = 50;
+
+StorageManager.prototype.getLastQuizDate = function () {
+  const iso =
+    this.data &&
+    this.data.globalStats &&
+    this.data.globalStats.lastQuizDate;
+
+  if (!iso || typeof iso !== "string") return null;
+
+  const ts = Date.parse(iso);
+  return Number.isFinite(ts) ? ts : null;
+};
+
+StorageManager.prototype.hasCompletedQuizToday = function () {
+  const lastTs = this.getLastQuizDate();
+  if (!lastTs) return false;
+
+  return (
+    this._getLocalDateKey(new Date(lastTs)) ===
+    this._getLocalDateKey()
+  );
+};
+
+StorageManager.prototype.getNextUnlockableTheme = function () {
+  if (this.isPremiumUser()) return null;
+
+  // prochain thème premium dans l’ordre (2..10)
+  const unlockedCount = this.getUnlockedPremiumThemesCount();
+  const nextThemeId = 2 + unlockedCount;
+
+  if (nextThemeId > 10) return null;
+
+  // si le thème précédent n’est pas débloqué, ce next n’est pas actionnable
+  if (!this.isThemeUnlocked(nextThemeId - 1)) {
+    return { themeId: nextThemeId, reason: "PREVIOUS_LOCKED", cost: null };
+  }
+
+  const cost = this.getThemeCost(nextThemeId);
+  return { themeId: nextThemeId, reason: "OK", cost: cost };
+};
+
+StorageManager.prototype.getFpToNextTheme = function () {
+  const next = this.getNextUnlockableTheme();
+  if (!next || next.reason !== "OK") return null;
+
+  const fp = this.getFrenchPoints();
+
+  return {
+    themeId: next.themeId,
+    cost: next.cost,
+    currentFP: fp,
+    missingFP: Math.max(0, next.cost - fp)
+  };
+};
+
 
 StorageManager.prototype.getFpPerLevel = function () {
   return FP_PER_LEVEL;
@@ -574,12 +653,23 @@ StorageManager.prototype.setLastDailyRewardTimestamp = function (ts) {
 
 
 
-
-
-// Utilisé par la paywall pour estimer un "rythme gratuit" simple (min garanti)
 StorageManager.prototype.getDailyRewardPoints = function () {
-  return DAILY_REWARD_MIN;
+  return DAILY_REWARD_BASE;
 };
+
+// UI/Tooltip: afficher le montant réel "aujourd’hui" (base + streak bonus), sans effets de bord
+StorageManager.prototype.getTodayDailyRewardAmount = function () {
+  const streakDays = Number(this.data && this.data.fpStats && this.data.fpStats.streakDays) || 0;
+
+  const streakBonus = Math.min(
+    DAILY_REWARD_STREAK_BONUS_MAX,
+    Math.floor(streakDays * DAILY_STREAK_MULTIPLIER)
+  );
+
+  const amount = DAILY_REWARD_BASE + streakBonus;
+  return (Number.isFinite(amount) && amount > 0) ? amount : DAILY_REWARD_BASE;
+};
+
 
 // Calendaire local: 1 chest par jour (timezone de l'appareil)
 StorageManager.prototype._getLocalDateKey = function (d) {
@@ -852,7 +942,15 @@ StorageManager.prototype.collectDailyReward = function () {
   const fpBefore = this.getFrenchPoints();
   const oldLevel = this.getUserLevel();
 
-  let earned = DAILY_REWARD_MIN;
+  // Base + streak bonus (plafonné à +5) — source unique pour UI + collecte
+  let earned =
+    (typeof this.getTodayDailyRewardAmount === "function")
+      ? this.getTodayDailyRewardAmount()
+      : DAILY_REWARD_BASE;
+
+  if (!Number.isFinite(earned) || earned <= 0) earned = DAILY_REWARD_BASE;
+
+  // Bonus aléatoire optionnel (désactivé par défaut)
   if (DAILY_REWARD_BONUS_AMOUNT > 0 && DAILY_REWARD_BONUS_CHANCE > 0) {
     if (Math.random() < DAILY_REWARD_BONUS_CHANCE) earned += DAILY_REWARD_BONUS_AMOUNT;
   }
@@ -902,6 +1000,7 @@ StorageManager.prototype.collectDailyReward = function () {
 
 
 
+
 // Legacy - ne plus utiliser (streak coffre géré par updateStreakDaysFromPrevious)
 StorageManager.prototype.updateStreakDays = function () {
   return; // deprecated
@@ -909,18 +1008,7 @@ StorageManager.prototype.updateStreakDays = function () {
 
 
 StorageManager.prototype.updateStreakDaysFromPrevious = function (previousTs) {
-  const dayKey = (d) => {
-    const x = new Date(d);
-    return (
-      x.getFullYear() +
-      "-" +
-      String(x.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(x.getDate()).padStart(2, "0")
-    );
-  };
-
-  const todayKey = dayKey(Date.now());
+  const todayKey = this._getLocalDateKey();
 
   // Premier coffre
   if (!previousTs) {
@@ -929,16 +1017,17 @@ StorageManager.prototype.updateStreakDaysFromPrevious = function (previousTs) {
     return;
   }
 
-  const prevKey = dayKey(previousTs);
+  const prevKey = this._getLocalDateKey(new Date(previousTs));
 
   if (prevKey === todayKey) {
     this.data.fpStats._lastDailyRewardDayKey = todayKey;
     return;
   }
 
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  const yesterdayKey = dayKey(y);
+  // DST-safe: "hier" en calendrier local
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = this._getLocalDateKey(yesterday);
 
   if (prevKey === yesterdayKey) {
     this.data.fpStats.streakDays = (Number(this.data.fpStats.streakDays) || 0) + 1;
@@ -948,8 +1037,6 @@ StorageManager.prototype.updateStreakDaysFromPrevious = function (previousTs) {
 
   this.data.fpStats._lastDailyRewardDayKey = todayKey;
 };
-
-
 
 StorageManager.prototype.getBadges = function () {
   return Array.isArray(this.data.badges) ? [...this.data.badges] : [];
@@ -979,21 +1066,21 @@ StorageManager.prototype.updateBadges = function (score, total, options = {}) {
     }
   }
 
-  // Streak badges
-  if ((Number(this.data.fpStats?.streakDays) || 0) >= 3 && !this.data.badges.includes("streak-3")) {
-    newBadges.push("streak-3");
-    this.data.badges.push("streak-3");
-  }
+  // Streak badges - anti-clone (irregular milestones)
+  const streakMilestones = [2, 5, 9, 16, 25];
+  streakMilestones.forEach((days) => {
+    const badgeId = "streak-" + days;
+    if ((Number(this.data.fpStats?.streakDays) || 0) >= days && !this.data.badges.includes(badgeId)) {
+      newBadges.push(badgeId);
+      this.data.badges.push(badgeId);
+    }
+  });
 
 
-  const inTx = typeof this.isInTransaction === "function" ? this.isInTransaction() : false;
-
-  // APRÈS — mapping #1 (dans updateBadges) : mapping remplacé + accolades/retours corrigés
   // Pas de dispatch ici: l’event badges-earned est émis après commit (markQuizCompleted).
-
-
   return newBadges;
 };
+
 
 
 
@@ -1009,12 +1096,11 @@ StorageManager.prototype.isQuizCompleted = function (quizId) {
   const theme = this.data.themeStats && this.data.themeStats[themeId];
   const quizzes = theme && theme.quizzes;
 
-  return !!(quizzes && quizzes[id] !== undefined);
+  const key = String(id);
+  return !!(quizzes && quizzes[key] !== undefined);
 };
 
 
-// APRÈS — storage.js: markQuizCompleted() sans double dispatch incohérent
-// Objectif: garder l’event "badges-earned" mais avec payload détaillé (objets) au lieu de strings.
 
 StorageManager.prototype.markQuizCompleted = function (
   themeId,
@@ -1023,13 +1109,20 @@ StorageManager.prototype.markQuizCompleted = function (
   total,
   timeSpent = 0
 ) {
+  const tId = Number(themeId);
+  const qId = Number(quizId);
+
+  if (!Number.isFinite(tId) || tId <= 0) return false;
+  if (!Number.isFinite(qId) || qId <= 0) return false;
+
   const now = new Date();
   const today = this._getLocalDateKey(now);
 
-  // Vérification STRICTE par thème
-  const themeStats = this.data.themeStats[themeId];
+  const themeStats = this.data.themeStats[tId];
+  const key = String(qId);
+
   const alreadyCompletedInTheme =
-    !!(themeStats && themeStats.quizzes && themeStats.quizzes[quizId]);
+    !!(themeStats && themeStats.quizzes && themeStats.quizzes[key]);
 
   if (alreadyCompletedInTheme) return false;
 
@@ -1053,16 +1146,18 @@ StorageManager.prototype.markQuizCompleted = function (
     this.addFrenchPoints(basePoints, "quiz_completion", { skipEvents: true });
 
     if (percentage === 100) {
-      this.addFrenchPoints(1, "perfect_quiz", { skipEvents: true });
+      this.addFrenchPoints(3, "perfect_quiz", { skipEvents: true });
     }
 
-    this.updateThemeStats(themeId, quizId, score, total, timeSpent, now);
+
+    // source unique: IDs numériques
+    this.updateThemeStats(tId, qId, score, total, timeSpent, now);
     this.updateGlobalStats(score, total, timeSpent, now);
-    this.updateStreak(today);
+    // this.updateStreak(today); // désactivé: streak = coffre (daily reward)
 
     newBadges = this.updateBadges(score, total, { skipEvents: true });
 
-    this.addToHistory(themeId, quizId, score, total, timeSpent, now);
+    this.addToHistory(tId, qId, score, total, timeSpent, now);
 
     if (!this.data.conversionTracking || typeof this.data.conversionTracking !== "object") {
       this.data.conversionTracking = JSON.parse(JSON.stringify(this.defaultData.conversionTracking));
@@ -1070,17 +1165,15 @@ StorageManager.prototype.markQuizCompleted = function (
     if (typeof this.data.conversionTracking.premiumQuizCompleted !== "number") {
       this.data.conversionTracking.premiumQuizCompleted = 0;
     }
-    if (quizId > 105) {
+    if (qId > 105) {
       this.data.conversionTracking.premiumQuizCompleted++;
     }
   });
-
 
   const fpAfter = this.getFrenchPoints();
   const gained = Math.max(0, fpAfter - fpBefore);
   const newLevel = this.getUserLevel();
 
-  // Events FP coherents (ui-features.js ecoute fp-gained et level-up)
   if (gained > 0) {
     this.dispatchFPEvent("fp-gained", { amount: gained, reason: "quiz_completion", total: fpAfter });
   }
@@ -1088,7 +1181,8 @@ StorageManager.prototype.markQuizCompleted = function (
     this.dispatchFPEvent("level-up", { newLevel, oldLevel });
   }
 
-  this.dispatchFPEvent("quiz-completed", { themeId, quizId, score, total, percentage });
+  // event: IDs numériques (cohérent partout)
+  this.dispatchFPEvent("quiz-completed", { themeId: tId, quizId: qId, score, total, percentage });
 
   if (newBadges && newBadges.length > 0) {
     this.dispatchFPEvent("badges-earned", { badges: this._formatBadgesForEvent(newBadges) });
@@ -1096,7 +1190,6 @@ StorageManager.prototype.markQuizCompleted = function (
 
   return true;
 };
-
 
 
 
@@ -1153,12 +1246,14 @@ StorageManager.prototype.updateGlobalStats = function (
 };
 
 
+// Legacy (v3.0): streak "quiz" désactivé. Le streak affiché/progressif est celui du coffre
+// via fpStats.streakDays (updateStreakDaysFromPrevious). On garde ce code uniquement
+// pour compat/debug ou si on réactive un jour le streak basé sur les quiz.
 StorageManager.prototype.updateStreak = function (today) {
   if (this.data.streak.lastActiveDate !== today) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yDate = this._getLocalDateKey(yesterday);
-
 
     if (this.data.streak.lastActiveDate === yDate) {
       this.data.streak.count++;
@@ -1173,6 +1268,7 @@ StorageManager.prototype.updateStreak = function (today) {
     }
   }
 };
+
 
 StorageManager.prototype.checkImprovement = function (themeId) {
   const themeData = this.data.themeStats[themeId];
@@ -1235,6 +1331,34 @@ StorageManager.prototype.addToHistory = function (
 // REGION: CONVERSION TRACKING & BUSINESS
 //================================================================================
 
+StorageManager.prototype.track = function (eventName, payload) {
+  if (!eventName) return false;
+
+  if (!this.data.conversionTracking || typeof this.data.conversionTracking !== "object") {
+    this.data.conversionTracking = JSON.parse(
+      JSON.stringify(this.defaultData.conversionTracking)
+    );
+  }
+
+  const ct = this.data.conversionTracking;
+  if (!Array.isArray(ct.events)) ct.events = [];
+
+  const ev = {
+    name: String(eventName),
+    at: Date.now(),
+    payload: (payload && typeof payload === "object") ? payload : null
+  };
+
+  ct.events.unshift(ev);
+
+  if (ct.events.length > 200) {
+    ct.events = ct.events.slice(0, 200);
+  }
+
+  return true;
+};
+
+
 StorageManager.prototype.getSessionDuration = function () {
   if (!this.data.conversionTracking.sessionStart) return 0;
   return Math.floor(
@@ -1255,7 +1379,6 @@ StorageManager.prototype.markQuizStarted = function (payload) {
 
   this.data.conversionTracking.totalQuizAttempted += 1;
 
-  // Compat: accepte un objet { themeId, quizId } mais reste optionnel
   if (payload && typeof payload === "object") {
     const themeId = Number(payload.themeId);
     const quizId = Number(payload.quizId);
@@ -1268,8 +1391,11 @@ StorageManager.prototype.markQuizStarted = function (payload) {
     this.data.conversionTracking.lastQuizAttempt = { themeId: null, quizId: null, at: Date.now() };
   }
 
+  this.track("quiz_started", payload && typeof payload === "object" ? payload : null);
   this.save();
 };
+
+
 
 
 
@@ -1287,11 +1413,27 @@ StorageManager.prototype.shouldTriggerPaywall = function () {
   return sessionDuration >= 15 && premiumTasted && !canUnlock;
 };
 
-StorageManager.prototype.markPaywallShown = function () {
-  this.data.conversionTracking.paywallShown = true;
+// markPaywallShown(source)
+StorageManager.prototype.markPaywallShown = function (source) {
+  if (!this.data.conversionTracking || typeof this.data.conversionTracking !== "object") {
+    this.data.conversionTracking = JSON.parse(JSON.stringify(this.defaultData.conversionTracking));
+  }
+
+  const ct = this.data.conversionTracking;
+
+  ct.paywallShown = true;
+  ct.paywallShownCount = (Number(ct.paywallShownCount) || 0) + 1;
+  ct.lastPaywallShownAt = Date.now();
+  ct.lastPaywallSource = source ? String(source) : "unknown";
+
+  this.track("paywall_shown", { source: ct.lastPaywallSource });
+
   this.save();
   return true;
 };
+
+
+
 
 StorageManager.prototype.getPremiumQuizCompleted = function () {
   return this.data.conversionTracking.premiumQuizCompleted || 0;
@@ -1311,9 +1453,19 @@ StorageManager.prototype.setUserProfile = function (email, firstName) {
     return false;
   }
 
+  // Validation email basique (MVP)
+  const emailValue = String(email).trim();
+  const nameValue = String(firstName).trim();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailValue)) {
+    console.warn("Invalid email format");
+    return false;
+  }
+
   this.data.userProfile = {
-    email: email.trim(),
-    firstName: firstName.trim(),
+    email: emailValue,
+    firstName: nameValue,
     isAnonymous: false,
     registeredAt: new Date().toISOString()
   };
@@ -1334,6 +1486,7 @@ StorageManager.prototype.setUserProfile = function (email, firstName) {
   );
   return true;
 };
+
 
 StorageManager.prototype.getUserProfile = function () {
   return this.data.userProfile || this.defaultData.userProfile;
@@ -1405,8 +1558,8 @@ StorageManager.prototype.getUIState = function () {
     isPremium: this.isPremiumUser(),
     completedQuizzes: completedQuizzes,
     completedThemes: this.getCompletedThemesCount(),
-    currentStreak: this.data.streak.count,
-    bestStreak: this.data.streak.bestStreak,
+    currentStreak: Number(this.data.fpStats?.streakDays) || 0,
+    bestStreak: 0, // ou supprime la ligne si l’UI peut
     accuracy: this.getGlobalAccuracy(),
     badges: this.data.badges.length,
     dailyReward: {
@@ -1424,14 +1577,15 @@ StorageManager.prototype.getGlobalStats = function () {
     completedQuizzes: this.getCompletedQuizzesCount(),
     completedThemes: this.getCompletedThemesCount(),
     avgAccuracy: this.getGlobalAccuracy(),
-    currentStreak: this.data.streak.count,
-    bestStreak: this.data.streak.bestStreak,
+    currentStreak: Number(this.data.fpStats?.streakDays) || 0,
+    bestStreak: 0, // option KISS: pas de best streak coffre pour l’instant
     frenchPoints: this.data.frenchPoints,
     userLevel: this.getUserLevel(),
     isPremium: this.isPremiumUser(),
     perfectQuizzes: this.data.fpStats.perfectQuizCount
   };
 };
+
 
 StorageManager.prototype.getThemeProgress = function (themeId) {
   const themeData = this.data.themeStats[themeId];
@@ -1510,19 +1664,26 @@ StorageManager.prototype.getVisualizationData = function () {
 
 StorageManager.prototype._formatBadgesForEvent = function (badgeIds) {
   if (!Array.isArray(badgeIds)) return [];
-  return badgeIds.map((id) => ({
-    id,
-    name:
-      id === "perfect" ? "Perfectionist" :
-        id === "streak-3" ? "3-day streak" :
-          id && String(id).startsWith("fp-") ? `French Points milestone (${String(id).replace("fp-", "")})` :
-            "Badge earned",
-    description:
-      id === "perfect" ? "Scored 100% on a quiz" :
-        id === "streak-3" ? "Collected chests 3 days in a row" :
-          id && String(id).startsWith("fp-") ? "Reached a French Points milestone" :
-            ""
-  }));
+
+  return badgeIds.map((id) => {
+    const sid = String(id || "");
+    const isStreak = sid.startsWith("streak-");
+    const streakDays = isStreak ? Number(sid.replace("streak-", "")) : 0;
+
+    return {
+      id,
+      name:
+        id === "perfect" ? "Perfectionist" :
+          isStreak && Number.isFinite(streakDays) && streakDays > 0 ? (streakDays + " days in a row") :
+            id && String(id).startsWith("fp-") ? `French Points milestone (${String(id).replace("fp-", "")})` :
+              "Badge earned",
+      description:
+        id === "perfect" ? "Scored 100% on a quiz" :
+          isStreak && Number.isFinite(streakDays) && streakDays > 0 ? ("Collected the daily chest " + streakDays + " days in a row") :
+            id && String(id).startsWith("fp-") ? "Reached a French Points milestone" :
+              ""
+    };
+  });
 };
 
 StorageManager.prototype.beginTransaction = function () {
@@ -1580,17 +1741,17 @@ StorageManager.prototype.runInTransaction = function (fn) {
 };
 
 
-
-
-
 //================================================================================
 // ENDREGION: UTILITIES
 //================================================================================
 
-StorageManager.prototype.getUnlockCost = function (premiumQuizCount) {
+// stepIndex: 0 => Theme 2, 1 => Theme 3, etc. Plafonné à 100 FP dès Theme 5.
+StorageManager.prototype.getUnlockCost = function (stepIndex) {
   const costs = [25, 50, 75, 100];
-  return costs[Math.min(premiumQuizCount, costs.length - 1)];
+  const i = Number(stepIndex);
+  return costs[Math.min(Math.max(0, i), costs.length - 1)];
 };
+
 
 // Retourne le coût d'un thème spécifique basé sur sa position (informatif)
 // Utilisé pour : roadmap, affichage (futur)

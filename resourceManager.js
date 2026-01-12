@@ -362,11 +362,27 @@
       const quizTimeout =
         (this.config && this.config.timeouts && Number(this.config.timeouts.quiz)) || 6000;
 
-      let response = await this.fetchWithTimeout(quizPathPrimary, quizTimeout);
-      if (!response.ok) response = await this.fetchWithTimeout(quizPathFallback, quizTimeout);
+      let response = null;
 
-      if (!response.ok) {
-        throw new Error("Quiz " + quizId + " not found (HTTP " + response.status + ")");
+      // 1) Tenter primary
+      try {
+        response = await this.fetchWithTimeout(quizPathPrimary, quizTimeout);
+      } catch (e) {
+        response = null;
+      }
+
+      // 2) Si primary absent ou non OK, tenter fallback
+      if (!response || !response.ok) {
+        try {
+          response = await this.fetchWithTimeout(quizPathFallback, quizTimeout);
+        } catch (e2) {
+          // garder response tel quel (null ou non-ok) et laisser la suite gérer l'erreur
+        }
+      }
+
+      if (!response || !response.ok) {
+        const status = response ? response.status : 0;
+        throw new Error("Quiz " + quizId + " not found (HTTP " + status + ")");
       }
 
       const quizData = await response.json();
@@ -455,10 +471,10 @@
 
       if (typeof q.correctIndex === "number") {
         if (!(q.correctIndex >= 0 && q.correctIndex < q.options.length)) return false;
+      } else if (typeof q.correctAnswer === "string") {
+        // KISS: correctAnswer doit matcher une option
+        if (q.options.indexOf(q.correctAnswer) === -1) return false;
       }
-
-      return true;
-
 
     });
   };
@@ -492,7 +508,8 @@
     if (lastDigit >= 1 && lastDigit <= 5) return lastDigit;
 
     // IMPORTANT: on refuse explicitement au lieu de "null silencieux"
-    throw new Error("Unsupported quiz id " + quizId + " (expected id ending with 1..5)");
+    return null;
+
   };
 
 

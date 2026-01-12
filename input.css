@@ -738,6 +738,32 @@
         box-shadow: none;
     }
 
+
+    /* Daily reward toast (robuste, sans dépendre de purge Tailwind) */
+    .tyf-toast {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        padding: 0.6rem 1rem;
+        border-radius: 14px;
+        box-shadow: var(--shadow-2);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .tyf-toast--success {
+        background: rgb(var(--color-success));
+        color: #fff;
+    }
+
+    /* Position floating (fallback quand pas de container) */
+    .tyf-toast--floating {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: var(--z-overlay);
+    }
+
     /* Cartes quiz / domaines */
     :is(.quiz-item, .assessment-domain) {
         background: white;
@@ -1125,8 +1151,7 @@
     .tyf-btn-secondary,
     :is(#view-stats-btn, #skip-profile-btn, #colors-first-btn, #toggle-details-btn,
         #close-modal-btn, .close-modal-btn,
-        #premium-code-modal [data-action="cancel"],
-        #sophie-paywall-modal [data-action="close"]) {
+        #premium-code-modal [data-action="cancel"]) {
         background: rgb(243 244 246);
         color: rgb(55 65 81);
         font-weight: 500;
@@ -1142,10 +1167,26 @@
 
     .tyf-btn-secondary:focus-visible,
     :is(#view-stats-btn, #skip-profile-btn, #colors-first-btn, #toggle-details-btn,
-        #close-modal-btn, .close-modal-btn):focus-visible {
+        #close-modal-btn, .close-modal-btn,
+        #premium-code-modal [data-action="cancel"]):focus-visible {
         outline: none;
         border-color: rgb(var(--color-primary));
         box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
+    }
+
+    .tyf-btn-secondary:hover:not(:disabled),
+    :is(#view-stats-btn, #skip-profile-btn, #colors-first-btn, #toggle-details-btn,
+        #close-modal-btn, .close-modal-btn,
+        #premium-code-modal [data-action="cancel"]):hover:not(:disabled) {
+        background: rgb(229 231 235);
+        border-color: rgb(209 213 219);
+    }
+
+    .tyf-btn-secondary:active:not(:disabled),
+    :is(#view-stats-btn, #skip-profile-btn, #colors-first-btn, #toggle-details-btn,
+        #close-modal-btn, .close-modal-btn,
+        #premium-code-modal [data-action="cancel"]):active:not(:disabled) {
+        transform: translateY(1px);
     }
 
     /* Ne pas cibler tous les *-btn (trop large) */
@@ -1390,8 +1431,8 @@
        UIFeatures - Modal compat layer (anti purge Tailwind)
        ==================================== */
 
-    /* Overlay: Sophie paywall / theme preview / premium code / profile */
-    :where(#sophie-paywall-modal, #theme-preview-modal, #premium-code-modal, #user-profile-modal) {
+    /* Overlay: Sophie paywall / theme preview / premium code / profile / roadmap */
+    :where(#sophie-paywall-modal, #theme-preview-modal, #premium-code-modal, #user-profile-modal, #roadmap-modal) {
         position: fixed;
         inset: 0;
         display: grid;
@@ -1402,9 +1443,8 @@
     }
 
     /* Inner card: first direct child is the panel in your templates */
-    :where(#sophie-paywall-modal, #theme-preview-modal, #premium-code-modal, #user-profile-modal)>div {
+    :where(#sophie-paywall-modal, #theme-preview-modal, #premium-code-modal, #user-profile-modal, #roadmap-modal)>div {
         position: relative;
-        /* clé: ancre le bouton close dans la carte */
         width: min(560px, 92vw);
         max-height: min(78vh, 720px);
         overflow: auto;
@@ -1616,11 +1656,6 @@
         margin-bottom: 1rem;
     }
 
-
-    /* Affiche correctement les retours ligne (\n) dans les messages UI (toasts/feedback) */
-    :where(#feedback-container, #daily-reward-toast, #toast-container, .tyf-toast, .tyf-feedback, .tyf-message) {
-        white-space: pre-line;
-    }
 
     /* fermeture correcte de @layer components */
 }
