@@ -104,11 +104,6 @@ UIFeatures.prototype.showFeedbackMessage = function (type, message) {
 };
 
 
-// APRÈS
-// (SUPPRIMÉ) XP progress indicator: on a "Level" au début, pas besoin de barre/progress ici.
-
-
-// Optional: notifications (no-op unless implemented)
 UIFeatures.prototype.initializeNotifications = function () {
     // Intentionally empty. Avoid crashes on prod.
 };
@@ -248,13 +243,38 @@ UIFeatures.prototype.setupGamificationUXEvents = function () {
     };
 
     this._onPremiumUnlocked = () => {
-        this.showFeedbackMessage("success", "Premium unlocked");
+        // 1) Stop conversion timer (sinon interval tourne pour rien)
+        try { this.stopConversionTimer?.(); } catch { }
+
+        // 2) Fermer tous les modals premium/paywall si ouverts (évite états incohérents)
+        try { document.getElementById("sophie-paywall-modal")?.remove?.(); } catch { }
+        try { document.getElementById("premium-code-modal")?.remove?.(); } catch { }
+        try { document.getElementById("theme-preview-modal")?.remove?.(); } catch { }
+
+        // 3) Feedback + refresh header
+        this.showFeedbackMessage("success", "Premium unlocked.");
         try { this.updateXPHeader(); } catch { }
+
+        // 4) Refresh UI principal (déterministe)
+        try {
+            if (this.uiCore?.showWelcomeScreen) this.uiCore.showWelcomeScreen();
+            else if (this.uiCore?.showQuizSelection) this.uiCore.showQuizSelection();
+        } catch { /* no-op */ }
     };
+
+    this._onQuizCompleted = (e) => {
+        try {
+            if (this.storageManager?.isUserIdentified?.()) return;
+            if (!this.storageManager?.shouldShowProfileModal?.()) return;
+            this.showUserProfileModal();
+        } catch { /* no-op */ }
+    };
+
 
     window.addEventListener("badges-earned", this._onBadgesEarned);
     window.addEventListener("level-up", this._onLevelUp);
     window.addEventListener("premium-unlocked", this._onPremiumUnlocked);
+    window.addEventListener("quiz-completed", this._onQuizCompleted);
 };
 
 
@@ -393,6 +413,15 @@ UIFeatures.prototype.showDailyRewardAnimation = function (points) {
 //================================================================================
 // CONVERSION SYSTEM (PAYWALL)
 //================================================================================
+UIFeatures.prototype.stopConversionTimer = function () {
+    if (this.paywallTimer) {
+        clearInterval(this.paywallTimer);
+        this.paywallTimer = null;
+    }
+};
+
+
+
 UIFeatures.prototype.startConversionTimer = function () {
     if (this.paywallTimer) return; // guard
     if (this.storageManager.isPremiumUser?.()) return;
@@ -510,7 +539,8 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
         codeBtn.addEventListener("click", () => {
             try { this.storageManager?.track?.("paywall_click_code", { source: "sophie_modal" }); } catch { }
             close();
-            this.showPremiumCodeModal();
+            this.showPremiumCodeModal?.();
+
         });
     }
 };
@@ -642,18 +672,32 @@ UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
     if (optionsContainer) {
         optionsContainer.classList.add("is-validated");
         optionsContainer.setAttribute("role", "radiogroup");
-        optionsContainer.setAttribute("aria-disabled", "true");
 
+        // Mode 2: l’utilisateur doit pouvoir changer d’avis après validation.
+        // Donc: PAS de aria-disabled, et on garde des options focusables.
         options.forEach((o, i) => {
             o.setAttribute("role", "radio");
-            o.setAttribute("tabindex", "-1");
             o.setAttribute("aria-checked", i === Number(selectedIndex) ? "true" : "false");
+
+            // KISS a11y: seule l’option sélectionnée est tab-focusable
+            o.setAttribute("tabindex", i === Number(selectedIndex) ? "0" : "-1");
         });
     }
 
 
+
     container.innerHTML = this.generateSimpleFeedback(isCorrect, question);
     container.classList.remove("hidden");
+
+    // Fix mobile layout: avoid floating feedback
+    container.classList.add(
+        "w-full",
+        "max-w-md",
+        "mx-auto",
+        "mt-6",
+        "px-3"
+    );
+
     // container.classList.add("as-toast"); // Removed - feedback displays inline below question
     container.setAttribute("role", "status");
     container.setAttribute("aria-live", "polite");
@@ -711,10 +755,6 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
 //================================================================================
 // THEME HANDLING
 //================================================================================
-// APRÈS (fix strict KISS)
-// 1) Tu SUPPRIMES entièrement le bloc ci-dessus (il ne doit pas exister en dehors de handleThemeClick)
-// 2) Tu gardes une seule logique unlock DANS handleThemeClick, sans alert(), et avec showFeedbackMessage.
-// 3) Tu fixes la fermeture de la fonction (pas de "};" fantôme).
 
 UIFeatures.prototype.handleThemeClick = function (theme) {
     if (!theme || !theme.id) return;
@@ -755,6 +795,12 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
         return;
     }
 
+    if (unlockStatus?.reason === "PREVIOUS_LOCKED") {
+        this.showFeedbackMessage?.("warn", "Unlock the previous theme first.");
+        return;
+    }
+
+
     if (unlockStatus?.reason === "LOCKED" || unlockStatus?.reason === "PREREQUISITE") {
         this.showFeedbackMessage?.("warn", "Keep progressing to unlock this theme.");
         return;
@@ -763,8 +809,6 @@ UIFeatures.prototype.handleThemeClick = function (theme) {
     // Default: premium preview
     this.showThemePreviewModal?.(theme, { mode: "premium", unlockStatus });
 };
-
-
 
 
 UIFeatures.prototype.getNextQuizInTheme = function () {
@@ -809,7 +853,6 @@ UIFeatures.prototype.getNextQuizInTheme = function () {
     return null;
 };
 
-// APRÈS — showThemePreviewModal (BLOC ENTIER)
 UIFeatures.prototype.showThemePreviewModal = function (theme, opts) {
     // Guard: single instance
     try {
@@ -973,8 +1016,9 @@ UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
         Number(unlockStatus?.cost) ||
         Number(unlockStatus?.requiredFP) ||
         Number(unlockStatus?.requiredPoints) ||
-        Number(this.storageManager?.getNextThemeUnlockCost?.()) ||
+        Number(this.storageManager?.getThemeCost?.(theme?.id)) ||
         NaN;
+
 
 
     const hasCost = Number.isFinite(costCandidate) && costCandidate > 0;
@@ -994,7 +1038,12 @@ UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
                 ? (hasCost ? `Cost: ${costText}. You have ${safeFP}.` : `Keep earning French Points.`)
                 : "");
 
-    const showFPButton = (mode === "fp" || mode === "insufficient_fp")
+    const canUnlockFp =
+        !!unlockStatus && (unlockStatus.canUnlock === true || unlockStatus.allowed === true || unlockStatus.ok === true);
+
+    const showFPButton =
+        (mode === "fp" || mode === "insufficient_fp")
+        && canUnlockFp
         && (typeof this.storageManager?.unlockTheme === "function");
 
     const fpDisabled = (mode === "insufficient_fp");
@@ -1019,13 +1068,13 @@ UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
                 (regular <span class="line-through">${UIFeatures.PRICE_DISPLAY.regular}</span>)
             </div>
 
-            <div class="space-y-3">
+                        <div class="space-y-3">
                 ${showFPButton ? `
                 <button
                     id="fp-unlock-btn"
                     class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg ${fpDisabled ? "opacity-50 cursor-not-allowed" : ""}"
                     ${fpDisabled ? "disabled" : ""}>
-                    Unlock with French Points${hasCost ? ` – ${costCandidate}` : ""}
+                    Unlock with French Points${hasCost ? ` – ${costCandidate} FP` : ""}
                 </button>` : ""}
 
                 <button
@@ -1048,13 +1097,13 @@ UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
             </div>
         </div>`;
 
+
     this.setupThemePreviewEvents(modal, theme, { mode, unlockStatus });
     return modal;
 };
 
 
 
-// APRÈS — setupThemePreviewEvents (BLOC ENTIER)
 UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme, opts) {
     const previouslyFocused = document.activeElement;
 
@@ -1114,7 +1163,8 @@ UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme, opts) {
 
 
     const codeBtn = modal.querySelector("#premium-code-btn");
-    if (codeBtn) codeBtn.addEventListener("click", () => { close(); this.showPremiumCodeModal(); });
+    if (codeBtn) codeBtn.addEventListener("click", () => { close(); this.showPremiumCodeModal?.(); });
+
 
     const buyBtn = modal.querySelector("#premium-buy-btn");
     if (buyBtn) buyBtn.addEventListener("click", () => {
@@ -1173,14 +1223,17 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
 
     const previouslyFocused = document.activeElement;
 
+    // Define first to avoid TDZ crash if user closes instantly
+    const onEsc = (e) => { if (e.key === 'Escape') close(); };
+
     const cleanup = () => {
-        document.removeEventListener('keydown', onEsc);
+        try { document.removeEventListener('keydown', onEsc); } catch { }
         this._removeFocusTrap?.(modal);
     };
 
     const close = () => {
         cleanup();
-        modal.remove();
+        try { modal.remove(); } catch { }
         try { previouslyFocused?.focus?.(); } catch { }
     };
 
@@ -1191,7 +1244,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
 
     modal.querySelectorAll('[data-action="close"], [data-action="cancel"]').forEach(btn => btn.addEventListener('click', close));
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-    const onEsc = (e) => { if (e.key === 'Escape') close(); };
+
     document.addEventListener('keydown', onEsc);
 
     // ✅ store for destroy() emergency cleanup
@@ -1222,41 +1275,23 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
                 ? this.storageManager.unlockPremiumWithCode(code)
                 : { success: false };
 
-            // APRÈS — showPremiumCodeModal() (bloc corrigé)
-            if (result.success) {
-                this.showFeedbackMessage?.("success", "🎉 Premium unlocked!");
-                try { this.updateXPHeader?.(); } catch { }
-
+            if (result && result.success) {
+                // Fermer la modal immédiatement.
+                // Le handler global "premium-unlocked" s’occupe du reste.
                 close();
-
-                try {
-                    const paywall = document.getElementById("sophie-paywall-modal");
-                    if (paywall) paywall.remove();
-                } catch { }
-
-                try {
-                    if (this.uiCore?.showWelcomeScreen) this.uiCore.showWelcomeScreen();
-                    else if (this.uiCore?.showQuizSelection) this.uiCore.showQuizSelection();
-                    else window.location.reload();
-                } catch {
-                    window.location.reload();
-                }
-            } else {
-                input.classList.add("tyf-input-error");
-                input.value = "";
-                input.placeholder = "Invalid code - try again";
-
-                // Remove error style as soon as user edits again
-                const clearError = () => {
-                    input.classList.remove("tyf-input-error");
-                    input.removeEventListener("input", clearError);
-                };
-                input.addEventListener("input", clearError);
-
+                return;
             }
 
+            // Invalid code
+            input.classList.add("tyf-input-error");
+            input.value = "";
+            input.placeholder = "Invalid code - try again";
 
-
+            const clearError = () => {
+                input.classList.remove("tyf-input-error");
+                input.removeEventListener("input", clearError);
+            };
+            input.addEventListener("input", clearError);
         });
     }
 
@@ -1267,6 +1302,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     });
 };
 
+
 //================================================================================
 // USER PROFILE MODAL
 //================================================================================
@@ -1275,9 +1311,10 @@ UIFeatures.prototype.showUserProfileModal = function () {
     if (this.storageManager?.isUserIdentified?.()) return;
     if (!this.storageManager?.shouldShowProfileModal?.()) return;
 
-    const modal =
-        this.uiCore?.createUserProfileModal?.()
-        || this.createUserProfileModal?.();
+    // ✅ Guard: avoid duplicates
+    if (document.getElementById("user-profile-modal")) return;
+
+    const modal = this.createUserProfileModal?.();
 
     if (!modal) {
         this.showFeedbackMessage?.("warn", "Profile modal unavailable.");
@@ -1294,6 +1331,7 @@ UIFeatures.prototype.showUserProfileModal = function () {
         if (firstInput) firstInput.focus();
     }, 300);
 };
+
 
 UIFeatures.prototype.closeUserProfileModal = function (modal) {
     // ✅ cleanup escape handler si présent (évite fuite + double handlers)
@@ -1387,7 +1425,8 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     const validateInputs = () => {
         const email = (emailInput.value || "").trim();
         const firstName = (firstNameInput.value || "").trim();
-        const isValid = email.includes('@') && firstName.length >= 2;
+        const isValid = /^\S+@\S+\.\S+$/.test(email) && firstName.length >= 2;
+
 
         saveBtn.disabled = !isValid;
         saveBtn.classList.toggle('opacity-50', !isValid);
@@ -1446,6 +1485,29 @@ UIFeatures.prototype.setupUserProfileEvents = function (modal) {
     });
 };
 
+UIFeatures.prototype.createUserProfileModal = function () {
+    const modal = document.createElement("div");
+    modal.id = "user-profile-modal";
+    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "profile-modal-title");
+
+    modal.innerHTML = this.generateUserProfileHTML();
+
+    // CRITIQUE: sinon boutons/validation ne marchent pas
+    this.setupUserProfileEvents(modal);
+
+    // Click outside = skip/refuse
+    modal.addEventListener("click", (e) => {
+        if (e.target !== modal) return;
+        try { this.storageManager?.markProfileModalRefused?.(); } catch { }
+        this.closeUserProfileModal(modal);
+    });
+
+    return modal;
+};
+
 
 
 
@@ -1474,8 +1536,6 @@ UIFeatures.prototype.updateUserGreeting = function () {
 //================================================================================
 
 
-// APRÈS
-// Helper générique: à mettre une seule fois dans ui-features.js (près des UTILITIES)
 UIFeatures.prototype._getFocusableIn = function (root) {
     if (!root) return [];
     const selectors = [
@@ -1606,9 +1666,6 @@ UIFeatures.prototype.setupChestTooltip = function () {
         tip.setAttribute("role", "tooltip");
         tip.setAttribute("aria-hidden", "true");
 
-        // important: tooltip ancré au viewport (sinon coords fausses au scroll)
-        tip.style.position = "fixed";
-
         tipText = document.createElement("div");
         tipText.id = "daily-chest-tooltip-text";
         tipText.className = "tyf-message"; // ton design system gère déjà pre-line
@@ -1617,6 +1674,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
         document.body.appendChild(tip);
 
     }
+
 
     // ✅ Make trigger focusable / button-like (helps keyboard + consistent tooltip behavior)
     if (!trigger.hasAttribute("tabindex")) trigger.setAttribute("tabindex", "0");
@@ -1835,7 +1893,6 @@ UIFeatures.prototype.getLevelNarrative = function (level) {
 //================================================================================
 // CLEANUP
 //================================================================================
-// APRÈS — destroy (BLOC ENTIER)
 UIFeatures.prototype.destroy = function () {
     if (this.paywallTimer) {
         clearInterval(this.paywallTimer);
@@ -1879,6 +1936,12 @@ UIFeatures.prototype.destroy = function () {
         document.removeEventListener("visibilitychange", this._onVisibilityChange);
         this._onVisibilityChange = null;
     }
+
+    if (this._onQuizCompleted) {
+        window.removeEventListener("quiz-completed", this._onQuizCompleted);
+        this._onQuizCompleted = null;
+    }
+
 
     // Tooltip cleanup
     const th = this._chestTooltipHandlers;
@@ -1941,6 +2004,13 @@ UIFeatures.prototype.destroy = function () {
                 m._tyfEscHandler = null;
             } catch { }
 
+            // ✅ Also remove profile modal escape handler
+            try {
+                if (m._tyfProfileEscapeHandler) document.removeEventListener("keydown", m._tyfProfileEscapeHandler);
+                m._tyfProfileEscapeHandler = null;
+            } catch { }
+
+
             // Focus trap (registered on modal)
             try { this._removeFocusTrap?.(m); } catch { }
 
@@ -1951,7 +2021,9 @@ UIFeatures.prototype.destroy = function () {
     cleanupModal("sophie-paywall-modal");
     cleanupModal("premium-code-modal");
     cleanupModal("theme-preview-modal");
+    cleanupModal("user-profile-modal");
 };
+
 
 // ===================================================
 // Global export (must run at file load)

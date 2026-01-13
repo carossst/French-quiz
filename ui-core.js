@@ -96,11 +96,16 @@
 
     UICore.prototype._todayKey = function () {
         try {
-            return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+            var d = new Date();
+            var y = d.getFullYear();
+            var m = String(d.getMonth() + 1).padStart(2, "0");
+            var day = String(d.getDate()).padStart(2, "0");
+            return y + "-" + m + "-" + day; // local YYYY-MM-DD
         } catch (e) {
             return "";
         }
     };
+
 
     UICore.prototype._isSameDay = function (a, b) {
         return String(a || "").slice(0, 10) === String(b || "").slice(0, 10);
@@ -136,29 +141,29 @@
     };
 
     UICore.prototype._getThemeIdForQuickStart = function () {
-        const sm = this.storageManager;
-        const themes = (this.themeIndexCache || [])
-            .map(t => Number(t && t.id))
-            .filter(id => Number.isFinite(id))
-            .sort((a, b) => a - b);
+        const sm = this.storageManager || {};
+        const isPremium = !!sm.isPremiumUser?.();
 
-        const isPremium = !!sm?.isPremiumUser?.();
+        const themes = (this.themeIndexCache || [])
+            .map(function (t) { return Number(t && t.id); })
+            .filter(function (id) { return Number.isFinite(id); })
+            .sort(function (a, b) { return a - b; });
 
         // Premium: reprendre le thème courant si valide, sinon 1
         if (isPremium) {
-            const current = Number(this.quizManager?.currentThemeId);
+            const current = Number(this.quizManager && this.quizManager.currentThemeId);
             return Number.isFinite(current) ? current : 1;
         }
 
         // Non-premium: si thème courant est déjà débloqué (ou Colors), on le garde
-        const current = Number(this.quizManager?.currentThemeId);
+        const current = Number(this.quizManager && this.quizManager.currentThemeId);
         if (Number.isFinite(current)) {
             if (current === 1) return 1;
-            if (typeof sm?.isThemeUnlocked === "function" && sm.isThemeUnlocked(current)) return current;
+            if (typeof sm.isThemeUnlocked === "function" && sm.isThemeUnlocked(current)) return current;
         }
 
         // Sinon: prendre le premier thème débloqué (>1)
-        if (typeof sm?.isThemeUnlocked === "function") {
+        if (typeof sm.isThemeUnlocked === "function") {
             for (let i = 0; i < themes.length; i++) {
                 const id = themes[i];
                 if (id > 1 && sm.isThemeUnlocked(id)) return id;
@@ -168,6 +173,7 @@
         // Fallback strict: Colors (seul free)
         return 1;
     };
+
 
     UICore.prototype._getPremiumPrice = function () {
         try {
@@ -186,6 +192,67 @@
         const p = this._getPremiumPrice();
         return '<span class="line-through">' + this.escapeHTML(p.anchor) + '</span> ' + this.escapeHTML(p.current);
     };
+
+    UICore.prototype._getWaitlistEmail = function () {
+        try {
+            const cfg = window.TYF_CONFIG && window.TYF_CONFIG.waitlist ? window.TYF_CONFIG.waitlist : null;
+            if (!cfg || cfg.enabled === false) return "";
+            const email = String(cfg.toEmail || "").trim();
+            return email || "";
+        } catch (e) {
+            return "";
+        }
+    };
+
+    UICore.prototype._buildWaitlistMailto = function (resultsData, pct, scoreLine, levelLabel, titleTheme) {
+        try {
+            const cfg = window.TYF_CONFIG && window.TYF_CONFIG.waitlist ? window.TYF_CONFIG.waitlist : null;
+            if (!cfg || cfg.enabled === false) return "";
+
+            const toEmail = String(cfg.toEmail || "").trim();
+            if (!toEmail) return "";
+
+            const prefix = String(cfg.subjectPrefix || "[TYF Early Access]").trim();
+            const topic = String(cfg.topicLabel || "A1/A2-specific diagnostic").trim();
+
+            const safeTheme = String(titleTheme || "Theme").trim();
+            const safeLevel = String(levelLabel || "Your level").trim();
+
+            const quizId = resultsData && resultsData.quizId != null ? String(resultsData.quizId) : "";
+            const themeId = resultsData && resultsData.themeId != null ? String(resultsData.themeId) : "";
+
+            const subject = prefix + " " + topic;
+
+            const bodyLines = [
+                "Hi Carole,",
+                "",
+                "I want early access to an A1/A2-style diagnostic.",
+                "",
+                "My last result:",
+                "- Theme: " + safeTheme + (themeId ? " (themeId " + themeId + ")" : ""),
+                "- Quiz: " + (quizId ? quizId : "N/A"),
+                "- Score: " + String(scoreLine || ""),
+                "- Accuracy: " + String(Math.round(Number(pct) || 0)) + "%",
+                "- Estimated level: " + safeLevel,
+                "",
+                "What I want next:",
+                "- Target level: A1 / A2 / B1 / B2 (choose)",
+                "- Goal: exam prep / travel / work / daily life (choose)",
+                "",
+                "Thanks!"
+            ];
+
+            const body = bodyLines.join("\n");
+
+            return "mailto:" + toEmail +
+                "?subject=" + encodeURIComponent(subject) +
+                "&body=" + encodeURIComponent(body);
+
+        } catch (e) {
+            return "";
+        }
+    };
+
 
 
 
@@ -341,6 +408,15 @@
     };
 
 
+    UICore.prototype.getCreatorLine = function () {
+        try {
+            var brand = window.TYF_BRAND || {};
+            var s = String(brand.creatorLine || "").trim();
+            return s || "";
+        } catch (e) {
+            return "";
+        }
+    };
 
 
     // Returning visitor: direct access to themes + stats
@@ -358,8 +434,10 @@
             progressText +
             '</p>' +
             '\n      <p class="text-xs text-gray-600 mt-2">' +
-            '\n        Written by Carole, a real French native from Paris. Not AI-generated.' +
+            '\n        ' + this.escapeHTML(this.getCreatorLine()) +
             '\n      </p>' +
+
+
 
             '\n    </div>' +
 
@@ -395,6 +473,7 @@
 
 
 
+
     UICore.prototype.generateResultsHTML = function (resultsData) {
         resultsData = resultsData || {};
 
@@ -411,32 +490,61 @@
         if (score != null && total != null) scoreLine = score + " / " + total;
         else scoreLine = Math.round(pct) + "%";
 
-        // Theme name (robuste)
         var titleTheme =
-            this.getCurrentThemeName && this.getCurrentThemeName()
+            (this.getCurrentThemeName && this.getCurrentThemeName())
                 ? this.getCurrentThemeName()
                 : (resultsData.themeName ? this.normalizeText(resultsData.themeName) : "This theme");
 
-        // Level box (CEFR-flavored)
-        var levelLabel = this.getCECRLevel ? this.getCECRLevel(pct) : "Your level";
-        var levelMsg = this.getCECRMessage ? this.getCECRMessage(pct) : "Keep practicing to progress.";
-        var levelClass = this.getCECRColorClass ? this.getCECRColorClass(pct) : "bg-gray-50 border-gray-200 text-gray-800";
+        var insight = this.getResultsInsight ? this.getResultsInsight(resultsData) : "This quiz gave you a clear snapshot.";
+        var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Replay now and focus on the pattern.";
 
-        // Insight + action (Duolingo-like guidance)
-        var insight = this.getResultsInsight ? this.getResultsInsight(resultsData) : "This quiz gives an honest snapshot.";
-        var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Next step: replay once and focus on the pattern.";
-
-        // Premium nudge: hidden by default; revealed in setupResultsEvents()
         var premiumNudgeHiddenClass = " hidden";
 
-        // Effort validation (Plan 2.A.1)
-        var effortLine = (pct >= 80)
-            ? "Strong result. This is real, usable French."
-            : (pct >= 60)
-                ? "Solid work. You are building reliable reflexes."
-                : (pct >= 40)
-                    ? "Good diagnostic. Now you know what to replay."
-                    : "Good starting point. Authentic French is hard and this is the right way to train.";
+        // Phrase signature: stable, mémorisable
+        var signatureTitle = "This is a real French diagnostic.";
+
+
+        // Support line: 1 seule idée, dépend du score
+        var signatureSub =
+            (pct >= 80) ? "It confirms you can handle real French situations."
+                : (pct >= 60) ? "It shows a solid base. One replay will stabilize it."
+                    : (pct >= 40) ? "It reveals the pattern you need to lock in."
+                        : "It highlights exactly what blocks you. One replay will make it click.";
+
+        // Level box (kept, but avoid repeating the same low-score message)
+        var levelLabel = this.getCECRLevel ? this.getCECRLevel(pct) : "Your level";
+        var levelClass = this.getCECRColorClass ? this.getCECRColorClass(pct) : "bg-gray-50 border-gray-200 text-gray-800";
+
+        var levelMsg = this.getCECRMessage ? this.getCECRMessage(pct) : "Keep practicing to progress.";
+        if (pct < 50) {
+            levelMsg = "This is a normal starting point with authentic French speed and nuance.";
+        }
+
+
+        // Waitlist / Early access (mailto). If not configured, do not render.
+        var waitlistEmail = this._getWaitlistEmail ? this._getWaitlistEmail() : "";
+        var waitlistHref = this._buildWaitlistMailto
+            ? this._buildWaitlistMailto(resultsData, pct, scoreLine, levelLabel, titleTheme)
+            : "";
+
+        var waitlistHTML = "";
+        if (waitlistEmail && waitlistHref) {
+            waitlistHTML =
+                '\n    <div class="tyf-stats-card mb-4" aria-label="Early access">' +
+                '\n      <div class="flex items-center justify-between gap-3">' +
+                '\n        <div class="text-sm text-gray-700">' +
+                '\n          <strong class="text-gray-900">Want a more precise A1/A2 diagnostic?</strong> Get early access.' +
+                '\n        </div>' +
+                '\n        <div class="shrink-0">' +
+                '\n          <a id="results-waitlist-link" class="text-sm underline font-semibold text-blue-700 hover:text-blue-900" href="' + this.escapeHTML(waitlistHref) + '">' +
+                '\n            Request' +
+                '\n          </a>' +
+                '\n        </div>' +
+                '\n      </div>' +
+                '\n    </div>';
+        }
+
+
 
         return (
             '\n<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" role="main" aria-label="Results screen">' +
@@ -446,42 +554,57 @@
             '\n      <button id="back-to-theme-btn" type="button">' + this.getBackToThemeLabel() + '</button>' +
             '\n    </div>' +
 
-
             '\n    <div class="text-center mb-5">' +
             '\n      <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Results</h1>' +
             '\n      <p class="text-sm text-gray-700 mt-1">Theme: <strong>' + this.escapeHTML(titleTheme) + '</strong></p>' +
             '\n    </div>' +
 
-            // 2.A.1 Validation de l’effort (court, non jugeant)
-            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Effort validation">' +
+            // 1) Signature (remplace Honest diagnostic)
+            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Summary">' +
             '\n      <div class="tyf-nudge-inner">' +
             '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Honest diagnostic</div>' +
-            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(effortLine) + '</div>' +
+            '\n          <div class="tyf-nudge-title">' + this.escapeHTML(signatureTitle) + '</div>' +
+            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(signatureSub) + '</div>' +
             '\n        </div>' +
             '\n      </div>' +
             '\n    </div>' +
 
-            // 2.A.2 Lecture simple du résultat (score + accuracy)
+            // 2) Score + accuracy
             '\n    <div class="theme-card mb-4">' +
-            '\n      <div class="flex items-start justify-between gap-4">' +
+            '\n      <div class="flex items-center justify-between gap-3">' +
             '\n        <div>' +
-            '\n          <div class="text-sm text-gray-600">Your score</div>' +
-            '\n          <div class="text-3xl font-extrabold text-gray-900 mt-1">' + this.escapeHTML(scoreLine) + '</div>' +
+            '\n          <div class="text-sm text-gray-600">Result</div>' +
+            '\n          <div class="text-2xl font-extrabold text-gray-900">' + this.escapeHTML(scoreLine) +
+            ' <span class="text-base font-semibold text-gray-600">(' + Math.round(pct) + '%)</span></div>' +
             '\n        </div>' +
-            '\n        <div class="text-right">' +
-            '\n          <div class="text-sm text-gray-600">Accuracy</div>' +
-            '\n          <div class="text-2xl font-extrabold text-gray-900 mt-1">' + Math.round(pct) + '%</div>' +
+            '\n        <div class="shrink-0">' +
+            '\n          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ' +
+            (pct >= 70 ? 'bg-green-100 text-green-800' :
+                pct >= 40 ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-slate-100 text-slate-700') +
+            '">' +
+            (this.escapeHTML(
+                pct >= 70 ? 'Clear signal' :
+                    pct >= 40 ? 'Useful signal' :
+                        'Early signal'
+            )) +
+            '</span>' +
             '\n        </div>' +
             '\n      </div>' +
             '\n    </div>' +
 
+
+            // 3) Level
             '\n    <div class="p-4 border rounded-lg mb-4 ' + levelClass + '">' +
             '\n      <div class="font-bold text-base">' + this.escapeHTML(levelLabel) + '</div>' +
             '\n      <div class="text-sm mt-1">' + this.escapeHTML(levelMsg) + '</div>' +
             '\n    </div>' +
 
-            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Your key insight">' +
+            // NEW: waitlist / early access
+            waitlistHTML +
+
+            // 4) Insight
+            '\n    <div class="tyf-stats-card tyf-nudge mb-3" aria-label="Your key insight">' +
             '\n      <div class="tyf-nudge-inner">' +
             '\n        <div>' +
             '\n          <div class="tyf-nudge-title">Your key insight</div>' +
@@ -490,37 +613,44 @@
             '\n      </div>' +
             '\n    </div>' +
 
+            // 5) Action immédiate
             '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Next step">' +
             '\n      <div class="tyf-nudge-inner">' +
             '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Next step</div>' +
+            '\n          <div class="tyf-nudge-title">Do this now</div>' +
             '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(action) + '</div>' +
             '\n        </div>' +
             '\n      </div>' +
             '\n    </div>' +
 
-            // 2.A.3 Une action principale (1 CTA)
-            '\n    <div class="flex justify-center mb-4">' +
+            // 6) CTA principal
+            '\n    <div class="flex justify-center mb-2">' +
             this.generateNextActionButton(resultsData) +
             '\n    </div>' +
+            '\n    <div class="text-xs text-gray-600 text-center mb-4">' +
+            (this.escapeHTML(pct >= 70 ? "Keep momentum: 2 minutes." : "One replay makes the pattern stick.")) +
+            '\n    </div>' +
 
-            // 2.A.4 Projection : raison de revenir (demain)
+
+
+            // 7) Tomorrow mantra
             '\n    <div class="tyf-stats-card tyf-nudge mb-5" aria-label="Come back tomorrow">' +
             '\n      <div class="tyf-nudge-inner">' +
             '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Come back tomorrow</div>' +
-            '\n          <div class="tyf-nudge-sub">One short quiz a day is enough to make progress.</div>' +
+            '\n          <div class="tyf-nudge-title">Tomorrow</div>' +
+            '\n          <div class="tyf-nudge-sub">One quiz a day. A clearer diagnostic.</div>' +
             '\n        </div>' +
             '\n      </div>' +
             '\n    </div>' +
 
+            // 8) Secondary: next unlock / premium
             '\n    <div id="next-unlock-slot" class="mb-4"></div>' +
 
             '\n    <div id="premium-success-nudge" class="tyf-stats-card tyf-nudge mb-4' + premiumNudgeHiddenClass + '" aria-label="Premium success nudge">' +
             '\n      <div class="tyf-nudge-inner">' +
             '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Keep momentum</div>' +
-            '\n          <div class="tyf-nudge-sub">Premium unlocks all themes instantly and keeps your progress structured.</div>' +
+            '\n          <div class="tyf-nudge-title">Unlock everything</div>' +
+            '\n          <div class="tyf-nudge-sub">Premium unlocks all themes instantly. One payment. No subscription.</div>' +
             '\n        </div>' +
             '\n        <div class="shrink-0">' +
             '\n          <button id="results-premium-nudge-btn" type="button" class="text-sm underline font-semibold text-purple-700 hover:text-purple-900">' +
@@ -530,9 +660,8 @@
             '\n      </div>' +
             '\n    </div>' +
 
-            // Detailed analysis toggle (IDs utilisés par setupResultsEvents)
             '\n    <div class="mt-3">' +
-            '\n      <button id="toggle-details-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">View detailed analysis</button>' +
+            '\n      <button id="toggle-details-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">Review mistakes</button>' +
             '\n    </div>' +
 
             '\n    <div id="secondary-actions" class="hidden mt-4 text-center">' +
@@ -549,9 +678,6 @@
     };
 
 
-
-
-
     /* ----------------------------------------
        RESULTS SCREEN
        ---------------------------------------- */
@@ -566,34 +692,36 @@
                 }
             }, 200);
 
-
             // Micro-conversion tracking (single entrypoint)
             this._track("quiz_completed", {
                 themeId: resultsData.themeId,
                 quizId: resultsData.quizId,
-                percentage: resultsData.percentage
+                percentage: resultsData.percentage,
+                score: resultsData.score,
+                total: resultsData.total,
+                timeSpentSec: resultsData.timeSpentSec
             });
 
 
             return html;
         });
-
-        if (this.features && this.features.handleResultsFP) {
-            this.features.handleResultsFP(resultsData);
-        }
     };
+
 
     UICore.prototype.generateNewUserWelcome = function () {
         return (
             '\n<section class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center" role="main" aria-label="Welcome screen">' +
             '\n  <div class="max-w-3xl text-center px-6 py-12">' +
             '\n    <h1 class="text-3xl md:text-4xl font-bold text-blue-700 mb-3">' +
-            "\n      Honest snapshot of your real French" +
+            "\n      A real diagnostic of your French" +
+
             "\n    </h1>" +
 
             '\n    <p class="text-sm text-gray-700 mb-4">' +
-            '\n      Written by Carole, a real French native from Paris. Not AI-generated.' +
+            '\n      ' + this.escapeHTML(this.getCreatorLine()) +
             '\n    </p>' +
+
+
 
 
             '\n    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-5 rounded-r-lg text-left md:text-center">' +
@@ -629,7 +757,8 @@
             '\n    </div>' +
 
             '\n    <p class="text-base text-gray-700 mb-6">' +
-            "\n      No signup. No account. Just a real diagnostic." +
+            "\n      No signup. No account. A clear diagnostic of your real French." +
+
             "\n    </p>" +
 
             '\n    <button id="start-first-quiz-btn" type="button" class="quiz-button w-full sm:w-auto">' +
@@ -652,9 +781,11 @@
         this.showScreen("quiz", this.generateQuizHTML);
         const self = this;
         setTimeout(function () {
-            self.renderCurrentQuestion();
+            // Source de vérité: QuizManager démarre le timing, puis délègue le rendu à UI (UICore.renderCurrentQuestion)
+            self.quizManager.renderCurrentQuestion();
         }, 80);
     };
+
 
 
     UICore.prototype.generateQuizHTML = function () {
@@ -687,11 +818,12 @@
             '\n  </div>' +
 
             '\n  <div class="w-full h-2 bg-slate-200 rounded-full mb-5" aria-hidden="true">' +
-            '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '" class="h-2 rounded-full transition-all w-pct-' + pct5 + '"></div>' +
+            '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '" class="h-2 rounded-full transition-all"></div>' +
             '  </div>' +
 
+
             '\n  <div id="question-container" class="space-y-4"></div>' +
-            '\n  <div id="feedback-container" class="mt-5" role="status" aria-live="polite"></div>' +
+            '\n  <div id="feedback-container" class="mt-6 w-full max-w-xl mx-auto pt-6 sm:pt-2" role="status" aria-live="polite"></div>' +
 
             '\n  <div id="nav-hint" class="mt-3 text-sm text-gray-600 hidden" role="status" aria-live="polite"></div>' +
 
@@ -725,6 +857,7 @@
         return arr[index];
     };
 
+
     UICore.prototype.getResultsInsight = function (resultsData) {
         try {
             var qm = this.quizManager;
@@ -734,22 +867,31 @@
 
             var total = questions.length;
             if (!total || !statusArr.length) {
-                return "This quiz gives an honest snapshot. Repeat it once to see what trips you up most.";
+                return "Clear snapshot. One replay will show you what changes the meaning.";
             }
 
-            var audioTotal = 0, audioIncorrect = 0, nonAudioTotal = 0, nonAudioIncorrect = 0;
+            var validatedCount = 0;
+            var incorrectCount = 0;
+
+            var audioTotal = 0, audioIncorrect = 0;
+            var nonAudioTotal = 0, nonAudioIncorrect = 0;
+
+            // Simple fatigue signal: compare last third vs first two thirds
+            var lastThirdStart = Math.floor((2 * total) / 3);
+            var incorrectLate = 0;
+            var validatedLate = 0;
 
             for (var i = 0; i < total; i++) {
                 var q = questions[i] || {};
                 var st = statusArr[i] || null;
 
-                // NEW SHAPE: { validated, selectedIndex, isCorrect }
                 var validated = !!(st && st.validated === true);
-                var isCorrect = validated && (st.isCorrect === true);
                 var isIncorrect = validated && (st.isCorrect === false);
 
-                var hasAudio = !!q.audio;
+                if (validated) validatedCount++;
+                if (isIncorrect) incorrectCount++;
 
+                var hasAudio = !!q.audio;
                 if (hasAudio) {
                     audioTotal++;
                     if (isIncorrect) audioIncorrect++;
@@ -757,43 +899,85 @@
                     nonAudioTotal++;
                     if (isIncorrect) nonAudioIncorrect++;
                 }
+
+                if (i >= lastThirdStart && validated) {
+                    validatedLate++;
+                    if (isIncorrect) incorrectLate++;
+                }
+            }
+
+            var pct = Number(resultsData && resultsData.percentage);
+            pct = Number.isFinite(pct) ? pct : 0;
+
+            if (validatedCount === 0) {
+                return "Nothing was validated here. Replay once and validate each answer to get a real diagnostic.";
             }
 
             var audioErrRate = audioTotal ? (audioIncorrect / audioTotal) : 0;
             var nonAudioErrRate = nonAudioTotal ? (nonAudioIncorrect / nonAudioTotal) : 0;
 
-            var pct = Number(resultsData && resultsData.percentage);
-            pct = Number.isFinite(pct) ? pct : 0;
-
+            // 1) Audio clearly harder
             if (audioTotal > 0 && audioErrRate >= Math.max(0.34, nonAudioErrRate + 0.20)) {
-                return "You perform better without audio. Speed and listening cues are the main blocker here.";
+                return "Audio is your current bottleneck. You know the idea, but the key word passes too fast.";
             }
 
+            // 2) Audio impacts mid-range accuracy
             if (audioTotal > 0 && pct >= 50 && pct < 80 && audioIncorrect > 0) {
-                return "You have the right reflexes, but natural-speed audio makes your accuracy drop.";
+                return "You’re close. In audio, the choices feel similar at real speed, so you lose accuracy.";
             }
 
-            return "Your mistakes look spread out. This is mostly about vocabulary nuance and close choices.";
+            // 3) Fatigue/pressure at the end
+            if (validatedLate >= 3 && (incorrectLate / Math.max(1, validatedLate)) >= 0.67 && incorrectCount >= 3) {
+                return "You start strong, then you rush near the end. Totally normal. One calm decision per question fixes it.";
+            }
+
+            // 4) Default: close calls, nuance, distractors
+            if (pct < 50) {
+                return "These misses are close calls. One word flips the meaning. One replay will make it obvious.";
+            }
+
+            return "Most misses are close choices. You’re building nuance, not memorizing basics. That is progress.";
         } catch (e) {
-            return "This quiz gives an honest snapshot. Repeat it once to see what trips you up most.";
+            return "Clear snapshot. One replay will show you what changes the meaning.";
         }
     };
+
 
 
     UICore.prototype.getResultsAction = function (resultsData) {
         try {
             var insight = this.getResultsInsight(resultsData) || "";
-            if (insight.indexOf("without audio") !== -1 || insight.indexOf("listening") !== -1) {
-                return "Next step: replay this quiz and focus on 2 key words you catch in the audio before choosing.";
+            var pct = Number(resultsData && resultsData.percentage);
+            pct = Number.isFinite(pct) ? pct : 0;
+
+            // Audio-focused actions
+            var insightLc = String(insight || "").toLowerCase();
+
+            if (insightLc.indexOf("audio is your current bottleneck") !== -1 || insightLc.indexOf("audio is your bottleneck") !== -1) {
+                return "Replay now. Before you answer, catch 2 anchor words in the audio. Then choose fast.";
             }
-            if (insight.indexOf("natural-speed audio") !== -1) {
-                return "Next step: replay and aim for 1 clean listen, then decide fast. Do not overthink.";
+            if (insightLc.indexOf("in audio") !== -1 && insightLc.indexOf("lose accuracy") !== -1) {
+                return "Replay now. Do 1 clean listen, decide quickly, and do not change your mind.";
             }
-            return "Next step: replay and use the explanations to spot the exact word that changes the meaning.";
+
+
+            // End-of-quiz rush
+            if (insight.indexOf("rush near the end") !== -1) {
+                return "Replay now. For the last questions, pause 2 seconds before you choose. Make one calm decision.";
+            }
+
+            // Low score: explanation-driven replay
+            if (pct < 50) {
+                return "Replay now and open the detailed analysis. Find the single word that flips the meaning.";
+            }
+
+            // Default: pattern-building
+            return "Replay now and use the explanations to spot what makes the distractor tempting.";
         } catch (e) {
-            return "Next step: replay this quiz once to reinforce the pattern.";
+            return "Replay this quiz once and focus on the pattern.";
         }
     };
+
 
     UICore.prototype.renderCurrentQuestion = function () {
         const question = this.quizManager.getCurrentQuestion();
@@ -1152,7 +1336,6 @@
                 // Accessibilité + clavier
                 // IMPORTANT: même verrouillé, le tile doit rester activable (pour ouvrir paywall/roadmap)
                 const tabIndexAttr = ' tabindex="0"';
-                const ariaDisabled = isLocked ? ' aria-disabled="true"' : ' aria-disabled="false"';
 
                 // Label lisible (pas de HTML)
                 const ariaLabel =
@@ -1173,11 +1356,10 @@
                     ' aria-label="' +
                     self.escapeHTML(ariaLabel) +
                     '"' +
-                    ariaDisabled +
                     '>' +
                     '\n  <div class="text-center">' +
                     '\n    <div class="text-2xl mb-2">' +
-                    (theme.icon || "") +
+                    self.escapeHTML(theme.icon || "") +
                     "</div>" +
                     '\n    <h3 class="text-sm font-bold mb-1">' +
                     name +
@@ -1240,7 +1422,8 @@
 
         // Si pas de logique French Points → fallback premium
         if (typeof this.storageManager.canUnlockTheme !== "function") {
-            return '<div class="text-xs text-gray-500 mt-2">Premium theme – unlock via purchase.</div>';
+            return '<div class="text-xs text-gray-500 mt-2">Unlock with Premium</div>';
+
         }
 
         // Déterminer le prochain thème atteignable (ordre par id)
@@ -1260,9 +1443,12 @@
 
                 const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
                 const prev = list[i - 1];
-                const prevUnlocked = prev ? !!self.storageManager.isThemeUnlocked?.(prev.id) : true;
+                const prevUnlocked = !prev
+                    ? true
+                    : (prev.id === 1 ? true : !!self.storageManager.isThemeUnlocked?.(prev.id));
 
                 if (!unlocked && prevUnlocked) return t.id;
+
             }
             return null;
         })();
@@ -1541,18 +1727,22 @@
             }
 
             // Générer HTML de la ligne
+            const safeIcon = self.escapeHTML(theme.icon || "");
+            const safeName = self.escapeHTML(self.normalizeText(theme.name));
+
             rows +=
                 '<div class="flex items-center justify-between p-3 mb-2 border rounded-lg ' + bgColor + '">' +
                 '<div class="flex items-center gap-3">' +
-                '<div class="text-2xl">' + (theme.icon || '') + '</div>' +
+                '<div class="text-2xl">' + safeIcon + '</div>' +
                 '<div>' +
                 '<div class="font-semibold text-gray-900">' +
-                self.normalizeText(theme.name) +
+                safeName +
                 '</div>' +
                 statusHTML +
                 '</div>' +
                 '</div>' +
                 '<div class="text-right">';
+
 
             if (isFree) {
                 rows += '<div class="text-sm font-bold text-green-600">FREE</div>';
@@ -1572,10 +1762,10 @@
         // Retourner HTML complet de la modal
         return (
             '<div id="roadmap-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="roadmap-title">' +
-            '<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">' +
-
+            '<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen flex flex-col">' +
             // HEADER
             '<div class="sticky top-0 bg-white border-b border-gray-200 p-6 pb-4">' +
+
             '<div class="flex items-center justify-between mb-2">' +
             '<h2 id="roadmap-title" class="text-2xl font-bold text-gray-900">🗺️ How unlocking works</h2>' +
             '<button id="close-roadmap-btn" type="button" aria-label="Close roadmap" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>' +
@@ -1587,7 +1777,7 @@
             (isPremium ? ' • <span class="text-purple-600 font-semibold">Premium ✨</span>' : '') +
             '</div>' +
             (isPremium || !stripeUrl ? '' :
-                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" class="quiz-button" style="display:block;width:100%;text-align:center;margin-bottom:0.75rem;">' +
+                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" class="quiz-button block w-full text-center mb-3">' +
                 'Unlock all themes instantly - ' + this._getPremiumPriceHTML() +
                 '</a>'
 
@@ -1668,8 +1858,9 @@
 
             '\n    <div class="text-center mb-8">' +
             '\n      <div class="text-4xl mb-4">' +
-            (theme.icon || "") +
+            this.escapeHTML(theme.icon || "") +
             '</div>' +
+
             '\n      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">' +
             themeNameSafe +
             '</h1>' +
@@ -1801,11 +1992,24 @@
        EVENT WIRING
        ---------------------------------------- */
     UICore.prototype.setupStatsEvents = function () {
+        const self = this;
+
         this.addClickHandler("back-to-welcome-btn", this.showWelcomeScreen.bind(this));
+
+        // NEW: best action from stats (rendered in UICharts, wired here)
+        this.addClickHandler("stats-quickstart-btn", function () {
+            self._track("stats_quickstart_clicked", { source: "stats" });
+
+            const themeId = self._getThemeIdForQuickStart();
+            self.quizManager.currentThemeId = themeId;
+            self.showQuizSelection();
+        });
+
         if (this.charts && this.charts.loadDetailedStats) {
             setTimeout(this.charts.loadDetailedStats.bind(this.charts), 100);
         }
     };
+
 
     UICore.prototype.renderDailyGoalNudge = function () {
         const slot = document.getElementById("daily-goal-slot");
@@ -1962,7 +2166,7 @@
         const quizCards = document.querySelectorAll(".quiz-item[data-quiz-id]");
         quizCards.forEach(function (card) {
             card.setAttribute("role", "button");
-            // Ne pas forcer tabindex ici: il est déjà correct dans le HTML (0 ou -1)
+            // Ne pas forcer tabindex ici: le HTML gère déjà le focus (actuellement tabindex="0" même si locked).
 
             const activate = function (e) {
                 if (e) {
@@ -2018,19 +2222,29 @@
             el.addEventListener("click", function (e) {
                 e.preventDefault();
                 if (el.disabled) return;
+
                 el.disabled = true;
                 el.setAttribute("aria-disabled", "true");
+
                 Promise.resolve()
                     .then(handler)
                     .finally(function () {
+                        // Si l’écran a changé, le node peut ne plus exister dans le DOM
+                        if (!document.body.contains(el)) return;
                         el.disabled = false;
                         el.removeAttribute("aria-disabled");
                     });
             });
+
         };
 
         // BUG FIX: goBackToSelection robuste (force currentThemeId si manquant)
         const goBackToSelection = function () {
+            // ✅ Pause timing uniquement quand on quitte l'écran quiz (pas Next/Previous/Finish)
+            if (self.quizManager && typeof self.quizManager.pauseTiming === "function") {
+                self.quizManager.pauseTiming();
+            }
+
             const themeId =
                 self.quizManager?.currentThemeId ||
                 Math.floor((self.quizManager?.currentQuizId || 0) / 100);
@@ -2046,6 +2260,11 @@
         // Quiz screen IDs: go-themes-btn / home-quiz-btn (pas quit-quiz-btn / back-to-themes-btn)
         addClick("go-themes-btn", goBackToSelection);
         addClick("home-quiz-btn", function () {
+            // ✅ Pause timing uniquement quand on quitte l'écran quiz
+            if (self.quizManager && typeof self.quizManager.pauseTiming === "function") {
+                self.quizManager.pauseTiming();
+            }
+
             self.showWelcomeScreen();
         });
 
@@ -2061,6 +2280,7 @@
             }
         });
     };
+
 
 
     UICore.prototype.setupResultsEvents = function () {
@@ -2141,12 +2361,15 @@
 
                         const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
                         const prev = themes[i - 1];
-                        const prevUnlocked = prev ? !!self.storageManager.isThemeUnlocked?.(prev.id) : true;
+                        const prevUnlocked = !prev
+                            ? true
+                            : (prev.id === 1 ? true : !!self.storageManager.isThemeUnlocked?.(prev.id));
 
                         if (!unlocked && prevUnlocked) {
                             nextId = t.id;
                             break;
                         }
+
                     }
 
                     if (nextId) {
@@ -2230,8 +2453,9 @@
 
                 if (btn) {
                     btn.textContent = detailsDiv.classList.contains("hidden")
-                        ? "View detailed analysis"
-                        : "Hide detailed analysis";
+                        ? "Review mistakes"
+                        : "Hide review";
+
                 }
 
                 // Afficher Retry en action secondaire uniquement si CTA principal = Next quiz
@@ -2295,18 +2519,21 @@
             self._track("theme_locked_clicked", { themeId: id, source: "themes_grid" });
             self._track("paywall_shown", { source: "locked_theme_click", themeId: id });
 
+            try {
+                if (self.storageManager && typeof self.storageManager.markPaywallShown === "function") {
+                    self.storageManager.markPaywallShown({ source: "locked_theme_click", themeId: id });
+                }
+            } catch (e) { }
+
             if (self.features && typeof self.features.showPaywallModal === "function") {
                 self.features.showPaywallModal("unlock-theme-" + id);
+
             } else {
-                var msg = document.createElement("div");
-                msg.style.cssText =
-                    "position:fixed;top:16px;left:50%;transform:translateX(-50%);" +
-                    "background:#2563eb;color:#fff;padding:12px 18px;border-radius:12px;" +
-                    "box-shadow:0 10px 25px rgba(0,0,0,.15);z-index:9999;" +
-                    "font-weight:600;font-size:14px;max-width:90vw;text-align:center;";
-                msg.textContent = "This theme requires unlocking. Complete more quizzes or go Premium!";
-                document.body.appendChild(msg);
-                setTimeout(function () { msg.remove(); }, 3000);
+                self.showFeedbackMessage(
+                    "info",
+                    "This theme requires unlocking. Complete more quizzes or go Premium."
+                );
+
             }
         };
 
@@ -2340,16 +2567,12 @@
             if (bar) {
                 const pctNum = Number(progress && progress.percentage);
                 const pct = Number.isFinite(pctNum) ? pctNum : 0;
-                const pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
 
                 bar.setAttribute("aria-valuenow", String(Math.round(pct)));
 
-                Array.prototype.slice
-                    .call(bar.classList)
-                    .filter(function (c) { return c.indexOf("w-pct-") === 0; })
-                    .forEach(function (c) { bar.classList.remove(c); });
+                // KISS: Tailwind purge-safe (pas de classes dynamiques)
+                bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
 
-                bar.classList.add("w-pct-" + pct5);
             }
 
             // ID stable: on update seulement la valeur
@@ -2641,13 +2864,14 @@
             '\n  <div class="max-w-md text-center p-6 bg-white rounded-lg shadow">' +
             '\n    <h1 class="text-xl font-bold mb-4 text-gray-900">Oops</h1>' +
             '\n    <p class="text-gray-700 mb-4">' +
-            (message || "An error occurred.") +
+            this.escapeHTML(message || "An error occurred.") +
             "</p>" +
             '\n    <button id="back-to-home-btn" class="quiz-button">Home</button>' +
             "\n  </div>" +
             "\n</div>"
         );
     };
+
 
 
     // CLICK HANDLER: simple et fiable (les écrans sont re-rendus, donc pas de doublons sur les mêmes nodes)

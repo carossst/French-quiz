@@ -157,9 +157,15 @@ QuizManager.prototype.loadQuiz = async function (themeId, quizId) {
 
     if (this.ui && this.ui.showQuizScreen) {
       this.ui.showQuizScreen();
+
+      // Tracking start (source de vérité StorageManager)
+      if (this.storageManager && typeof this.storageManager.markQuizStarted === "function") {
+        this.storageManager.markQuizStarted({ themeId: this.currentThemeId, quizId: this.currentQuizId });
+      }
     } else {
       getLogger().error("QuizManager: UI method not available");
     }
+
 
     getLogger().log(`QuizManager: Quiz loaded successfully. ${questionCount} questions.`);
 
@@ -227,6 +233,10 @@ QuizManager.prototype._recordTimeForCurrentQuestion = function (finalize) {
   this.questionStartTime = finalize ? null : now;
 };
 
+QuizManager.prototype.pauseTiming = function () {
+  // Enregistre le temps courant sans avancer l’index
+  this._recordTime(false);
+};
 
 QuizManager.prototype.preprocessQuestions = function () {
   if (!this.currentQuiz || !this.currentQuiz.questions) return;
@@ -326,20 +336,21 @@ QuizManager.prototype.selectAnswer = function (answerIndex) {
     return;
   }
 
-  const prev = this.userAnswers[this.currentIndex];
+  const st = this.questionStatus[this.currentIndex];
+  const prevValidatedIndex = st ? st.selectedIndex : null;
+
   this.userAnswers[this.currentIndex] = answerIndex;
 
-  // Si l’utilisateur change de réponse après validation, on repasse par un état "non validé"
-  if (prev !== null && prev !== undefined && prev !== answerIndex) {
-    const st = this.questionStatus[this.currentIndex];
-    if (st) {
-      st.validated = false;
-      st.selectedIndex = null;
-      st.isCorrect = null;
-    }
+  // Si l’utilisateur change une réponse déjà validée, on invalide proprement
+  if (st && st.validated === true && prevValidatedIndex !== answerIndex) {
+    st.validated = false;
+    st.selectedIndex = null;
+    st.isCorrect = null;
+
     this._lastValidatedQuestionIndex = null;
     this._lastValidatedAnswerIndex = null;
   }
+
 
   if (this.ui && this.ui.updateSelectedOption) {
     this.ui.updateSelectedOption(answerIndex);
@@ -415,10 +426,9 @@ QuizManager.prototype.nextQuestion = function () {
   const st = this.questionStatus && this.questionStatus[this.currentIndex];
   if (!st || st.validated !== true) {
     if (typeof this.ui?.showFeedbackMessage === "function") {
-      // compat: garder la clé historique si tu l’avais déjà câblée côté UI
-      this.ui.showFeedbackMessage("warn", "validation_required");
+      this.ui.showFeedbackMessage("warn", "Select an answer to continue.");
     } else if (typeof window.showErrorMessage === "function") {
-      window.showErrorMessage("Select an answer to continue");
+      window.showErrorMessage("Select an answer to continue.");
     }
     return false;
   }
@@ -508,22 +518,28 @@ QuizManager.prototype.finishQuiz = function () {
     return;
   }
 
-
-  // plus aucun appel à _recordTime ici
-
   const totalQuestions = this.currentQuiz.questions.length;
+
+  // ⏱️ Source de vérité interne QuizManager = millisecondes
+  const timeSpentMs = Number(this.totalTimeElapsed) || 0;
+  // ✅ Conversion KISS vers secondes pour StorageManager
+  const timeSpentSec = Math.max(0, Math.round(timeSpentMs / 1000));
 
   const resultsData = {
     score: this.score,
     total: totalQuestions,
-    percentage: totalQuestions > 0 ? Math.round((this.score / totalQuestions) * 100) : 0,
+    percentage: totalQuestions > 0
+      ? Math.round((this.score / totalQuestions) * 100)
+      : 0,
     themeId: this.currentThemeId,
     quizId: this.currentQuizId,
-    timeSpentMs: Number(this.totalTimeElapsed) || 0
+
+    // UI-friendly (optionnel mais utile)
+    timeSpentSec: timeSpentSec,
+    timeSpentMs: timeSpentMs
   };
 
-
-
+  // Tracking éventuel externe (si présent)
   if (typeof window.track === "function") {
     window.track("quiz_completed", {
       theme: this.currentThemeId,
@@ -538,21 +554,22 @@ QuizManager.prototype.finishQuiz = function () {
 
   if (typeof this.storageManager.markQuizCompleted !== "function") {
     getLogger().error("QuizManager: storageManager.markQuizCompleted is missing");
-    // Fallback: afficher les résultats sans enregistrer
-    if (this.ui && this.ui.showResults) this.ui.showResults(resultsData);
+
+    // Fallback: afficher les résultats sans persister
+    if (this.ui && this.ui.showResults) {
+      this.ui.showResults(resultsData);
+    }
     return;
   }
 
-  const timeSpentMs = Number(this.totalTimeElapsed) || 0;
-
+  // ✅ IMPORTANT: on passe DES SECONDES à StorageManager
   const didSave = this.storageManager.markQuizCompleted(
     this.currentThemeId,
     this.currentQuizId,
     resultsData.score,
     resultsData.total,
-    timeSpentMs
+    timeSpentSec
   );
-
 
   const fpAfter = this.storageManager.getFrenchPoints?.() ?? fpBefore;
   resultsData.fpEarned = didSave ? Math.max(0, fpAfter - fpBefore) : 0;
@@ -561,14 +578,13 @@ QuizManager.prototype.finishQuiz = function () {
     resultsData.revisionMode = true;
   }
 
-
   if (this.ui && this.ui.showResults) {
     this.ui.showResults(resultsData);
   } else {
     getLogger().error("QuizManager: ui.showResults not available");
   }
 
-
+  // Post-quiz UX: email capture après Theme 1 / Quiz 105
   if (
     this.currentThemeId === 1 &&
     this.currentQuizId === 105 &&
@@ -578,10 +594,8 @@ QuizManager.prototype.finishQuiz = function () {
       this.ui?.features?.showUserProfileModal?.();
     }, 2000);
   }
-
-  // Badges: StorageManager est la source de vérité et dispatch déjà "badges-earned".
-  // Donc rien à déclencher ici.
 };
+
 
 QuizManager.prototype.getResultsSummary = function () {
   if (!this.currentQuiz) {
