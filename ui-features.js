@@ -506,21 +506,39 @@ UIFeatures.prototype.createPaywallModal = function () {
 UIFeatures.prototype.setupPaywallEvents = function (modal) {
     const previouslyFocused = document.activeElement;
 
-    const onEsc = (e) => { if (e.key === "Escape") close(); };
-
     const cleanup = () => {
-        document.removeEventListener("keydown", onEsc);
-        this._removeFocusTrap?.(modal);
+        try { document.removeEventListener("keydown", onEsc); } catch { }
+        try { this._removeFocusTrap?.(modal); } catch { }
     };
 
-    const close = () => {
+    const close = (reason) => {
+        try {
+            this.storageManager?.track?.("paywall_close", {
+                source: "sophie_modal",
+                reason: reason || "unknown"
+            });
+        } catch { }
+
         cleanup();
-        modal.remove();
+        try { modal.remove(); } catch { }
         try { previouslyFocused?.focus?.(); } catch { }
     };
 
-    modal.querySelectorAll('[data-action="close"]').forEach(btn => btn.addEventListener("click", close));
-    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+    const onEsc = (e) => { if (e.key === "Escape") close("escape"); };
+
+    modal.querySelectorAll('[data-action="close"]').forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const id = btn.id || "";
+            const label = (btn.textContent || "").trim();
+            close(
+                id === "paywall-continue-free-btn"
+                    ? "continue_free"
+                    : (label === "×" ? "close_x" : "close_btn")
+            );
+        });
+    });
+
+    modal.addEventListener("click", (e) => { if (e.target === modal) close("overlay"); });
 
     document.addEventListener("keydown", onEsc);
     modal._tyfEscHandler = onEsc;
@@ -538,12 +556,12 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
     if (codeBtn) {
         codeBtn.addEventListener("click", () => {
             try { this.storageManager?.track?.("paywall_click_code", { source: "sophie_modal" }); } catch { }
-            close();
+            close("code");
             this.showPremiumCodeModal?.();
-
         });
     }
 };
+
 
 UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitDays, waitDaysLabel) {
     const freePaceLine = waitDaysLabel
@@ -1754,37 +1772,61 @@ UIFeatures.prototype.setupChestTooltip = function () {
     const position = () => {
         try {
             const r = trigger.getBoundingClientRect();
-            const top = Math.round(r.bottom + 8);
             const centerX = r.left + (r.width / 2);
 
-            // Center horizontally on the trigger
+            // Explicit fixed positioning
+            tip.style.position = "fixed";
             tip.style.transform = "translateX(-50%)";
 
-            // Keep the tooltip anchor point inside the viewport
-            const left = Math.round(Math.min(window.innerWidth - 16, Math.max(16, centerX)));
-            tip.style.top = `${top}px`;
+            // Measure tooltip box (must be visible or at least measurable)
+            const tipRect = tip.getBoundingClientRect();
+            const half = tipRect.width / 2;
+
+            // Horizontal clamp (12px margin)
+            const minLeft = 12 + half;
+            const maxLeft = window.innerWidth - 12 - half;
+            const left = Math.round(Math.min(maxLeft, Math.max(minLeft, centerX)));
+
+            // Vertical placement: prefer below, but flip above if needed (12px margins)
+            const margin = 12;
+            const belowTop = Math.round(r.bottom + 8);
+            const aboveTop = Math.round(r.top - 8 - tipRect.height);
+
+            const fitsBelow = (belowTop + tipRect.height + margin) <= window.innerHeight;
+            const top = fitsBelow ? belowTop : Math.max(margin, aboveTop);
+
             tip.style.left = `${left}px`;
-
-            // Ensure true centering even with "fixed"
+            tip.style.top = `${top}px`;
             tip.style.transform = "translateX(-50%)";
-
         } catch { }
     };
 
 
+
+
     const open = () => {
         tipText.textContent = buildText();
-        position();
+
+        // Make it measurable without flashing
         tip.classList.remove("hidden");
+        tip.style.visibility = "hidden";
+
+        position();
+
+        // Now show it for real
+        tip.style.visibility = "";
         tip.setAttribute("aria-hidden", "false");
         trigger.setAttribute("aria-expanded", "true");
     };
 
+
     const close = () => {
+        tip.style.visibility = "";
         tip.classList.add("hidden");
         tip.setAttribute("aria-hidden", "true");
         trigger.setAttribute("aria-expanded", "false");
     };
+
 
     const toggle = () => (tip.classList.contains("hidden") ? open() : close());
 

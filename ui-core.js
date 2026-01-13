@@ -498,7 +498,13 @@
         var insight = this.getResultsInsight ? this.getResultsInsight(resultsData) : "This quiz gave you a clear snapshot.";
         var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Replay now and focus on the pattern.";
 
-        var premiumNudgeHiddenClass = " hidden";
+        // Visibilité safe par défaut: si non-premium et themes lockés, on l'affiche.
+        // Ensuite setupResultsEvents() peut affiner (ou remplacer par next-unlock).
+        var premiumNudgeHiddenClass =
+            (!this.storageManager.isPremiumUser?.() && this._hasLockedThemes?.())
+                ? ""
+                : " hidden";
+
 
         // Phrase signature: stable, mémorisable
         var signatureTitle = "This is a real French diagnostic.";
@@ -682,7 +688,7 @@
        RESULTS SCREEN
        ---------------------------------------- */
     UICore.prototype.showResults = function (resultsData) {
-        this.showScreen("results", () => {
+        this.showScreen("results", function () {
             const html = this.generateResultsHTML(resultsData);
 
             // Refresh XP header (level / FP / streak) shortly after rendering
@@ -702,10 +708,10 @@
                 timeSpentSec: resultsData.timeSpentSec
             });
 
-
             return html;
         });
     };
+
 
 
     UICore.prototype.generateNewUserWelcome = function () {
@@ -782,7 +788,12 @@
         const self = this;
         setTimeout(function () {
             // Source de vérité: QuizManager démarre le timing, puis délègue le rendu à UI (UICore.renderCurrentQuestion)
-            self.quizManager.renderCurrentQuestion();
+            if (self.quizManager && typeof self.quizManager.renderCurrentQuestion === "function") {
+                self.quizManager.renderCurrentQuestion();
+            } else {
+                self.renderCurrentQuestion();
+            }
+
         }, 80);
     };
 
@@ -844,8 +855,9 @@
 
 
             '\n  <div class="tyf-quiz-actions">' +
-            '    <button id="prev-question-btn" type="button" class="quiz-button">Previous</button>' +
-            '    <button id="next-question-btn" type="button" class="quiz-button">Next</button>' +
+            '    <button id="prev-question-btn" type="button">Previous</button>' +
+            '    <button id="next-question-btn" type="button">Next</button>' +
+
             '  </div>' +
 
             "\n</div>"
@@ -1493,10 +1505,11 @@
             return (
                 '<div class="text-xs text-gray-400 mt-2">' +
                 '🔒 Complete <strong>' + previousThemeSafe + '</strong> first | ' +
-                '<button type="button" class="text-purple-600 hover:underline" data-action="show-roadmap">' +
-                'See roadmap</button>' +
+                '<a href="#" class="text-purple-600 hover:underline" data-action="show-roadmap" role="button" tabindex="0">' +
+                'See roadmap</a>' +
                 '</div>'
             );
+
 
 
         }
@@ -1982,7 +1995,7 @@
             return;
         }
 
-        this.showScreen("stats", () => {
+        this.showScreen("stats", function () {
             try {
                 return this.charts.generateFullStatsPage();
             } catch (error) {
@@ -1990,6 +2003,7 @@
                 return this.generateFallbackStatsHTML();
             }
         });
+
     };
 
     UICore.prototype.generateFallbackStatsHTML = function () {
@@ -2089,6 +2103,8 @@
         const slot = document.getElementById("primary-cta-slot");
         if (!slot) return;
 
+        const self = this;
+
         let uiState = null;
         try {
             uiState = this.storageManager.getUIState?.() || {};
@@ -2096,8 +2112,6 @@
             uiState = {};
         }
 
-        // Returning user screen only.
-        // Keep CTA simple and safe: open Colors quiz selection (theme 1).
         slot.innerHTML =
             '<div class="tyf-stats-card tyf-nudge">' +
             '<div class="tyf-nudge-inner">' +
@@ -2110,13 +2124,13 @@
             '</div>' +
             '</div></div>';
 
-        this.addClickHandler("primary-cta-continue-btn", () => {
-            const themeId = this._getThemeIdForQuickStart();
-            this.quizManager.currentThemeId = themeId;
-            this.showQuizSelection();
-
+        this.addClickHandler("primary-cta-continue-btn", function () {
+            const themeId = self._getThemeIdForQuickStart();
+            self.quizManager.currentThemeId = themeId;
+            self.showQuizSelection();
         });
     };
+
 
 
 
@@ -2156,20 +2170,30 @@
                 const target = e.target.closest('[data-action="show-roadmap"]');
                 if (!target) return;
 
+                // Support click + clavier (Enter/Espace) sur lien/role=button
+                const isKey = e && e.type === "keydown";
+                if (isKey) {
+                    const k = e.key;
+                    if (k !== "Enter" && k !== " ") return;
+                }
+
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Toujours utiliser l'instance courante via `self`
+                // IMPORTANT: empêcher le tile parent (role=button) de réagir aussi
                 if (typeof self.showUnlockRoadmap === "function") {
                     self.showUnlockRoadmap();
                 }
             };
+
 
             // Stocker la ref pour cleanup si un jour tu ajoutes destroy()
             this._roadmapDelegatedHandler = handler;
 
             // appContainer reste stable, contrairement au HTML interne
             this.appContainer.addEventListener("click", handler);
+            this.appContainer.addEventListener("keydown", handler);
+
 
             this._roadmapListenerAttached = true;
         }
@@ -2309,158 +2333,10 @@
     UICore.prototype.setupResultsEvents = function () {
         const self = this;
 
-        this.addClickHandler("next-quiz-btn", function () {
-            const nextQuiz =
-                self.features && self.features.getNextQuizInTheme
-                    ? self.features.getNextQuizInTheme()
-                    : null;
-
-            if (nextQuiz) {
-                self.storageManager?.markQuizStarted?.({ themeId: nextQuiz.themeId, quizId: nextQuiz.quizId });
-
-                self.quizManager.loadQuiz(nextQuiz.themeId, nextQuiz.quizId).catch(function (e) {
-                    console.error("Failed to load next quiz:", e);
-                    self.showError("Unable to load next quiz.");
-                });
-            } else {
-                self.showQuizSelection();
-            }
-        });
-
-        // 🔒 PREMIUM NUDGE OU PROGRESSION (EXCLUSIF)
-        const canComputeNextUnlock =
-            (typeof self.storageManager.canUnlockTheme === "function") &&
-            (typeof self.storageManager.getFrenchPoints === "function") &&
-            (typeof self.storageManager.getThemeCost === "function");
-
-        const showPremiumOnly =
-            !self.storageManager.isPremiumUser?.() &&
-            self._hasLockedThemes?.() &&
-            !canComputeNextUnlock;
-
-
-        if (showPremiumOnly) {
-            const nudge = document.getElementById("premium-success-nudge");
-            if (nudge) {
-                nudge.classList.remove("hidden");
-                self._track("premium_nudge_visible", { source: "results" });
-
-                const btn = document.getElementById("results-premium-nudge-btn");
-                if (btn) {
-                    btn.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
-                        if (stripeUrl) {
-                            window.open(stripeUrl, "_blank", "noopener,noreferrer");
-                        } else if (self.features?.showPaywallModal) {
-                            self.features.showPaywallModal("results-success");
-                        }
-                    });
-                }
-            }
-        } else {
-            const slot = document.getElementById("next-unlock-slot");
-
-            if (slot) {
-                // Toujours laisser les autres bindings Results se faire
-                slot.innerHTML = "";
-
-                const canCompute =
-                    (typeof self.storageManager.canUnlockTheme === "function") &&
-                    (typeof self.storageManager.getFrenchPoints === "function") &&
-                    (typeof self.storageManager.getThemeCost === "function");
-
-                if (canCompute) {
-                    const themes = (self.themeIndexCache || [])
-                        .filter(t => t && t.id != null)
-                        .map(t => ({ ...t, id: Number(t.id) }))
-                        .filter(t => Number.isFinite(t.id))
-                        .sort((a, b) => a.id - b.id);
-
-                    let nextId = null;
-                    for (let i = 0; i < themes.length; i++) {
-                        const t = themes[i];
-                        if (t.id === 1) continue;
-
-                        const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
-                        const prev = themes[i - 1];
-                        const prevUnlocked = !prev
-                            ? true
-                            : (prev.id === 1 ? true : !!self.storageManager.isThemeUnlocked?.(prev.id));
-
-                        if (!unlocked && prevUnlocked) {
-                            nextId = t.id;
-                            break;
-                        }
-
-                    }
-
-                    if (nextId) {
-                        const fp = Number(self.storageManager.getFrenchPoints()) || 0;
-                        const cost = Number(self.storageManager.getThemeCost(nextId));
-
-                        if (Number.isFinite(cost)) {
-                            const needed = Math.max(0, cost - fp);
-
-                            if (needed <= 0) {
-                                slot.innerHTML =
-                                    '<div class="tyf-stats-card tyf-nudge">' +
-                                    '<div class="tyf-nudge-inner">' +
-                                    '<div>' +
-                                    '<div class="tyf-nudge-title">Ready to unlock your next theme</div>' +
-                                    '<div class="tyf-nudge-sub">You have enough French Points. Go back and unlock it.</div>' +
-                                    '</div>' +
-                                    '<div class="shrink-0">' +
-                                    '<button id="results-back-unlock-btn" type="button" class="quiz-button">Back to themes</button>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>';
-
-                                self.addClickHandler("results-back-unlock-btn", function () {
-                                    self.showWelcomeScreen();
-                                });
-                            } else {
-                                slot.innerHTML =
-                                    '<div class="tyf-stats-card">' +
-                                    '<div class="tyf-row">' +
-                                    '<div class="tyf-row-title">Next unlock</div>' +
-                                    '<div class="tyf-row-meta">' + needed + ' FP to go</div>' +
-                                    '</div>' +
-                                    '<div class="tyf-caption">Complete a few more quizzes, or unlock everything with Premium.</div>' +
-                                    '</div>';
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-        ["retry-quiz-primary-btn", "retry-quiz-btn"].forEach(function (id) {
-            self.addClickHandler(id, function () {
-                const currentThemeId = self.quizManager.currentThemeId;
-                const currentQuizId = self.quizManager.currentQuizId;
-
-                if (!currentThemeId || !currentQuizId) {
-                    self.showQuizSelection();
-                    return;
-                }
-
-                self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
-
-                self.quizManager.loadQuiz(currentThemeId, currentQuizId).catch(function (e) {
-                    console.error("Failed to reload quiz:", e);
-                    self.showError("Unable to reload quiz.");
-                });
-            });
-        });
-
+        // 1) NAV CRITIQUE D’ABORD (doit toujours marcher)
         this.addClickHandler("back-to-theme-btn", function () {
-            self.showQuizSelection();
+            self.showWelcomeScreen();
         });
-
-        // (removed) back-to-home-btn no longer exists on Results header
 
 
         this.addClickHandler("toggle-details-btn", function () {
@@ -2478,106 +2354,176 @@
                     btn.textContent = detailsDiv.classList.contains("hidden")
                         ? "Review mistakes"
                         : "Hide review";
-
                 }
 
-                // Afficher Retry en action secondaire uniquement si CTA principal = Next quiz
                 if (!detailsDiv.classList.contains("hidden")) {
                     const hasNext = !!document.getElementById("next-quiz-btn");
                     const sec = document.getElementById("secondary-actions");
                     if (sec && hasNext) sec.classList.remove("hidden");
                 }
-
             }
         });
-    };
 
-    // CORRIGÉ: Event delegation au lieu de boucle forEach (performance + anti-bug)
-    UICore.prototype.setupThemeClickEvents = function () {
-        const self = this;
-        const themesGrid = document.getElementById("themes-grid");
+        // 2) LE RESTE: PROTÉGÉ POUR NE PAS CASSER LES BOUTONS
+        try {
+            this.addClickHandler("next-quiz-btn", function () {
+                const nextQuiz =
+                    self.features && self.features.getNextQuizInTheme
+                        ? self.features.getNextQuizInTheme()
+                        : null;
 
-        if (!themesGrid) return;
+                if (nextQuiz) {
+                    self.storageManager?.markQuizStarted?.({ themeId: nextQuiz.themeId, quizId: nextQuiz.quizId });
 
-        // Anti-doublon : vérifier si déjà lié
-        if (themesGrid.dataset.delegationBound === "1") return;
-        themesGrid.dataset.delegationBound = "1";
-
-        // AMÉLIORATION 1: Fonction partagée pour clic ET clavier
-        var handleThemeActivate = function (tile) {
-            // IMPORTANT: aria-disabled="true" ne doit PAS bloquer ici.
-            // Un thème verrouillé doit rester activable pour ouvrir le paywall/roadmap.
-
-            const id = Number(tile.dataset.themeId || "0");
-
-            const theme =
-                (self.resourceManager &&
-                    typeof self.resourceManager.getThemeById === "function" &&
-                    self.resourceManager.getThemeById(id)) ||
-                (self.themeIndexCache || []).find(function (t) {
-                    return Number(t.id) === id;
-                });
-
-            if (!theme) {
-                console.error("Theme not found for ID:", id);
-                return;
-            }
-
-            // Optional features hook: paywall / analytics
-            if (self.features && typeof self.features.handleThemeClick === "function") {
-                self.features.handleThemeClick(theme);
-                return;
-            }
-
-            const isFree = id === 1;
-            const isPremium = !!self.storageManager.isPremiumUser?.();
-            const isUnlocked = !!self.storageManager.isThemeUnlocked?.(id);
-
-            if (isFree || isPremium || isUnlocked) {
-                self.quizManager.currentThemeId = id;
-                self.showQuizSelection();
-                return;
-            }
-
-            self._track("theme_locked_clicked", { themeId: id, source: "themes_grid" });
-            self._track("paywall_shown", { source: "locked_theme_click", themeId: id });
-
-            try {
-                if (self.storageManager && typeof self.storageManager.markPaywallShown === "function") {
-                    self.storageManager.markPaywallShown({ source: "locked_theme_click", themeId: id });
+                    self.quizManager.loadQuiz(nextQuiz.themeId, nextQuiz.quizId).catch(function (e) {
+                        console.error("Failed to load next quiz:", e);
+                        self.showError("Unable to load next quiz.");
+                    });
+                } else {
+                    self.showQuizSelection();
                 }
-            } catch (e) { }
+            });
 
-            if (self.features && typeof self.features.showPaywallModal === "function") {
-                self.features.showPaywallModal("unlock-theme-" + id);
+            // 🔒 PREMIUM BUTTON: binder une fois, indépendamment de la logique d'affichage
+            self.addClickHandler("results-premium-nudge-btn", function (e) {
+                if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+                self._track("premium_nudge_clicked", { source: "results" });
+
+                const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
+                if (stripeUrl) {
+                    window.open(stripeUrl, "_blank", "noopener,noreferrer");
+                    return;
+                }
+                if (self.features?.showPaywallModal) {
+                    self.features.showPaywallModal("results-success");
+                }
+            });
+
+            // 🔒 PREMIUM NUDGE OU PROGRESSION (EXCLUSIF)
+            const canComputeNextUnlock =
+                (typeof self.storageManager.canUnlockTheme === "function") &&
+                (typeof self.storageManager.getFrenchPoints === "function") &&
+                (typeof self.storageManager.getThemeCost === "function");
+
+            const showPremiumOnly =
+                !self.storageManager.isPremiumUser?.() &&
+                self._hasLockedThemes?.() &&
+                !canComputeNextUnlock;
+
+            if (showPremiumOnly) {
+                const nudge = document.getElementById("premium-success-nudge");
+                if (nudge) {
+                    nudge.classList.remove("hidden");
+                    self._track("premium_nudge_visible", { source: "results" });
+                }
 
             } else {
-                self.showFeedbackMessage(
-                    "info",
-                    "This theme requires unlocking. Complete more quizzes or go Premium."
-                );
+                // EXCLUSIF: si on entre dans la voie "next unlock", on cache le nudge premium
+                const nudge = document.getElementById("premium-success-nudge");
+                if (nudge) nudge.classList.add("hidden");
 
+                const slot = document.getElementById("next-unlock-slot");
+                if (slot) {
+                    slot.innerHTML = "";
+
+                    const canCompute =
+                        (typeof self.storageManager.canUnlockTheme === "function") &&
+                        (typeof self.storageManager.getFrenchPoints === "function") &&
+                        (typeof self.storageManager.getThemeCost === "function");
+
+                    if (canCompute) {
+                        const themes = (self.themeIndexCache || [])
+                            .filter(t => t && t.id != null)
+                            .map(t => ({ ...t, id: Number(t.id) }))
+                            .filter(t => Number.isFinite(t.id))
+                            .sort((a, b) => a.id - b.id);
+
+                        let nextId = null;
+                        for (let i = 0; i < themes.length; i++) {
+                            const t = themes[i];
+                            if (t.id === 1) continue;
+
+                            const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
+                            const prev = themes[i - 1];
+                            const prevUnlocked = !prev
+                                ? true
+                                : (prev.id === 1 ? true : !!self.storageManager.isThemeUnlocked?.(prev.id));
+
+                            if (!unlocked && prevUnlocked) {
+                                nextId = t.id;
+                                break;
+                            }
+                        }
+
+                        if (nextId) {
+                            const fp = Number(self.storageManager.getFrenchPoints()) || 0;
+                            const cost = Number(self.storageManager.getThemeCost(nextId));
+
+                            if (Number.isFinite(cost)) {
+                                const needed = Math.max(0, cost - fp);
+
+                                if (needed <= 0) {
+                                    slot.innerHTML =
+                                        '<div class="tyf-stats-card tyf-nudge">' +
+                                        '<div class="tyf-nudge-inner">' +
+                                        '<div>' +
+                                        '<div class="tyf-nudge-title">Ready to unlock your next theme</div>' +
+                                        '<div class="tyf-nudge-sub">You have enough French Points. Go back and unlock it.</div>' +
+                                        '</div>' +
+                                        '<div class="shrink-0">' +
+                                        '<button id="results-back-unlock-btn" type="button" class="quiz-button">Back to themes</button>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
+
+                                    self.addClickHandler("results-back-unlock-btn", function () {
+                                        self.showWelcomeScreen();
+                                    });
+                                } else {
+                                    slot.innerHTML =
+                                        '<div class="tyf-stats-card">' +
+                                        '<div class="tyf-row">' +
+                                        '<div class="tyf-row-title">Next unlock</div>' +
+                                        '<div class="tyf-row-meta">' + needed + ' FP to go</div>' +
+                                        '</div>' +
+                                        '<div class="tyf-caption">Complete a few more quizzes, or unlock everything with Premium.</div>' +
+                                        '</div>';
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        };
 
+            ["retry-quiz-primary-btn", "retry-quiz-btn"].forEach(function (id) {
+                self.addClickHandler(id, function () {
+                    const currentThemeId = self.quizManager.currentThemeId;
+                    const currentQuizId = self.quizManager.currentQuizId;
 
-        // Listener clic
-        themesGrid.addEventListener("click", function (e) {
-            const tile = e.target.closest(".theme-item[data-theme-id]");
-            if (!tile) return;
-            handleThemeActivate(tile);
-        });
+                    if (!currentThemeId || !currentQuizId) {
+                        self.showQuizSelection();
+                        return;
+                    }
 
-        // Listener clavier (Enter/Espace)
-        themesGrid.addEventListener("keydown", function (e) {
-            if (e.key !== "Enter" && e.key !== " ") return;
-            const tile = e.target.closest(".theme-item[data-theme-id]");
-            if (!tile) return;
-            e.preventDefault();
-            handleThemeActivate(tile);
-        });
+                    self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
 
+                    self.quizManager.loadQuiz(currentThemeId, currentQuizId).catch(function (e) {
+                        console.error("Failed to reload quiz:", e);
+                        self.showError("Unable to reload quiz.");
+                    });
+                });
+            });
+
+        } catch (e) {
+            console.error("setupResultsEvents aborted (non-critical):", e);
+            // Important: on ne casse pas la nav
+        }
     };
+
+
+
+
 
     /* ----------------------------------------
        PROGRESS / NAVIGATION
@@ -2612,8 +2558,8 @@
 
 
     /* ----------------------------------------
-   PROGRESS / NAVIGATION
-   ---------------------------------------- */
+    PROGRESS / NAVIGATION
+    ---------------------------------------- */
     UICore.prototype.updateNavigationButtons = function () {
         var prevBtn = document.getElementById("prev-question-btn");
         var nextBtn = document.getElementById("next-question-btn");
@@ -2857,26 +2803,27 @@
 
 
     // These are "CEFR-flavored" but intentionally simple and motivational
-    UICore.prototype.getCECRLevel = function (percentage) {
+    UICore.prototype.getCEFRLevel = function (percentage) {
         if (percentage >= 80) return "Strong range (confident in France)";
         if (percentage >= 60) return "Solid range (you will manage well)";
         if (percentage >= 50) return "Growing range (on your way)";
         return "Discovery range (good starting point)";
     };
 
-    UICore.prototype.getCECRMessage = function (percentage) {
+    UICore.prototype.getCEFRMessage = function (percentage) {
         if (percentage >= 80) return "You handle authentic daily French very well.";
         if (percentage >= 60) return "You can deal with most everyday situations in French.";
         if (percentage >= 50) return "You are starting to grasp real-life French patterns.";
         return "Authentic French is challenging. Keep testing to progress step by step.";
     };
 
-    UICore.prototype.getCECRColorClass = function (percentage) {
+    UICore.prototype.getCEFRColorClass = function (percentage) {
         if (percentage >= 80) return "bg-green-50 border-green-200 text-green-800";
         if (percentage >= 60) return "bg-blue-50 border-blue-200 text-blue-800";
         if (percentage >= 50) return "bg-orange-50 border-orange-200 text-orange-800";
         return "bg-gray-50 border-gray-200 text-gray-800";
     };
+
 
     /* ----------------------------------------
        UTILITIES

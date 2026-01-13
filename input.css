@@ -95,8 +95,8 @@
 @layer components {
 
     /* =========================
-               STATS (Duolingo-like)
-               ========================= */
+     STATS (Duolingo-like) — 2025 (COMPLET)
+    ========================= */
 
     .tyf-page {
         min-height: 100vh;
@@ -323,8 +323,7 @@
 
     .tyf-nudge {
         border: 1px solid rgba(168, 85, 247, 0.18);
-        background:
-            linear-gradient(180deg, rgba(168, 85, 247, 0.08), rgba(168, 85, 247, 0.05));
+        background: linear-gradient(180deg, rgba(168, 85, 247, 0.08), rgba(168, 85, 247, 0.05));
         box-shadow: var(--shadow-1);
     }
 
@@ -372,7 +371,6 @@
         font-weight: 800;
         color: rgb(15 23 42);
     }
-
 
     .tyf-table-wrap {
         overflow-x: auto;
@@ -443,6 +441,78 @@
         white-space: nowrap;
     }
 
+    /* =========================
+   2025 COMPACT OVERRIDES
+   Objectif: réduire le hero + densité (desktop), sans casser le mobile
+   ========================= */
+
+    @media (min-width: 1024px) {
+        .tyf-stats-wrap {
+            padding: 1.25rem 1rem 2rem 1rem;
+            gap: 0.85rem;
+        }
+
+        .tyf-stats-hero {
+            padding: 0.75rem 0.95rem;
+        }
+
+        .tyf-stats-hero-inner {
+            gap: 0.6rem;
+        }
+
+        .tyf-hero-title {
+            font-size: 1.3rem;
+            /* au lieu de 1.5rem */
+            line-height: 1.15;
+        }
+
+        .tyf-hero-sub {
+            font-size: 0.82rem;
+        }
+
+        .tyf-hero-kicker {
+            font-size: 0.74rem;
+        }
+
+        .tyf-stats-card {
+            padding: 0.85rem 0.9rem;
+        }
+
+        .tyf-value {
+            font-size: 1.45rem;
+        }
+    }
+
+    /* =========================
+   Quiz cards micro-interactions (desktop hover + mobile tap)
+   IMPORTANT: ça agit sur .quiz-item / .assessment-domain, pas sur les stats cards
+   ========================= */
+
+    /* Desktop hover only */
+    @media (hover: hover) and (pointer: fine) {
+        :is(.quiz-item, .assessment-domain):hover {
+            transform: translateY(-2px);
+            border-color: rgb(203 213 225);
+            background: rgb(248 250 252);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        :is(.quiz-item, .assessment-domain):active {
+            transform: translateY(1px);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+        }
+    }
+
+    /* Mobile tap feedback (no hover jitter) */
+    @media (hover: none) and (pointer: coarse) {
+        :is(.quiz-item, .assessment-domain):active {
+            transform: scale(0.99);
+            background: rgb(248 250 252);
+            border-color: rgb(203 213 225);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.07);
+        }
+    }
+
     /* Header XP: laisser Tailwind piloter le layout (KISS).
    On ne garde que des "améliorations" non bloquantes. */
 
@@ -461,12 +531,41 @@
     /* IMPORTANT: pas de taille/marge/typo ici.
                Tailwind garde le contrôle sur le header. */
 
-    /* Chest (conserve uniquement l’icône + badge) */
+    /* Chest (KISS): état verrouillé visible + hover perceptible, sans opacity inline */
     #daily-chest-wrapper {
         position: relative;
         display: inline-flex;
         align-items: center;
         overflow: visible;
+    }
+
+    /* Locked state: utiliser un style, pas une opacité inline */
+    #daily-chest-wrapper[data-state="locked"] {
+        filter: grayscale(1) brightness(0.92);
+    }
+
+    /* Hover/Active uniquement sur desktop (comme le reste de ton design) */
+    @media (hover: hover) and (pointer: fine) {
+        #daily-chest-wrapper:hover {
+            filter: brightness(1.06);
+        }
+
+        #daily-chest-wrapper:active {
+            filter: brightness(1.02);
+        }
+
+        #daily-chest-wrapper:hover .chest-icon {
+            transform: translateY(-1px) scale(1.03);
+        }
+
+        #daily-chest-wrapper:active .chest-icon {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Locked: hover léger mais pas “premium” */
+        #daily-chest-wrapper[data-state="locked"]:hover {
+            filter: grayscale(0.85) brightness(0.98);
+        }
     }
 
     .chest-icon {
@@ -475,13 +574,12 @@
         align-items: center;
         margin-left: 8px;
         font-size: 18px;
-        transition: transform 0.2s;
+        transition: transform 160ms ease, filter 160ms ease;
     }
 
+    /* Available: reste distinct */
     .chest-icon--available {
         cursor: pointer;
-
-        /* 2025: moins “gold glow”, plus discret */
         filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.45));
     }
 
@@ -504,18 +602,9 @@
         box-shadow: var(--shadow-1);
     }
 
-    .tyf-tooltip-wrap {
-        position: relative;
-        z-index: var(--z-notification);
-        display: inline-flex;
-        align-items: center;
-    }
 
     .tyf-tooltip-panel {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%);
+        position: fixed;
         width: max-content;
         max-width: min(320px, 85vw);
         padding: 10px 12px;
@@ -769,9 +858,40 @@
         background: white;
         border-radius: var(--radius-card);
         border: 1px solid rgb(229 231 235);
-        padding: 1rem;
+        padding: 0.85rem 1rem;
         cursor: pointer;
-        transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+
+        /* modern hover feel */
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+        transform: translateY(0);
+
+        transition:
+            transform 160ms ease,
+            box-shadow 160ms ease,
+            border-color 160ms ease,
+            background-color 160ms ease;
+    }
+
+    /* Desktop only (pas sur mobile) */
+    @media (hover: hover) and (pointer: fine) {
+        :is(.quiz-item, .assessment-domain):hover {
+            transform: translateY(-2px);
+            border-color: rgb(203 213 225);
+            background: rgb(248 250 252);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        :is(.quiz-item, .assessment-domain):active {
+            transform: translateY(1px);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+        }
+    }
+
+    /* Focus clavier (accessible) */
+    :is(.quiz-item, .assessment-domain):focus-visible {
+        outline: none;
+        border-color: rgb(var(--color-primary));
+        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16), 0 10px 24px rgba(15, 23, 42, 0.08);
     }
 
     .theme-card {
@@ -962,11 +1082,12 @@
     /* =========================
        BUTTONS (KISS + no conflict)
        ========================= */
+    /* =========================
+       BUTTONS (KISS + no conflict)
+       ========================= */
 
-    /* Primary CTA buttons only (NO header nav pills here) */
     .tyf-btn-primary,
-    :where(.quiz-button,
-        #start-first-quiz-btn,
+    :is(#start-first-quiz-btn,
         #retry-quiz-primary-btn,
         #back-to-themes-btn,
         #premium-code-btn,
@@ -991,8 +1112,7 @@
     }
 
     .tyf-btn-primary:hover:not(:disabled),
-    :where(.quiz-button,
-        #start-first-quiz-btn,
+    :is(#start-first-quiz-btn,
         #retry-quiz-primary-btn,
         #back-to-themes-btn,
         #premium-code-btn,
@@ -1009,8 +1129,7 @@
     }
 
     .tyf-btn-primary:active:not(:disabled),
-    :where(.quiz-button,
-        #start-first-quiz-btn,
+    :is(#start-first-quiz-btn,
         #retry-quiz-primary-btn,
         #back-to-themes-btn,
         #premium-code-btn,
@@ -1028,8 +1147,7 @@
     }
 
     .tyf-btn-primary:disabled,
-    :where(.quiz-button,
-        #start-first-quiz-btn,
+    :is(#start-first-quiz-btn,
         #retry-quiz-primary-btn,
         #back-to-themes-btn,
         #premium-code-btn,
@@ -1085,34 +1203,45 @@
     }
 
     /* Quiz: Back button must be secondary (not CTA) */
-    #prev-question-btn {
-        background: rgb(243 244 246);
-        color: rgb(55 65 81);
-        font-weight: 700;
+    /* Quiz: Back button must be secondary (not CTA) */
+    /* IMPORTANT: override aussi les styles "primary" de .quiz-button */
+    #prev-question-btn,
+    #prev-question-btn.quiz-button {
+        background: rgb(243 244 246) !important;
+        color: rgb(55 65 81) !important;
+        font-weight: 700 !important;
+
         padding: 0.9rem 1.4rem;
         border-radius: 14px;
-        border: 2px solid rgb(229 231 235);
+
+        border: 2px solid rgb(229 231 235) !important;
+        box-shadow: none !important;
+        filter: none !important;
+
         cursor: pointer;
-        box-shadow: none;
         transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
     }
 
-    #prev-question-btn:hover:not(:disabled) {
-        background: rgb(229 231 235);
-        border-color: rgb(209 213 219);
+    #prev-question-btn:hover:not(:disabled),
+    #prev-question-btn.quiz-button:hover:not(:disabled) {
+        background: rgb(229 231 235) !important;
+        border-color: rgb(209 213 219) !important;
     }
 
-    #prev-question-btn:active:not(:disabled) {
+    #prev-question-btn:active:not(:disabled),
+    #prev-question-btn.quiz-button:active:not(:disabled) {
         transform: translateY(1px);
     }
 
-    #prev-question-btn:focus-visible {
+    #prev-question-btn:focus-visible,
+    #prev-question-btn.quiz-button:focus-visible {
         outline: none;
-        border-color: rgb(var(--color-primary));
-        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
+        border-color: rgb(var(--color-primary)) !important;
+        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16) !important;
     }
 
-    #prev-question-btn:disabled {
+    #prev-question-btn:disabled,
+    #prev-question-btn.quiz-button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
@@ -1472,25 +1601,6 @@
         }
     }
 
-    /* Mobile: réduire légèrement pour que le texte rentre */
-    @media (max-width: 420px) {
-
-        #prev-question-btn,
-        #next-question-btn {
-            padding: 0.75rem 1rem;
-            /* au lieu de 0.9rem 1.4rem */
-            font-size: 0.95rem;
-        }
-    }
-
-    @media (max-width: 360px) {
-
-        #prev-question-btn,
-        #next-question-btn {
-            padding: 0.7rem 0.85rem;
-            font-size: 0.9rem;
-        }
-    }
 
     /* ====================================
        UIFeatures - Modal compat layer (anti purge Tailwind)
@@ -1873,6 +1983,17 @@
 
     .w-pct-100 {
         width: 100%;
+    }
+
+    /* =========================
+    TEXT UTILITIES
+    ========================= */
+
+    .tyf-clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
     }
 }
 
