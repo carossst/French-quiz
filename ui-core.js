@@ -353,26 +353,51 @@
                 // IMPORTANT:
                 // Rien dans UIFeatures ne doit pouvoir casser l'écran Welcome
                 try {
-                    // XP header uniquement si returning screen (themes grid present)
                     if (this.features && isReturningWelcome) {
-                        if (typeof this.features.showXPHeader === "function") {
-                            this.features.showXPHeader();
+
+                        // 1) XP header (peut échouer sans casser le reste)
+                        try {
+                            if (typeof this.features.showXPHeader === "function") {
+                                this.features.showXPHeader();
+                            }
+                        } catch (e) {
+                            console.error("showXPHeader failed (non-blocking):", e);
                         }
 
-                        // Après showXPHeader(): ne pas relier 2x les listeners
+                        // 2) IMPORTANT: le DOM est recréé à chaque showScreen()
+                        // → rebind UI du coffre + tooltip à CHAQUE render (même si showXPHeader a planté)
+                        try {
+                            if (typeof this.features.addChestIconToHeader === "function") {
+                                this.features.addChestIconToHeader();
+                            }
+                        } catch (e) {
+                            console.error("addChestIconToHeader failed (non-blocking):", e);
+                        }
+
+                        try {
+                            if (typeof this.features.setupChestTooltip === "function") {
+                                this.features.setupChestTooltip();
+                            }
+                        } catch (e) {
+                            console.error("setupChestTooltip failed (non-blocking):", e);
+                        }
+
+                        // 3) Listeners globaux = une seule fois
                         if (!this._xpSystemInitialized && typeof this.features.initializeXPSystem === "function") {
                             this.features.initializeXPSystem();
                             this._xpSystemInitialized = true;
                         }
 
-                        // On peut updater à chaque render (safe)
-                        if (typeof this.features.updateXPHeader === "function") {
-                            this.features.updateXPHeader();
+                        // 4) Update header (safe)
+                        try {
+                            if (typeof this.features.updateXPHeader === "function") {
+                                this.features.updateXPHeader();
+                            }
+                        } catch (e) {
+                            console.error("updateXPHeader failed (non-blocking):", e);
                         }
-
                     }
                 } catch (e) {
-                    // Non bloquant: on loggue mais on laisse l'app vivre
                     console.error("Welcome UIFeatures failed (non-blocking):", e);
                 }
 
@@ -706,29 +731,40 @@
        RESULTS SCREEN
        ---------------------------------------- */
     UICore.prototype.showResults = function (resultsData) {
+        resultsData = resultsData || {};
+
         this.showScreen("results", function () {
             const html = this.generateResultsHTML(resultsData);
 
             // Refresh XP header (level / FP / streak) shortly after rendering
             setTimeout(() => {
-                if (this.features && this.features.updateXPHeader) {
-                    this.features.updateXPHeader();
+                try {
+                    if (this.features && typeof this.features.updateXPHeader === "function") {
+                        this.features.updateXPHeader();
+                    }
+                } catch (e) {
+                    console.error("updateXPHeader failed on results (non-blocking):", e);
                 }
             }, 200);
 
             // Micro-conversion tracking (single entrypoint)
-            this._track("quiz_completed", {
-                themeId: resultsData.themeId,
-                quizId: resultsData.quizId,
-                percentage: resultsData.percentage,
-                score: resultsData.score,
-                total: resultsData.total,
-                timeSpentSec: resultsData.timeSpentSec
-            });
+            try {
+                this._track("quiz_completed", {
+                    themeId: resultsData.themeId,
+                    quizId: resultsData.quizId,
+                    percentage: resultsData.percentage,
+                    score: resultsData.score,
+                    total: resultsData.total,
+                    timeSpentSec: resultsData.timeSpentSec
+                });
+            } catch (e) {
+                // silent fail
+            }
 
             return html;
         });
     };
+
 
 
 
@@ -817,7 +853,6 @@
 
 
 
-    // APRÈS
     UICore.prototype.generateQuizHTML = function () {
         const progress =
             (this.quizManager.getQuizProgress && this.quizManager.getQuizProgress()) || {
@@ -828,7 +863,7 @@
 
         var pctNum = Number(progress && progress.percentage);
         var pct = Number.isFinite(pctNum) ? pctNum : 0;
-        var pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+
 
         // ✅ Nom du thème (fallback safe)
         var themeName = (this.getCurrentThemeName && this.getCurrentThemeName())
@@ -1137,13 +1172,14 @@
             return "";
         }
 
-        // IMPORTANT: on utilise ton CSS (anti-purge) au lieu d’inline styles
+        const audioPathSafe = this.escapeHTML(String(audioPath || ""));
+
         return (
             '\n<div class="question-audio-container mb-5">' +
             '\n  <div class="flex justify-center">' +
             '\n    <div class="tyf-audio-panel">' +
             '\n      <audio class="question-audio hidden" preload="metadata">' +
-            '\n        <source src="' + audioPath + '" type="audio/mpeg">' +
+            '\n        <source src="' + audioPathSafe + '" type="audio/mpeg">' +
             "Your browser does not support audio." +
             "\n      </audio>" +
             '\n      <button type="button" class="audio-play-btn quiz-button" aria-label="Play audio">Listen</button>' +
@@ -1153,6 +1189,7 @@
             "\n</div>"
         );
     };
+
 
 
 
@@ -1379,8 +1416,12 @@
         return this.themeIndexCache
             .map(function (theme) {
                 const id = Number(theme && theme.id);
-                const name = self.normalizeText(theme && theme.name);
-                const desc = self.normalizeText((theme && theme.description) || "");
+
+                const nameRaw = self.normalizeText(theme && theme.name);
+                const descRaw = self.normalizeText((theme && theme.description) || "");
+
+                const name = self.escapeHTML(nameRaw);
+                const desc = self.escapeHTML(descRaw);
 
                 const stateClass = self.getThemeStateClass(theme);
                 const isLocked = stateClass === "section-theme-locked";
@@ -1391,7 +1432,7 @@
 
                 // Label lisible (pas de HTML)
                 const ariaLabel =
-                    (name ? name : "Theme") +
+                    (nameRaw ? nameRaw : "Theme") +
                     (isLocked ? " (locked, opens unlock options)" : "");
 
                 // Visuel (NE PAS bloquer les events: paywall + "See roadmap" doivent rester cliquables)
@@ -1427,6 +1468,8 @@
             })
             .join("");
     };
+
+
 
     UICore.prototype.getThemeProgressDisplay = function (themeId) {
         const idNum = Number(themeId);
@@ -1699,7 +1742,10 @@
     UICore.prototype.generateUnlockRoadmapHTML = function () {
         const currentFP = this.storageManager.getFrenchPoints?.() || 0;
         const isPremium = this.storageManager.isPremiumUser?.() || false;
+
         const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
+        const stripeUrlSafe = this.escapeHTML(String(stripeUrl || ""));
+
         const themeData = this.themeIndexCache || [];
         const self = this;
 
@@ -1723,7 +1769,6 @@
             return total;
         };
 
-        // Calculer total et daysNeeded (robuste même si themeData n'est pas trié)
         const lastThemeId = (function () {
             let maxId = 10;
             for (let i = 0; i < themeData.length; i++) {
@@ -1732,33 +1777,29 @@
             }
             return maxId;
         })();
+
         const totalNeeded = getCumulativeForTheme(lastThemeId);
         const remaining = Math.max(0, totalNeeded - currentFP);
 
-        // Estimation simple: combien de jours pour gagner "remaining" FP
-        // Fallback volontairement conservateur si aucune estimation n'existe ailleurs
         const FP_PER_DAY_ESTIMATE = (window.TYF_CONFIG && Number(window.TYF_CONFIG.fpPerDayEstimate)) || 8;
         const daysNeeded = remaining > 0
             ? Math.max(1, Math.ceil(remaining / Math.max(1, FP_PER_DAY_ESTIMATE)))
             : 0;
 
-        // Générer lignes de thèmes
         let rows = '';
 
         themeData.forEach(function (theme) {
             const id = Number(theme && theme.id);
             if (!Number.isFinite(id)) return;
 
-            const isFree = id === 1; // Colors est gratuit
+            const isFree = id === 1;
             const isUnlocked = self.storageManager.isThemeUnlocked?.(id) || isFree;
             const unlockStatus = isFree ? null : (self.storageManager.canUnlockTheme?.(id) || {});
-            // Roadmap = coût fixe du thème (25/50/75/100...), pas le “next unlock cost”
             const cost = isFree ? 0 : (typeof self.storageManager.getThemeCost === "function"
                 ? self.storageManager.getThemeCost(id)
                 : null);
             const cumulative = isFree ? 0 : getCumulativeForTheme(id);
 
-            // Déterminer status et couleur
             let statusHTML = '';
             let bgColor = '';
 
@@ -1779,7 +1820,6 @@
                 bgColor = "bg-gray-100 border-gray-300";
             }
 
-            // Générer HTML de la ligne
             const safeIcon = self.escapeHTML(theme.icon || "");
             const safeName = self.escapeHTML(self.normalizeText(theme.name));
 
@@ -1796,13 +1836,11 @@
                 '</div>' +
                 '<div class="text-right">';
 
-
             if (isFree) {
                 rows += '<div class="text-sm font-bold text-green-600">FREE</div>';
             } else if (isPremium || isUnlocked) {
                 rows += '<div class="text-sm font-bold text-blue-600">Unlocked</div>';
             } else {
-                // Afficher "—" si cost inconnu (null)
                 rows += (cost === null)
                     ? '<div class="text-sm font-bold text-gray-900">—</div>'
                     : '<div class="text-sm font-bold text-gray-900">' + cost + ' FP</div>';
@@ -1812,13 +1850,11 @@
             rows += '</div></div>';
         });
 
-        // Retourner HTML complet de la modal
         return (
             '<div id="roadmap-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="roadmap-title">' +
             '<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen flex flex-col">' +
-            // HEADER
-            '<div class="sticky top-0 bg-white border-b border-gray-200 p-6 pb-4">' +
 
+            '<div class="sticky top-0 bg-white border-b border-gray-200 p-6 pb-4">' +
             '<div class="flex items-center justify-between mb-2">' +
             '<h2 id="roadmap-title" class="text-2xl font-bold text-gray-900">🗺️ How unlocking works</h2>' +
             '<button id="close-roadmap-btn" type="button" aria-label="Close roadmap" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>' +
@@ -1829,20 +1865,17 @@
             '<div class="text-sm text-gray-600 mb-3">You have <strong>' + currentFP + ' FP</strong>' +
             (isPremium ? ' • <span class="text-purple-600 font-semibold">Premium ✨</span>' : '') +
             '</div>' +
-            (isPremium || !stripeUrl ? '' :
-                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" class="quiz-button block w-full text-center mb-3">' +
+            (isPremium || !stripeUrlSafe ? '' :
+                '<a href="' + stripeUrlSafe + '" target="_blank" rel="noopener noreferrer" class="quiz-button block w-full text-center mb-3">' +
                 'Unlock all themes instantly - ' + this._getPremiumPriceHTML() +
                 '</a>'
-
             ) +
             '</div>' +
 
-            // BODY
             '<div class="flex-1 overflow-y-auto p-6 pt-4">' +
             rows +
             '</div>' +
 
-            // FOOTER
             '<div class="sticky bottom-0 bg-white border-t border-gray-200 p-6 pt-4">' +
             '<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-sm text-blue-800">' +
             (isPremium ?
@@ -1856,11 +1889,10 @@
                 )
             ) +
             '</div>' +
-            (isPremium || !stripeUrl ? '' :
-                '<a href="' + stripeUrl + '" target="_blank" rel="noopener noreferrer" ' +
+            (isPremium || !stripeUrlSafe ? '' :
+                '<a href="' + stripeUrlSafe + '" target="_blank" rel="noopener noreferrer" ' +
                 'class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors">' +
                 '🚀 Get Premium - ' + this._getPremiumPriceHTML() + '</a>'
-
             ) +
             (isPremium ? '' :
                 '<div class="text-xs text-gray-500 text-center mt-4">' +
@@ -1868,10 +1900,12 @@
                 '</div>'
             ) +
             '</div>' +
+
             '</div>' +
             '</div>'
         );
     };
+
 
 
 
@@ -2880,8 +2914,7 @@
 
 
 
-    // APRÈS
-    // These are "CEFR-flavored" but intentionally simple and motivational
+    // Single source of truth (CEFR naming)
     UICore.prototype.getCEFRLevel = function (percentage) {
         if (percentage >= 80) return "Strong range (confident in France)";
         if (percentage >= 60) return "Solid range (you will manage well)";
@@ -2903,15 +2936,13 @@
         return "bg-gray-50 border-gray-200 text-gray-800";
     };
 
-    // Compat: some parts of the UI use "CECR" naming by mistake.
+    // Backward compatibility (CECR typo in callers) - keep forever
     UICore.prototype.getCECRLevel = function (percentage) {
         return this.getCEFRLevel(percentage);
     };
-
     UICore.prototype.getCECRMessage = function (percentage) {
         return this.getCEFRMessage(percentage);
     };
-
     UICore.prototype.getCECRColorClass = function (percentage) {
         return this.getCEFRColorClass(percentage);
     };

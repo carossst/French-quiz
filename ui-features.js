@@ -113,15 +113,16 @@ UIFeatures.prototype.setupStorageEvents = function () {
     if (this._onStorageUpdated) return;
 
     this._onStorageUpdated = () => {
-        // 1) Header numbers
         try { this.updateXPHeader(); } catch { }
 
-        // 2) Chest state (opacity, aria-label) – addChestIconToHeader() is idempotent
+        // Chest UI
         try { this.addChestIconToHeader(); } catch { }
+        try { this.setupChestTooltip(); } catch { }   // ✅ rebinde quand le header vient d’être rendu
 
-        // 3) If tooltip is open, close it (avoids stale ETA text)
+        // If tooltip is open, close it (avoids stale ETA text)
         try { this._closeChestTooltip?.(); } catch { }
     };
+
 
     window.addEventListener("storage-updated", this._onStorageUpdated);
 };
