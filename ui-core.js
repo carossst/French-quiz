@@ -2134,6 +2134,74 @@
 
 
 
+    // ----------------------------------------
+    // THEME TILE EVENTS (welcome screen)
+    // ----------------------------------------
+    UICore.prototype.setupThemeClickEvents = function () {
+        const self = this;
+
+        const tiles = document.querySelectorAll('.theme-item[data-theme-id]');
+        if (!tiles || !tiles.length) return;
+
+        tiles.forEach(function (tile) {
+            // Anti-doublon
+            if (tile.dataset.themeBound === "1") return;
+            tile.dataset.themeBound = "1";
+
+            const activate = function (e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                // Si clic sur le lien "See roadmap" à l’intérieur, on laisse la délégation roadmap gérer
+                try {
+                    if (e && e.target && e.target.closest && e.target.closest('[data-action="show-roadmap"]')) {
+                        return;
+                    }
+                } catch (err) { }
+
+                const themeId = Number(tile.dataset.themeId);
+                if (!Number.isFinite(themeId)) {
+                    console.error("Invalid themeId on tile:", tile.dataset.themeId);
+                    return;
+                }
+
+                const isPremium = !!self.storageManager.isPremiumUser?.();
+                const isFree = themeId === 1;
+                const isUnlocked = isFree || isPremium || !!self.storageManager.isThemeUnlocked?.(themeId);
+
+                if (isUnlocked) {
+                    self._track("theme_opened", { source: "welcome", themeId: themeId });
+                    self.quizManager.currentThemeId = themeId;
+                    self.showQuizSelection();
+                    return;
+                }
+
+                // Locked theme: ouvrir le roadmap (prioritaire), sinon paywall
+                self._track("theme_locked_clicked", { source: "welcome", themeId: themeId });
+
+                if (typeof self.showUnlockRoadmap === "function") {
+                    self.showUnlockRoadmap();
+                    return;
+                }
+                if (self.features && typeof self.features.showPaywallModal === "function") {
+                    self.features.showPaywallModal("locked-theme-" + themeId);
+                }
+            };
+
+            tile.addEventListener("click", activate);
+
+            tile.addEventListener("keydown", function (e) {
+                const k = e && e.key;
+                if (k === "Enter" || k === " ") {
+                    activate(e);
+                }
+            });
+        });
+    };
+
+
     UICore.prototype.setupWelcomeEvents = function () {
         const self = this;
 
@@ -2154,8 +2222,6 @@
             });
         });
 
-
-
         // Returning user: stats button
         this.bindEvent("view-stats-btn", "showStatsScreen");
 
@@ -2170,7 +2236,6 @@
                 const target = e.target.closest('[data-action="show-roadmap"]');
                 if (!target) return;
 
-                // Support click + clavier (Enter/Espace) sur lien/role=button
                 const isKey = e && e.type === "keydown";
                 if (isKey) {
                     const k = e.key;
@@ -2180,29 +2245,24 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                // IMPORTANT: empêcher le tile parent (role=button) de réagir aussi
                 if (typeof self.showUnlockRoadmap === "function") {
                     self.showUnlockRoadmap();
                 }
             };
 
-
-            // Stocker la ref pour cleanup si un jour tu ajoutes destroy()
             this._roadmapDelegatedHandler = handler;
 
-            // appContainer reste stable, contrairement au HTML interne
             this.appContainer.addEventListener("click", handler);
             this.appContainer.addEventListener("keydown", handler);
-
 
             this._roadmapListenerAttached = true;
         }
 
-
         // Theme tiles
-        this.setupThemeClickEvents();
+        if (typeof this.setupThemeClickEvents === "function") {
+            this.setupThemeClickEvents();
+        }
     };
-
 
 
     UICore.prototype.setupQuizSelectionEvents = function () {
