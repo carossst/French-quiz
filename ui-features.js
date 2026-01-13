@@ -604,9 +604,10 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
 <button
   id="paywall-continue-free-btn"
   data-action="close"
-  class="paywall-continue-free">
-  ${continueFreeText}
+  class="tyf-btn-secondary w-full">
+  Continue for free
 </button>
+
 
 
     </div>
@@ -689,20 +690,15 @@ UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
     container.innerHTML = this.generateSimpleFeedback(isCorrect, question);
     container.classList.remove("hidden");
 
-    // Fix mobile layout: avoid floating feedback
-    container.classList.add(
-        "w-full",
-        "max-w-md",
-        "mx-auto",
-        "mt-6",
-        "px-3"
-    );
+    // Compact + predictable sizing (avoid class accumulation across renders)
+    container.classList.remove("w-full", "max-w-md", "mx-auto", "mt-6", "px-3");
+    container.classList.add("w-full", "max-w-md", "mx-auto", "mt-4", "px-3");
 
-    // container.classList.add("as-toast"); // Removed - feedback displays inline below question
     container.setAttribute("role", "status");
     container.setAttribute("aria-live", "polite");
     container.tabIndex = -1;
     requestAnimationFrame(() => container.focus({ preventScroll: true }));
+
 };
 
 UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
@@ -719,36 +715,32 @@ UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
 
     if (isCorrect) {
         return `
-      <div class="feedback-content correct text-center">
-        <div class="text-2xl mb-1">✅</div>
-        <div class="text-lg font-bold mb-1">Excellent!</div>
+      <div class="feedback-content correct text-center rounded-xl border border-green-200 bg-green-50 text-green-900 px-4 py-3">
+        <div class="text-xl mb-1">✅</div>
+        <div class="text-base font-bold mb-1">Correct.</div>
 
         ${safeExplanation ? `
-          <div class="mt-3 p-3 bg-white/10 rounded-lg border border-white/20">
-            <div class="flex items-start gap-2">
-              <span class="text-lg">💡</span>
-              <div class="text-left">
-                <div class="text-sm font-semibold mb-1">Did you know?</div>
-                <div class="text-sm opacity-95">${safeExplanation}</div>
-              </div>
-            </div>
+          <div class="mt-2 text-sm text-green-900/90 text-left">
+            <span class="mr-1" aria-hidden="true">💡</span>${safeExplanation}
           </div>` : ""}
       </div>`;
     }
 
     return `
-      <div class="feedback-content incorrect text-center">
-        <div class="text-2xl mb-1">✗</div>
-        <div class="text-lg font-bold mb-1">Keep learning!</div>
-        <div class="text-base opacity-95 mb-1">
+      <div class="feedback-content incorrect text-center rounded-xl border border-red-200 bg-red-50 text-red-900 px-4 py-3">
+        <div class="text-xl mb-1">✗</div>
+        <div class="text-base font-bold mb-1">Not quite.</div>
+        <div class="text-sm text-red-900/90 mb-1">
           Correct answer: <strong>${safeCorrect}</strong>
         </div>
+
         ${safeExplanation ? `
-          <div class="mt-2 text-sm opacity-90">
-            <span>💡 </span>${safeExplanation}
+          <div class="mt-2 text-sm text-red-900/90 text-left">
+            <span class="mr-1" aria-hidden="true">💡</span>${safeExplanation}
           </div>` : ""}
       </div>`;
 };
+
 
 
 

@@ -823,9 +823,10 @@
 
 
             '\n  <div id="question-container" class="space-y-4"></div>' +
-            '\n  <div id="feedback-container" class="mt-6 w-full max-w-xl mx-auto pt-6 sm:pt-2" role="status" aria-live="polite"></div>' +
+            '\n  <div id="feedback-container" class="mt-3 w-full max-w-lg mx-auto pt-2" role="status" aria-live="polite"></div>' +
 
             '\n  <div id="nav-hint" class="mt-3 text-sm text-gray-600 hidden" role="status" aria-live="polite"></div>' +
+
 
             '\n  <div class="tyf-quiz-actions">' +
             '    <button id="prev-question-btn" type="button" class="quiz-button">Previous</button>' +
@@ -2039,11 +2040,12 @@
             '\n      <div class="tyf-nudge-title">Daily goal: 1 quiz today</div>' +
             '\n      <div class="tyf-nudge-sub">One quick quiz. No pressure. Keep momentum.</div>' +
             '\n    </div>' +
-            '\n    <div class="shrink-0">' +
-            '\n      <button id="daily-goal-start-btn" type="button" class="quiz-button">Choose a quiz</button>' +
+            '\n    <div class="w-full sm:w-auto">' +
+            '\n      <button id="daily-goal-start-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">Choose a quiz</button>' +
             '\n    </div>' +
             '\n  </div>' +
             '\n</div>';
+
 
         const btn = document.getElementById("daily-goal-start-btn");
         const self = this;
@@ -2082,8 +2084,8 @@
             '<div class="tyf-nudge-title">Continue with a quick quiz</div>' +
             '<div class="tyf-nudge-sub">Pick a quiz and keep momentum.</div>' +
             '</div>' +
-            '<div class="shrink-0">' +
-            '<button id="primary-cta-continue-btn" type="button" class="quiz-button">Choose a quiz</button>' +
+            '<div class="w-full sm:w-auto">' +
+            '<button id="primary-cta-continue-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">Choose a quiz</button>' +
             '</div>' +
             '</div></div>';
 
