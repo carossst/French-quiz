@@ -839,6 +839,22 @@
        ---------------------------------------- */
     UICore.prototype.showQuizScreen = function () {
         this.showScreen("quiz", this.generateQuizHTML);
+
+        // Banner (practice mode): visible uniquement si le quiz est déjà complété
+        try {
+            const quizId = Number(this.quizManager && this.quizManager.currentQuizId);
+            const canCheck = typeof this.storageManager?.isQuizCompleted === "function";
+            const isPractice = Number.isFinite(quizId) && canCheck && !!this.storageManager.isQuizCompleted(quizId);
+
+            if (isPractice) {
+                this.setQuizBanner("info", "🔄 Practice mode: train freely. Points on first run only.");
+            } else {
+                this.clearQuizBanner();
+            }
+        } catch (e) {
+            this.clearQuizBanner();
+        }
+
         const self = this;
         setTimeout(function () {
             // Source de vérité: QuizManager démarre le timing, puis délègue le rendu à UI (UICore.renderCurrentQuestion)
@@ -863,7 +879,6 @@
 
         var pctNum = Number(progress && progress.percentage);
         var pct = Number.isFinite(pctNum) ? pctNum : 0;
-
 
         // ✅ Nom du thème (fallback safe)
         var themeName = (this.getCurrentThemeName && this.getCurrentThemeName())
@@ -895,26 +910,42 @@
 
             '\n  </div>' +
 
+            // NEW: banner (practice mode)
+            '\n  <div id="quiz-banner" class="tyf-card-soft hidden" role="status" aria-live="polite"></div>' +
 
             '\n  <div class="w-full h-2 bg-slate-200 rounded-full mb-5" aria-hidden="true">' +
             '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '" class="h-2 rounded-full transition-all"></div>' +
             '  </div>' +
-
 
             '\n  <div id="question-container" class="space-y-4"></div>' +
             '\n  <div id="feedback-container" class="mt-3 w-full max-w-lg mx-auto pt-2" role="status" aria-live="polite"></div>' +
 
             '\n  <div id="nav-hint" class="mt-3 text-sm text-gray-600 hidden" role="status" aria-live="polite"></div>' +
 
-
             '\n  <div class="tyf-quiz-actions">' +
             '    <button id="prev-question-btn" type="button">Previous</button>' +
             '    <button id="next-question-btn" type="button">Next</button>' +
-
             '  </div>' +
 
             "\n</div>"
         );
+    };
+
+
+    UICore.prototype.setQuizBanner = function (type, text) {
+        const el = document.getElementById("quiz-banner");
+        if (!el) return;
+
+        el.textContent = String(text == null ? "" : text);
+        el.classList.remove("hidden");
+    };
+
+    UICore.prototype.clearQuizBanner = function () {
+        const el = document.getElementById("quiz-banner");
+        if (!el) return;
+
+        el.textContent = "";
+        el.classList.add("hidden");
     };
 
 
@@ -1356,12 +1387,16 @@
                 indicator.classList.add("scale-100");
             }
 
-            // Source de vérité: QuizManager gère la sélection + l’auto-validation + le score.
-            // IMPORTANT: ne PAS reset questionStatus ici, ne PAS re-valider ici.
             this.quizManager.selectAnswer(index);
 
-            // Next lock/unlock
+            // Next lock/unlock (QuizManager peut valider après-coup)
             this.updateNavigationButtons();
+            setTimeout(() => {
+                try {
+                    this.updateNavigationButtons();
+                } catch (e) { }
+            }, 0);
+
 
             // Focus Next UNIQUEMENT si action clavier
             if (this._lastInputWasKeyboard) {
