@@ -2880,6 +2880,7 @@
 
 
 
+    // APRÈS
     // These are "CEFR-flavored" but intentionally simple and motivational
     UICore.prototype.getCEFRLevel = function (percentage) {
         if (percentage >= 80) return "Strong range (confident in France)";
@@ -2900,6 +2901,19 @@
         if (percentage >= 60) return "bg-blue-50 border-blue-200 text-blue-800";
         if (percentage >= 50) return "bg-orange-50 border-orange-200 text-orange-800";
         return "bg-gray-50 border-gray-200 text-gray-800";
+    };
+
+    // Compat: some parts of the UI use "CECR" naming by mistake.
+    UICore.prototype.getCECRLevel = function (percentage) {
+        return this.getCEFRLevel(percentage);
+    };
+
+    UICore.prototype.getCECRMessage = function (percentage) {
+        return this.getCEFRMessage(percentage);
+    };
+
+    UICore.prototype.getCECRColorClass = function (percentage) {
+        return this.getCEFRColorClass(percentage);
     };
 
 
