@@ -311,33 +311,36 @@ UIFeatures.prototype.addChestIconToHeader = function () {
         );
     };
 
-
     if (!this._chestHeaderHandlers) this._chestHeaderHandlers = {};
     const h = this._chestHeaderHandlers;
 
+    // 1) If previously bound to a different node, unbind it
     if (h.node && h.node !== wrapper && h.onActivate) {
         try { h.node.removeEventListener("click", h.onActivate); } catch { }
         try { delete h.node.dataset.chestBound; } catch { }
         h.node = null;
+        h.onActivate = null;
     }
 
-    if (wrapper.dataset.chestBound === "1") {
-        updateState();
-        return;
+    // 2) If already bound on THIS node, remove the old handler before rebinding
+    //    (critical fix: avoid stale handlers when addChestIconToHeader is called again)
+    if (h.node === wrapper && h.onActivate) {
+        try { wrapper.removeEventListener("click", h.onActivate); } catch { }
     }
+
+    // 3) Mark bound (do NOT early-return: we want to be able to refresh the handler safely)
     wrapper.dataset.chestBound = "1";
-
     h.node = wrapper;
 
+    // 4) Create the fresh handler
     h.onActivate = (event) => {
         const availableNow =
-            (typeof this.storageManager.isDailyRewardAvailable === "function")
+            (typeof this.storageManager?.isDailyRewardAvailable === "function")
                 ? !!this.storageManager.isDailyRewardAvailable()
                 : !!this.getChestInfo?.().available;
 
-        // Locked: mobile toggle tooltip (click reserved for collect when available)
+        // Locked: toggle tooltip (mobile) - click reserved for collect when available
         if (!availableNow) {
-            // Tooltip already initialized by initializeXPSystem()
             try { this._toggleChestTooltip?.(); } catch { }
             event.preventDefault?.();
             event.stopPropagation?.();
@@ -345,14 +348,13 @@ UIFeatures.prototype.addChestIconToHeader = function () {
             return;
         }
 
-
         if (typeof this.collectDailyReward !== "function") return;
 
         if (wrapper.dataset.collecting === "1") return;
         wrapper.dataset.collecting = "1";
 
         try {
-            // ✅ si le tooltip était ouvert (mobile), on le ferme après collecte
+            // If tooltip was open, close it after collect
             try { this._closeChestTooltip?.(); } catch { }
 
             this.collectDailyReward();
@@ -362,10 +364,12 @@ UIFeatures.prototype.addChestIconToHeader = function () {
         }
     };
 
+    // 5) Bind the fresh handler
     wrapper.addEventListener("click", h.onActivate);
+
+    // 6) Always refresh aria-label state
     updateState();
 };
-
 
 
 
@@ -721,44 +725,48 @@ UIFeatures.prototype.showQuestionFeedback = function (question, selectedIndex) {
 
 UIFeatures.prototype.generateSimpleFeedback = function (isCorrect, question) {
     const hasOptions = Array.isArray(question?.options);
-    const validIdx = Number.isInteger(question?.correctIndex) && hasOptions &&
-        question.correctIndex >= 0 && question.correctIndex < question.options.length;
+    const validIdx =
+        Number.isInteger(question?.correctIndex) &&
+        hasOptions &&
+        question.correctIndex >= 0 &&
+        question.correctIndex < question.options.length;
 
     const strip = (s) => String(s).replace(/^\s*[A-D]\s*[\.)]\s*/i, "").trim();
     const rawCorrect = validIdx ? String(question.options[question.correctIndex]) : "-";
     const safeCorrect = this.escapeHTML(strip(rawCorrect));
-    const safeExplanation = typeof question?.explanation === "string"
-        ? this.escapeHTML(question.explanation)
+
+    const safeExplanation =
+        typeof question?.explanation === "string"
+            ? this.escapeHTML(question.explanation)
+            : "";
+
+    const explanationBlock = safeExplanation
+        ? (
+            `<div class="mt-2 text-sm ${isCorrect ? "text-green-900/90" : "text-red-900/90"} text-left">` +
+            `<span class="mr-1" aria-hidden="true">💡</span>${safeExplanation}` +
+            `</div>`
+        )
         : "";
 
     if (isCorrect) {
-        return `
-      <div class="feedback-content correct text-center rounded-xl border border-green-200 bg-green-50 text-green-900 px-4 py-3">
-        <div class="text-xl mb-1">✅</div>
-        <div class="text-base font-bold mb-1">Correct.</div>
-
-        ${safeExplanation ? `
-          <div class="mt-2 text-sm text-green-900/90 text-left">
-            <span class="mr-1" aria-hidden="true">💡</span>${safeExplanation}
-          </div>` : ""}
-      </div>`;
+        return (
+            `<div class="feedback-content correct text-center rounded-xl border border-green-200 bg-green-50 text-green-900 px-4 py-3">` +
+            `<div class="text-xl mb-1">✅</div>` +
+            `<div class="text-base font-bold mb-1">Correct.</div>` +
+            explanationBlock +
+            `</div>`
+        );
     }
 
-    return `
-      <div class="feedback-content incorrect text-center rounded-xl border border-red-200 bg-red-50 text-red-900 px-4 py-3">
-        <div class="text-xl mb-1">✗</div>
-        <div class="text-base font-bold mb-1">Not quite.</div>
-        <div class="text-sm text-red-900/90 mb-1">
-          Correct answer: <strong>${safeCorrect}</strong>
-        </div>
-
-        ${safeExplanation ? `
-          <div class="mt-2 text-sm text-red-900/90 text-left">
-            <span class="mr-1" aria-hidden="true">💡</span>${safeExplanation}
-          </div>` : ""}
-      </div>`;
+    return (
+        `<div class="feedback-content incorrect text-center rounded-xl border border-red-200 bg-red-50 text-red-900 px-4 py-3">` +
+        `<div class="text-xl mb-1">✗</div>` +
+        `<div class="text-base font-bold mb-1">Not quite.</div>` +
+        `<div class="text-sm text-red-900/90 mb-1">Correct answer: <strong>${safeCorrect}</strong></div>` +
+        explanationBlock +
+        `</div>`
+    );
 };
-
 
 
 
@@ -1682,9 +1690,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
 
         tip.appendChild(tipText);
         document.body.appendChild(tip);
-
     }
-
 
     // ✅ Make trigger focusable / button-like (helps keyboard + consistent tooltip behavior)
     if (!trigger.hasAttribute("tabindex")) trigger.setAttribute("tabindex", "0");
@@ -1700,8 +1706,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
             h.node.removeEventListener("pointerleave", h.onPointerLeave);
             h.node.removeEventListener("focus", h.onFocus);
             h.node.removeEventListener("blur", h.onBlur);
-            h.node.removeEventListener("keydown", h.onKeydown); // ✅ AJOUT
-
+            h.node.removeEventListener("keydown", h.onKeydown);
             delete h.node.dataset.chestTooltipBound;
         } catch { }
 
@@ -1723,7 +1728,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
                 trigger.removeEventListener("pointerleave", h.onPointerLeave);
                 trigger.removeEventListener("focus", h.onFocus);
                 trigger.removeEventListener("blur", h.onBlur);
-                trigger.removeEventListener("keydown", h.onKeydown); // ✅ AJOUT
+                trigger.removeEventListener("keydown", h.onKeydown);
             } catch { }
 
             try {
@@ -1754,7 +1759,6 @@ UIFeatures.prototype.setupChestTooltip = function () {
         }
     };
 
-
     const buildText = () => {
         const info = this.getChestInfo();
         const label = info.points === 1 ? "French Point" : "French Points";
@@ -1766,8 +1770,6 @@ UIFeatures.prototype.setupChestTooltip = function () {
         return `🎁 One chest per calendar day.\nReward: +${info.points} ${label}.\nNo accumulation.\n${etaLine}`;
     };
 
-
-
     // ✅ Position tooltip near the trigger (fixed tooltip)
     const position = () => {
         try {
@@ -1778,7 +1780,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
             tip.style.position = "fixed";
             tip.style.transform = "translateX(-50%)";
 
-            // Measure tooltip box (must be visible or at least measurable)
+            // Measure tooltip box
             const tipRect = tip.getBoundingClientRect();
             const half = tipRect.width / 2;
 
@@ -1801,15 +1803,15 @@ UIFeatures.prototype.setupChestTooltip = function () {
         } catch { }
     };
 
-
-
-
     const open = () => {
         tipText.textContent = buildText();
 
         // Make it measurable without flashing
         tip.classList.remove("hidden");
         tip.style.visibility = "hidden";
+
+        // ✅ Force layout so getBoundingClientRect() is reliable (prevents 0 width/height first open)
+        void tip.offsetWidth;
 
         position();
 
@@ -1819,14 +1821,12 @@ UIFeatures.prototype.setupChestTooltip = function () {
         trigger.setAttribute("aria-expanded", "true");
     };
 
-
     const close = () => {
         tip.style.visibility = "";
         tip.classList.add("hidden");
         tip.setAttribute("aria-hidden", "true");
         trigger.setAttribute("aria-expanded", "false");
     };
-
 
     const toggle = () => (tip.classList.contains("hidden") ? open() : close());
 
@@ -1874,7 +1874,6 @@ UIFeatures.prototype.setupChestTooltip = function () {
     };
 
     trigger.addEventListener("keydown", h.onKeydown);
-
 
     document.addEventListener("click", h.onDocClick);
     document.addEventListener("keydown", h.onDocKeydown);
@@ -2016,12 +2015,16 @@ UIFeatures.prototype.destroy = function () {
 
     // Chest header cleanup
     const hh = this._chestHeaderHandlers;
-    if (hh?.node) {
+    if (hh && hh.node) {
         try {
             if (hh.onActivate) hh.node.removeEventListener("click", hh.onActivate);
         } catch { }
 
         try { delete hh.node.dataset.chestBound; } catch { }
+        try { hh.node.removeAttribute("aria-label"); } catch { }
+
+        hh.node = null;
+        hh.onActivate = null;
     }
     this._chestHeaderHandlers = null;
 

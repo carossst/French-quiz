@@ -350,30 +350,48 @@
 
                 var isReturningWelcome = !!document.getElementById("themes-grid");
 
-                // XP header uniquement si returning screen (themes grid present)
-                if (this.features && isReturningWelcome) {
-                    if (typeof this.features.showXPHeader === "function") {
-                        this.features.showXPHeader();
-                    }
+                // IMPORTANT:
+                // Rien dans UIFeatures ne doit pouvoir casser l'écran Welcome
+                try {
+                    // XP header uniquement si returning screen (themes grid present)
+                    if (this.features && isReturningWelcome) {
+                        if (typeof this.features.showXPHeader === "function") {
+                            this.features.showXPHeader();
+                        }
 
-                    // Après showXPHeader(): ne pas relier 2x les listeners
-                    if (!this._xpSystemInitialized) {
-                        // initializeXPSystem() doit être l’unique point d’entrée (il gère les sous-setup internes)
-                        if (typeof this.features.initializeXPSystem === "function") this.features.initializeXPSystem();
-                        this._xpSystemInitialized = true;
-                    }
+                        // Après showXPHeader(): ne pas relier 2x les listeners
+                        if (!this._xpSystemInitialized && typeof this.features.initializeXPSystem === "function") {
+                            this.features.initializeXPSystem();
+                            this._xpSystemInitialized = true;
+                        }
 
-                    if (typeof this.features.updateXPHeader === "function") {
-                        this.features.updateXPHeader();
+                        // On peut updater à chaque render (safe)
+                        if (typeof this.features.updateXPHeader === "function") {
+                            this.features.updateXPHeader();
+                        }
+
                     }
+                } catch (e) {
+                    // Non bloquant: on loggue mais on laisse l'app vivre
+                    console.error("Welcome UIFeatures failed (non-blocking):", e);
                 }
 
-                if (typeof this.renderDailyGoalNudge === "function") {
-                    this.renderDailyGoalNudge();
+                // Daily goal nudge (ne doit jamais casser l’écran)
+                try {
+                    if (typeof this.renderDailyGoalNudge === "function") {
+                        this.renderDailyGoalNudge();
+                    }
+                } catch (e) {
+                    console.error("renderDailyGoalNudge failed (non-blocking):", e);
                 }
 
-                if (typeof this.renderPrimaryCTA === "function") {
-                    this.renderPrimaryCTA();
+                // CTA principal (ne doit jamais casser l’écran)
+                try {
+                    if (typeof this.renderPrimaryCTA === "function") {
+                        this.renderPrimaryCTA();
+                    }
+                } catch (e) {
+                    console.error("renderPrimaryCTA failed (non-blocking):", e);
                 }
                 break;
 
