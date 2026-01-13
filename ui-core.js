@@ -788,6 +788,7 @@
 
 
 
+    // APRÈS
     UICore.prototype.generateQuizHTML = function () {
         const progress =
             (this.quizManager.getQuizProgress && this.quizManager.getQuizProgress()) || {
@@ -800,22 +801,36 @@
         var pct = Number.isFinite(pctNum) ? pctNum : 0;
         var pct5 = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
 
+        // ✅ Nom du thème (fallback safe)
+        var themeName = (this.getCurrentThemeName && this.getCurrentThemeName())
+            ? this.getCurrentThemeName()
+            : "themes";
+
         return (
             '\n<div class="quiz-wrapper" role="main" aria-label="Quiz screen">' +
 
             '\n  <div class="flex items-center justify-between gap-3 mb-4">' +
-            '\n    <div class="text-sm font-extrabold text-slate-700">' +
+
+            '\n    <div class="text-sm font-extrabold text-slate-700 shrink-0">' +
             '      <span id="quiz-progress-count" class="inline-flex items-center gap-2">' +
             '        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-100 border border-slate-200">' +
             '          <span id="quiz-progress-value">' + progress.current + '/' + progress.total + '</span>' +
             '        </span>' +
             '      </span>' +
             '    </div>' +
-            '\n    <div class="flex items-center gap-2">' +
-            '      <button id="go-themes-btn" type="button">' + this.getBackToThemeLabel() + '</button>' +
-            '      <button id="home-quiz-btn" type="button">Home</button>' +
+
+            // ✅ Fix layout: pas de collision, wrap autorisé dans le texte du bouton Back
+            '\n    <div class="flex items-center gap-2 flex-nowrap min-w-0">' +
+            '      <button id="go-themes-btn" type="button" class="min-w-0 text-left whitespace-normal leading-tight">' +
+            '        Back to ' + this.escapeHTML(themeName) +
+            '      </button>' +
+            '      <button id="home-quiz-btn" type="button" class="shrink-0">' +
+            '        Home' +
+            '      </button>' +
             '    </div>' +
+
             '\n  </div>' +
+
 
             '\n  <div class="w-full h-2 bg-slate-200 rounded-full mb-5" aria-hidden="true">' +
             '    <div id="quiz-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '" class="h-2 rounded-full transition-all"></div>' +
@@ -1143,15 +1158,18 @@
 
         options.forEach(function (optionEl, index) {
             optionEl.addEventListener("click", function () {
+                self._lastInputWasKeyboard = false;
                 self.selectOption(index, optionEl);
             });
 
             optionEl.addEventListener("keydown", function (e) {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
+                    self._lastInputWasKeyboard = true;
                     self.selectOption(index, optionEl);
                     return;
                 }
+
                 if (e.key === "ArrowDown" || e.key === "ArrowRight") {
                     e.preventDefault();
                     const next = options[(index + 1) % options.length];
@@ -1283,6 +1301,7 @@
                 const nextBtn = document.getElementById("next-question-btn");
                 if (nextBtn && !nextBtn.disabled) nextBtn.focus();
             }
+
 
         } catch (error) {
             console.error("Error selecting option:", error);
@@ -2877,7 +2896,6 @@
     };
 
 
-
     UICore.prototype.addClickHandler = function (elementId, handler) {
         const el = document.getElementById(elementId);
         if (!el) return;
@@ -2892,6 +2910,7 @@
             handler(e);
         });
     };
+
 
 
 
