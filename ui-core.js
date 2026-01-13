@@ -1278,9 +1278,11 @@
             // Next lock/unlock
             this.updateNavigationButtons();
 
-            // Focus sur Next uniquement si réellement débloqué
-            const nextBtn = document.getElementById("next-question-btn");
-            if (nextBtn && !nextBtn.disabled) nextBtn.focus();
+            // Focus Next UNIQUEMENT si action clavier
+            if (this._lastInputWasKeyboard) {
+                const nextBtn = document.getElementById("next-question-btn");
+                if (nextBtn && !nextBtn.disabled) nextBtn.focus();
+            }
 
         } catch (error) {
             console.error("Error selecting option:", error);
@@ -1857,18 +1859,18 @@
             '</button>' +
             '\n    </div>' +
 
-            '\n    <div class="text-center mb-8">' +
-            '\n      <div class="text-4xl mb-4">' +
+            '\n    <div class="text-center mb-5">' +
+            '\n      <div class="text-2xl mb-2">' +
             this.escapeHTML(theme.icon || "") +
             '</div>' +
-
-            '\n      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">' +
+            '\n      <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">' +
             themeNameSafe +
             '</h1>' +
-            '\n      <p class="text-lg text-gray-700">' +
+            '\n      <p class="text-sm md:text-base text-gray-700 max-w-2xl mx-auto line-clamp-2">' +
             themeDescSafe +
             '</p>' +
             '\n    </div>' +
+
 
             '\n    <div id="quizzes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="Quizzes in this theme">' +
             (quizzes.length
@@ -2876,10 +2878,13 @@
 
 
 
-    // CLICK HANDLER: simple et fiable (les écrans sont re-rendus, donc pas de doublons sur les mêmes nodes)
     UICore.prototype.addClickHandler = function (elementId, handler) {
         const el = document.getElementById(elementId);
         if (!el) return;
+
+        // Anti-doublon simple (KISS)
+        if (el.dataset.clickBound === "1") return;
+        el.dataset.clickBound = "1";
 
         el.addEventListener("click", function (e) {
             if (e && typeof e.preventDefault === "function") e.preventDefault();
