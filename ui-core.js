@@ -1110,8 +1110,19 @@
             return;
         }
 
+        // Stop any previous audio before rerender (prevents "ghost" playback)
+        try {
+            document.querySelectorAll(".question-audio").forEach(function (a) {
+                try {
+                    a.pause();
+                    a.currentTime = 0;
+                } catch (e) { }
+            });
+        } catch (e) { }
+
         questionContainer.innerHTML = this.generateQuestionHTML(question);
         this.setupQuestionEvents();
+
 
         // Re-appliquer la sélection précédente (si existante)
         const idx = this.getCurrentIndexSafe ? this.getCurrentIndexSafe() : 0;
@@ -1208,18 +1219,27 @@
         return (
             '\n<div class="question-audio-container mb-5">' +
             '\n  <div class="flex justify-center">' +
-            '\n    <div class="tyf-audio-panel">' +
-            '\n      <audio class="question-audio hidden" preload="metadata">' +
+            '\n    <div class="tyf-audio-player">' +
+            '\n      <audio class="question-audio sr-only" preload="metadata">' +
             '\n        <source src="' + audioPathSafe + '" type="audio/mpeg">' +
-            "Your browser does not support audio." +
-            "\n      </audio>" +
-            '\n      <button type="button" class="audio-play-btn quiz-button" aria-label="Play audio">Listen</button>' +
-            '\n      <span class="tyf-audio-meta">Audio</span>' +
-            "\n    </div>" +
-            "\n  </div>" +
-            "\n</div>"
+            '\n        Your browser does not support audio.' +
+            '\n      </audio>' +
+
+            '\n      <div class="tyf-audio-controls">' +
+            '\n        <button type="button" class="audio-play-btn tyf-audio-btn" data-state="idle" aria-label="Play audio">▶</button>' +
+            '\n        <button type="button" class="audio-stop-btn tyf-audio-stop" aria-label="Stop audio">Stop</button>' +
+            '\n        <span class="tyf-audio-time" aria-label="Audio time">0:00</span>' +
+            '\n      </div>' +
+
+            '\n      <div class="tyf-track" aria-hidden="true">' +
+            '\n        <div class="tyf-fill" style="width:0%"></div>' +
+            '\n      </div>' +
+            '\n    </div>' +
+            '\n  </div>' +
+            '\n</div>'
         );
     };
+
 
 
 
@@ -1279,6 +1299,9 @@
                     const prev = options[(index - 1 + options.length) % options.length];
                     if (prev) prev.focus();
                     return;
+
+
+
                 }
             });
         });
@@ -1286,85 +1309,201 @@
         const container = document.querySelector(".question-audio-container");
         if (!container) return;
 
+        // Anti-doublon: setupQuestionEvents() est rappelé à chaque render
+        if (container.dataset.audioBound === "1") return;
+        container.dataset.audioBound = "1";
+
         const audio = container.querySelector(".question-audio");
-        const btn = container.querySelector(".audio-play-btn");
-        if (!audio || !btn) return;
+        const playBtn = container.querySelector(".audio-play-btn");
+        const stopBtn = container.querySelector(".audio-stop-btn");
+        if (!audio || !playBtn) return;
+
+        // === PLAYER UI (progress + time) ===
+        const progressFill = container.querySelector(".tyf-fill");
+        const timeLabel = container.querySelector(".tyf-audio-time");
+
+        const formatTime = function (sec) {
+            if (!Number.isFinite(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60).toString().padStart(2, "0");
+            return m + ":" + s;
+        };
+
+        const updateTimeUI = function () {
+            if (!timeLabel) return;
+            const cur = audio.currentTime || 0;
+            const dur = audio.duration || 0;
+            timeLabel.textContent = formatTime(cur) + " / " + formatTime(dur);
+        };
+
+        const updateProgressUI = function () {
+            if (!progressFill || !audio.duration) return;
+            const pct = Math.min(100, Math.max(0, (audio.currentTime / audio.duration) * 100));
+            progressFill.style.width = pct + "%";
+        };
+
+
+        const setPlayBtnState = function (state) {
+            // state: "idle" | "loading" | "playing" | "ready" | "error"
+            if (state === "loading") {
+                playBtn.disabled = true;
+                playBtn.textContent = "… Loading";
+                playBtn.setAttribute("aria-busy", "true");
+                return;
+            }
+
+            playBtn.setAttribute("aria-busy", "false");
+
+            if (state === "playing") {
+                playBtn.disabled = false;
+                playBtn.textContent = "↻ Replay";
+                return;
+            }
+            if (state === "ready") {
+                playBtn.disabled = false;
+                playBtn.textContent = "▶ Play";
+                return;
+            }
+            if (state === "error") {
+                playBtn.disabled = false;
+                playBtn.textContent = "⚠ Audio error";
+                return;
+            }
+
+            // idle
+            playBtn.disabled = false;
+            playBtn.textContent = "▶ Play";
+        };
+
+
+        const stopAudio = function () {
+            try {
+                audio.pause();
+                audio.currentTime = 0;
+            } catch (e) { }
+            setPlayBtnState("ready");
+        };
 
         const playNow = function () {
-            audio.currentTime = 0;
+            try {
+                audio.currentTime = 0;
+            } catch (e) { }
+
+            updateProgressUI();
+            updateTimeUI();
+
             audio.play().then(function () {
-                btn.textContent = "Replay";
-                btn.disabled = false;
+                setPlayBtnState("playing");
+                updateProgressUI();
+                updateTimeUI();
             }).catch(function (error) {
                 console.error("Audio playback failed:", error);
+
+                // Cas courant mobile: interaction requise
                 if (error && error.name === "NotAllowedError") {
-                    btn.textContent = "Click to allow audio";
-                    btn.disabled = false;
-                } else if (error && error.name === "NotSupportedError") {
-                    btn.textContent = "Format not supported";
-                    btn.disabled = true;
-                } else if (audio.error && audio.error.code === 4) {
-                    btn.textContent = "Audio file not found";
-                    btn.disabled = true;
-                } else {
-                    btn.textContent = "Audio error - try again";
-                    btn.disabled = false;
+                    playBtn.textContent = "Tap to allow audio";
+                    playBtn.disabled = false;
+                    return;
                 }
+
+                // Format/ressource
+                if (error && error.name === "NotSupportedError") {
+                    playBtn.textContent = "Format not supported";
+                    playBtn.disabled = true;
+                    return;
+                }
+
+                if (audio.error && audio.error.code === 4) {
+                    playBtn.textContent = "Audio file not found";
+                    playBtn.disabled = true;
+                    return;
+                }
+
+                setPlayBtnState("error");
             });
         };
 
-        btn.addEventListener("click", function () {
-            btn.disabled = true;
-            btn.textContent = "Loading...";
+        playBtn.addEventListener("click", function () {
+            setPlayBtnState("loading");
 
             if (audio.readyState >= 1) {
                 playNow();
-            } else {
-                const timeoutId = setTimeout(function () {
-                    console.error("Audio loading timeout");
-                    btn.textContent = "Loading timeout";
-                    btn.disabled = false;
-                }, 10000);
+                return;
+            }
 
-                const onReady = function () {
-                    clearTimeout(timeoutId);
-                    playNow();
-                };
+            const timeoutId = setTimeout(function () {
+                console.error("Audio loading timeout");
+                playBtn.textContent = "Loading timeout";
+                playBtn.disabled = false;
+            }, 10000);
 
-                audio.addEventListener("loadedmetadata", onReady, { once: true });
-                audio.addEventListener("canplay", onReady, { once: true });
+            const onReady = function () {
+                clearTimeout(timeoutId);
+                playNow();
+            };
 
-                try {
-                    audio.load();
-                } catch (loadError) {
-                    console.error("Audio load() failed:", loadError);
-                    clearTimeout(timeoutId);
-                    btn.textContent = "Cannot load audio";
-                    btn.disabled = true;
-                }
+            audio.addEventListener("loadedmetadata", onReady, { once: true });
+            audio.addEventListener("canplay", onReady, { once: true });
+
+            try {
+                audio.load();
+            } catch (loadError) {
+                console.error("Audio load() failed:", loadError);
+                clearTimeout(timeoutId);
+                playBtn.textContent = "Cannot load audio";
+                playBtn.disabled = true;
             }
         });
 
+        if (stopBtn) {
+            stopBtn.addEventListener("click", function (e) {
+                if (e) e.preventDefault();
+                try {
+                    audio.pause();
+                    audio.currentTime = 0;
+                } catch (e) { }
+                updateProgressUI();
+                updateTimeUI();
+                setPlayBtnState("ready");
+            });
+        }
+
+
+        // Si l'audio plante pendant/avant lecture
         audio.addEventListener("error", function () {
             if (audio.error) {
                 switch (audio.error.code) {
-                    case 1: btn.textContent = "Audio loading cancelled"; break;
-                    case 2: btn.textContent = "Network error"; break;
-                    case 3: btn.textContent = "Audio format error"; break;
-                    case 4: btn.textContent = "Audio file not found"; break;
-                    default: btn.textContent = "Audio unavailable";
+                    case 1: playBtn.textContent = "Audio cancelled"; break;
+                    case 2: playBtn.textContent = "Network error"; break;
+                    case 3: playBtn.textContent = "Audio format error"; break;
+                    case 4: playBtn.textContent = "Audio file not found"; break;
+                    default: playBtn.textContent = "Audio unavailable";
                 }
             } else {
-                btn.textContent = "Audio unavailable";
+                playBtn.textContent = "Audio unavailable";
             }
-            btn.disabled = true;
+            playBtn.disabled = true;
+        });
+
+        // Si l'audio plante pendant/avant lecture
+        audio.addEventListener("loadedmetadata", function () {
+            updateTimeUI();
+            updateProgressUI();
+        });
+
+        audio.addEventListener("timeupdate", function () {
+            updateTimeUI();
+            updateProgressUI();
         });
 
         audio.addEventListener("ended", function () {
-            btn.textContent = "Replay";
-            btn.disabled = false;
+            updateProgressUI();
+            updateTimeUI();
+            setPlayBtnState("ready");
         });
+
     };
+
 
 
     UICore.prototype.selectOption = function (index, optionElement) {
@@ -1392,23 +1531,19 @@
             // Next lock/unlock (QuizManager peut valider après-coup)
             this.updateNavigationButtons();
             setTimeout(() => {
-                try {
-                    this.updateNavigationButtons();
-                } catch (e) { }
+                try { this.updateNavigationButtons(); } catch (e) { }
             }, 0);
-
 
             // Focus Next UNIQUEMENT si action clavier
             if (this._lastInputWasKeyboard) {
                 const nextBtn = document.getElementById("next-question-btn");
                 if (nextBtn && !nextBtn.disabled) nextBtn.focus();
             }
-
-
         } catch (error) {
             console.error("Error selecting option:", error);
         }
     };
+
 
 
     UICore.prototype.showQuestionFeedback = function (question, selectedIndex) {
@@ -1644,6 +1779,56 @@
         return '<div class="text-xs text-gray-500 mt-2"></div>';
     };
 
+    /* ----------------------------------------
+       ROADMAP MODAL (HTML GENERATOR)
+       ---------------------------------------- */
+    UICore.prototype.generateUnlockRoadmapHTML = function () {
+        // Prix (utilise ton helper existant)
+        var priceHTML = "";
+        try {
+            priceHTML = this._getPremiumPriceHTML ? this._getPremiumPriceHTML() : "$99 $12";
+        } catch (e) {
+            priceHTML = "$99 $12";
+        }
+
+        // KISS: une seule modale, 1 bouton close, 2 boutons "enter code"
+        return (
+            '\n<div id="roadmap-modal" class="tyf-modal-backdrop" role="dialog" aria-modal="true" aria-label="Unlock roadmap">' +
+            '\n  <div class="tyf-modal" role="document">' +
+
+            '\n    <div class="flex items-start justify-between gap-3 mb-3">' +
+            '\n      <h2 class="text-lg font-bold text-gray-900">How unlocking works</h2>' +
+            '\n      <button id="close-roadmap-btn" type="button" class="text-sm underline">Close</button>' +
+            '\n    </div>' +
+
+            '\n    <p class="text-sm text-gray-700 mb-4">Two ways to unlock themes. Pick what fits you.</p>' +
+
+            '\n    <div class="space-y-3">' +
+
+            '\n      <div class="tyf-card-soft p-4">' +
+            '\n        <div class="font-bold text-gray-900 mb-1">Option 1: Progress with French Points</div>' +
+            '\n        <div class="text-sm text-gray-700">Complete quizzes, earn French Points, unlock themes step by step.</div>' +
+            '\n        <div class="text-xs text-gray-600 mt-2">Tip: finish the previous theme to access the next one.</div>' +
+            '\n      </div>' +
+
+            '\n      <div class="tyf-card-soft p-4">' +
+            '\n        <div class="font-bold text-gray-900 mb-1">Option 2: Premium (all themes instantly)</div>' +
+            '\n        <div class="text-sm text-gray-700">One payment. No subscription. Unlock everything now.</div>' +
+            '\n        <div class="text-sm text-gray-700 mt-2"><strong>Today:</strong> ' + priceHTML + ' one-time</div>' +
+            '\n      </div>' +
+
+            '\n    </div>' +
+
+            '\n    <div class="mt-4 flex flex-col sm:flex-row gap-2">' +
+            '\n      <button id="roadmap-enter-code-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">Enter a premium code</button>' +
+            '\n      <button id="roadmap-enter-code-btn-bottom" type="button" class="text-sm underline w-full sm:w-auto">I already have a code</button>' +
+            '\n    </div>' +
+
+            '\n  </div>' +
+            '\n</div>\n'
+        );
+    };
+
 
 
     UICore.prototype.showUnlockRoadmap = function () {
@@ -1659,7 +1844,6 @@
             existing.dispatchEvent(ev);
             if (existing.parentNode) existing.parentNode.removeChild(existing);
         }
-
 
         const previousActiveElement = document.activeElement;
         const prevBodyOverflow = document.body.style.overflow;
@@ -1677,7 +1861,11 @@
         document.body.appendChild(modal);
 
         const closeBtn = modal.querySelector("#close-roadmap-btn");
+        const codeBtnTop = modal.querySelector("#roadmap-enter-code-btn");
+        const codeBtnBottom = modal.querySelector("#roadmap-enter-code-btn-bottom");
         let cleaned = false;
+
+        var self = this;
 
         var getFocusable = function () {
             return modal.querySelectorAll(
@@ -1685,26 +1873,9 @@
             );
         };
 
-        var cleanup = function () {
-            if (cleaned) return;
-            cleaned = true;
-
-            document.removeEventListener("keydown", handleEscape);
-            document.removeEventListener("keydown", handleTabTrap);
-
-            document.body.style.overflow = prevBodyOverflow || "";
-
-            try {
-                if (previousActiveElement && typeof previousActiveElement.focus === "function") {
-                    previousActiveElement.focus();
-                }
-            } catch (e) { }
-        };
-
         var handleTabTrap = function (e) {
             if (e.key !== "Tab") return;
 
-            // si le focus est sorti de la modal, on le ramène dedans
             if (!modal.contains(document.activeElement)) {
                 e.preventDefault();
                 const focusable = getFocusable();
@@ -1739,9 +1910,53 @@
         var handleEscape = function (e) {
             if (e.key === "Escape" || e.key === "Esc") {
                 cleanup();
-                modal.remove();
+                try { modal.remove(); } catch (err) { }
             }
         };
+
+        var cleanup = function () {
+            if (cleaned) return;
+            cleaned = true;
+
+            document.removeEventListener("keydown", handleEscape);
+            document.removeEventListener("keydown", handleTabTrap);
+
+            document.body.style.overflow = prevBodyOverflow || "";
+
+            try {
+                if (previousActiveElement && typeof previousActiveElement.focus === "function") {
+                    previousActiveElement.focus();
+                }
+            } catch (e) { }
+        };
+
+        var openCodeModal = function (e) {
+            if (e) e.preventDefault();
+
+            cleanup();
+            try { modal.remove(); } catch (err) { }
+
+            // Source of truth: UIFeatures instance attached to uiCore
+            if (self.features && typeof self.features.showPremiumCodeModal === "function") {
+                self.features.showPremiumCodeModal();
+                return;
+            }
+
+            // Fallback if instance is globalized elsewhere
+            if (window.uiCore && window.uiCore.features && typeof window.uiCore.features.showPremiumCodeModal === "function") {
+                window.uiCore.features.showPremiumCodeModal();
+                return;
+            }
+
+            if (typeof window.showErrorMessage === "function") {
+                window.showErrorMessage("Code entry is unavailable. Please refresh the page.");
+            } else {
+                console.error("Code entry is unavailable.");
+            }
+        };
+
+        if (codeBtnTop) codeBtnTop.addEventListener("click", openCodeModal);
+        if (codeBtnBottom) codeBtnBottom.addEventListener("click", openCodeModal);
 
         modal.addEventListener("tyf:close", cleanup, { once: true });
 
@@ -1752,9 +1967,8 @@
             closeBtn.addEventListener("click", function (e) {
                 if (e) e.preventDefault();
                 cleanup();
-                modal.remove();
+                try { modal.remove(); } catch (err) { }
             });
-
             setTimeout(function () { closeBtn.focus(); }, 100);
         } else {
             setTimeout(function () {
@@ -1768,177 +1982,9 @@
                 e.preventDefault();
                 e.stopPropagation();
                 cleanup();
-                modal.remove();
+                try { modal.remove(); } catch (err) { }
             }
         });
-    };
-
-
-    UICore.prototype.generateUnlockRoadmapHTML = function () {
-        const currentFP = this.storageManager.getFrenchPoints?.() || 0;
-        const isPremium = this.storageManager.isPremiumUser?.() || false;
-
-        const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
-        const stripeUrlSafe = this.escapeHTML(String(stripeUrl || ""));
-
-        const themeData = this.themeIndexCache || [];
-        const self = this;
-
-        // Helper local pour calculer cumulative (robuste si ids sont des strings)
-        const getCumulativeForTheme = function (targetThemeId) {
-            const targetId = Number(targetThemeId);
-            let total = 0;
-
-            for (let i = 0; i < themeData.length; i++) {
-                const t = themeData[i];
-                const id = Number(t && t.id);
-                if (!Number.isFinite(id)) continue;
-
-                if (id <= targetId && id !== 1) {
-                    const themeCost = typeof self.storageManager.getThemeCost === "function"
-                        ? self.storageManager.getThemeCost(id)
-                        : 0;
-                    total += (typeof themeCost === "number" ? themeCost : 0);
-                }
-            }
-            return total;
-        };
-
-        const lastThemeId = (function () {
-            let maxId = 10;
-            for (let i = 0; i < themeData.length; i++) {
-                const id = Number(themeData[i] && themeData[i].id);
-                if (Number.isFinite(id)) maxId = Math.max(maxId, id);
-            }
-            return maxId;
-        })();
-
-        const totalNeeded = getCumulativeForTheme(lastThemeId);
-        const remaining = Math.max(0, totalNeeded - currentFP);
-
-        const FP_PER_DAY_ESTIMATE = (window.TYF_CONFIG && Number(window.TYF_CONFIG.fpPerDayEstimate)) || 8;
-        const daysNeeded = remaining > 0
-            ? Math.max(1, Math.ceil(remaining / Math.max(1, FP_PER_DAY_ESTIMATE)))
-            : 0;
-
-        let rows = '';
-
-        themeData.forEach(function (theme) {
-            const id = Number(theme && theme.id);
-            if (!Number.isFinite(id)) return;
-
-            const isFree = id === 1;
-            const isUnlocked = self.storageManager.isThemeUnlocked?.(id) || isFree;
-            const unlockStatus = isFree ? null : (self.storageManager.canUnlockTheme?.(id) || {});
-            const cost = isFree ? 0 : (typeof self.storageManager.getThemeCost === "function"
-                ? self.storageManager.getThemeCost(id)
-                : null);
-            const cumulative = isFree ? 0 : getCumulativeForTheme(id);
-
-            let statusHTML = '';
-            let bgColor = '';
-
-            if (isFree) {
-                statusHTML = '<div class="text-xs text-green-600">✓ Always free</div>';
-                bgColor = "bg-green-50 border-green-300";
-            } else if (isPremium || isUnlocked) {
-                statusHTML = '<div class="text-xs text-blue-600">✓ Unlocked</div>';
-                bgColor = "bg-blue-50 border-blue-300";
-            } else if (unlockStatus?.reason === 'PREVIOUS_LOCKED') {
-                statusHTML = '<div class="text-xs text-gray-500">🔒 Previous theme required</div>';
-                bgColor = "bg-gray-50 border-gray-300";
-            } else if (unlockStatus?.canUnlock) {
-                statusHTML = '<div class="text-xs text-yellow-700">⬜ Ready to unlock with French Points</div>';
-                bgColor = "bg-yellow-50 border-yellow-300";
-            } else {
-                statusHTML = '<div class="text-xs text-gray-500">🔒 Locked</div>';
-                bgColor = "bg-gray-100 border-gray-300";
-            }
-
-            const safeIcon = self.escapeHTML(theme.icon || "");
-            const safeName = self.escapeHTML(self.normalizeText(theme.name));
-
-            rows +=
-                '<div class="flex items-center justify-between p-3 mb-2 border rounded-lg ' + bgColor + '">' +
-                '<div class="flex items-center gap-3">' +
-                '<div class="text-2xl">' + safeIcon + '</div>' +
-                '<div>' +
-                '<div class="font-semibold text-gray-900">' +
-                safeName +
-                '</div>' +
-                statusHTML +
-                '</div>' +
-                '</div>' +
-                '<div class="text-right">';
-
-            if (isFree) {
-                rows += '<div class="text-sm font-bold text-green-600">FREE</div>';
-            } else if (isPremium || isUnlocked) {
-                rows += '<div class="text-sm font-bold text-blue-600">Unlocked</div>';
-            } else {
-                rows += (cost === null)
-                    ? '<div class="text-sm font-bold text-gray-900">—</div>'
-                    : '<div class="text-sm font-bold text-gray-900">' + cost + ' FP</div>';
-                rows += '<div class="text-xs text-gray-500 hidden sm:block">Total: ' + cumulative + ' FP</div>';
-            }
-
-            rows += '</div></div>';
-        });
-
-        return (
-            '<div id="roadmap-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="roadmap-title">' +
-            '<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen flex flex-col">' +
-
-            '<div class="sticky top-0 bg-white border-b border-gray-200 p-6 pb-4">' +
-            '<div class="flex items-center justify-between mb-2">' +
-            '<h2 id="roadmap-title" class="text-2xl font-bold text-gray-900">🗺️ How unlocking works</h2>' +
-            '<button id="close-roadmap-btn" type="button" aria-label="Close roadmap" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>' +
-            '</div>' +
-            '<div class="text-sm text-gray-600 mt-1 mb-3">' +
-            'Unlocking keeps the quizzes meaningful and progressive. Premium gives the full diagnostic instantly.' +
-            '</div>' +
-            '<div class="text-sm text-gray-600 mb-3">You have <strong>' + currentFP + ' FP</strong>' +
-            (isPremium ? ' • <span class="text-purple-600 font-semibold">Premium ✨</span>' : '') +
-            '</div>' +
-            (isPremium || !stripeUrlSafe ? '' :
-                '<a href="' + stripeUrlSafe + '" target="_blank" rel="noopener noreferrer" class="quiz-button block w-full text-center mb-3">' +
-                'Unlock all themes instantly - ' + this._getPremiumPriceHTML() +
-                '</a>'
-            ) +
-            '</div>' +
-
-            '<div class="flex-1 overflow-y-auto p-6 pt-4">' +
-            rows +
-            '</div>' +
-
-            '<div class="sticky bottom-0 bg-white border-t border-gray-200 p-6 pt-4">' +
-            '<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-sm text-blue-800">' +
-            (isPremium ?
-                '<strong>🎉 Premium Active:</strong> All themes unlocked!' :
-                (remaining === 0 ?
-                    '<strong>✅ You have enough French Points to unlock more themes!</strong>' :
-                    '<div class="space-y-1">' +
-                    '<div><strong>Free path:</strong> Unlock all themes in ~' + daysNeeded + ' days with regular play</div>' +
-                    '<div><strong>Premium path:</strong> One-time $12 -> all themes unlocked instantly ⚡</div>' +
-                    '</div>'
-                )
-            ) +
-            '</div>' +
-            (isPremium || !stripeUrlSafe ? '' :
-                '<a href="' + stripeUrlSafe + '" target="_blank" rel="noopener noreferrer" ' +
-                'class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-center transition-colors">' +
-                '🚀 Get Premium - ' + this._getPremiumPriceHTML() + '</a>'
-            ) +
-            (isPremium ? '' :
-                '<div class="text-xs text-gray-500 text-center mt-4">' +
-                'No subscription • No pressure • Learn at your pace' +
-                '</div>'
-            ) +
-            '</div>' +
-
-            '</div>' +
-            '</div>'
-        );
     };
 
 

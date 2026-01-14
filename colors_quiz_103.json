@@ -1,21 +1,21 @@
 {
   "id": 103,
   "themeId": 1,
-  "name": "Listening Colors â€“ Quiz 3",
+  "name": "Listening Colors — Quiz 3",
   "description": "Practice listening comprehension focusing on Colors vocabulary and phrases.",
   "version": "2.2.3",
   "questions": [
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. ÃŠtre dans le bouge",
-        "B. ÃŠtre dans le rouge",
-        "C. ÃŠtre dans le noir",
-        "D. ÃŠtre dans le brouge"
+        "A. Être dans le bouge",
+        "B. Être dans le rouge",
+        "C. Être dans le noir",
+        "D. Être dans le brouge"
       ],
-      "correctAnswer": "B. ÃŠtre dans le rouge",
+      "correctAnswer": "B. Être dans le rouge",
       "audio": "TYF_Colors_3_1.mp3",
-      "explanation": "ÃŠtre dans le rouge\" literally translates to \"to be in the red\". It is a common idiom used in French-speaking countries to describe a financial situation where expenses exceed income, resulting in a negative balance or debt."
+      "explanation": "Être dans le rouge\" literally translates to \"to be in the red\". It is a common idiom used in French-speaking countries to describe a financial situation where expenses exceed income, resulting in a negative balance or debt."
     },
     {
       "question": "Listen to this. What is she saying?",
@@ -32,14 +32,14 @@
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. ÃŠtre blanc comme un neige",
-        "B. ÃŠtre blanche comme neige",
-        "C. ÃŠtre blanc comme meige",
-        "D. ÃŠtre blanc comme neige"
+        "A. Être blanc comme un neige",
+        "B. Être blanche comme neige",
+        "C. Être blanc comme meige",
+        "D. Être blanc comme neige"
       ],
-      "correctAnswer": "D. ÃŠtre blanc comme neige",
+      "correctAnswer": "D. Être blanc comme neige",
       "audio": "TYF_Colors_3_3.mp3",
-      "explanation": "ÃŠtre blanc comme neige (to be as pure as snow) means to be innocent or free from wrongdoing, often used figuratively."
+      "explanation": "Être blanc comme neige (to be as pure as snow) means to be innocent or free from wrongdoing, often used figuratively."
     },
     {
       "question": "Listen to this. What is she saying?",
@@ -56,26 +56,26 @@
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. ÃŠtre vert de rage",
-        "B. ÃŠtre blanc de rage",
-        "C. ÃŠtre green de rage",
-        "D. ÃŠtre tout en rage"
+        "A. Être vert de rage",
+        "B. Être blanc de rage",
+        "C. Être green de rage",
+        "D. Être tout en rage"
       ],
-      "correctAnswer": "A. ÃŠtre vert de rage",
+      "correctAnswer": "A. Être vert de rage",
       "audio": "TYF_Colors_3_5.mp3",
-      "explanation": "ÃŠtre vert de rage (to be livid) means \"to be green with rage,\" referring to the intense anger that can cause someone's face to turn pale or greenish."
+      "explanation": "Être vert de rage (to be livid) means \"to be green with rage,\" referring to the intense anger that can cause someone's face to turn pale or greenish."
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. ÃŠtre rouge de rhonte",
-        "B. ÃŠtre rouge des hontes",
-        "C. ÃŠtre rouge trois hontes",
-        "D. ÃŠtre rouge de honte"
+        "A. Être rouge de rhonte",
+        "B. Être rouge des hontes",
+        "C. Être rouge trois hontes",
+        "D. Être rouge de honte"
       ],
-      "correctAnswer": "D. ÃŠtre rouge de honte",
+      "correctAnswer": "D. Être rouge de honte",
       "audio": "TYF_Colors_3_6.mp3",
-      "explanation": "ÃŠtre rouge de honte (to be red with shame) describes the feeling of embarrassment or humiliation, often causing someone's face to flush red."
+      "explanation": "Être rouge de honte (to be red with shame) describes the feeling of embarrassment or humiliation, often causing someone's face to flush red."
     },
     {
       "question": "Listen to this. What is she saying?",
@@ -92,14 +92,14 @@
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. ÃŠtre blanc comme un linge",
-        "B. ÃŠtre blanc Ã  la linge",
-        "C. ÃŠtre blanc Ã  la nage",
-        "D. ÃŠtre blanc en mÃ©nage"
+        "A. Être blanc comme un linge",
+        "B. Être blanc à la linge",
+        "C. Être blanc à la nage",
+        "D. Être blanc en ménage"
       ],
-      "correctAnswer": "A. ÃŠtre blanc comme un linge",
+      "correctAnswer": "A. Être blanc comme un linge",
       "audio": "TYF_Colors_3_8.mp3",
-      "explanation": "ÃŠtre blanc comme un linge (to be as white as a sheet) describes being extremely pale or ghostly white, often due to shock or fear."
+      "explanation": "Être blanc comme un linge (to be as white as a sheet) describes being extremely pale or ghostly white, often due to shock or fear."
     },
     {
       "question": "Listen to this. What is she saying?",
@@ -111,7 +111,7 @@
       ],
       "correctAnswer": "B. Etre un cordon bleu",
       "audio": "TYF_Colors_3_9.mp3",
-      "explanation": "ÃŠtre un cordon bleu (to be a master chef) is a term used for someone who is exceptionally skilled at cooking."
+      "explanation": "Être un cordon bleu (to be a master chef) is a term used for someone who is exceptionally skilled at cooking."
     },
     {
       "question": "Listen to this. What is she saying?",

@@ -850,7 +850,15 @@
         position: fixed;
         top: 1rem;
         right: 1rem;
-        z-index: var(--z-overlay);
+        z-index: var(--z-notification);
+    }
+
+    .tyf-toast--floating {
+        pointer-events: none;
+    }
+
+    .tyf-toast--floating * {
+        pointer-events: auto;
     }
 
     /* Cartes quiz / domaines */
@@ -1508,23 +1516,125 @@
         color: #fff !important;
     }
 
-    /* Audio panel (cohérent avec cards) */
-    .tyf-audio-panel {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 0.85rem;
-        border-radius: 16px;
-        border: 1px solid rgb(226 232 240);
-        background: rgb(248 250 252);
+    /* Audio player (vrai look player) */
+    .tyf-audio-player {
+        width: min(420px, 92vw);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 0.85rem 0.95rem;
         box-shadow: var(--shadow-1);
     }
 
-    .tyf-audio-meta {
-        font-size: 0.75rem;
-        font-weight: 900;
+    .tyf-audio-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .tyf-audio-time {
+        margin-left: auto;
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+        font-weight: 800;
         color: rgb(100 116 139);
-        letter-spacing: 0.02em;
+    }
+
+    .tyf-audio-stop {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+        min-width: 32px;
+        padding: 0 0.6rem;
+
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: rgb(71 85 105);
+
+        background: rgb(241 245 249);
+        border: 1px solid rgb(226 232 240);
+        border-radius: 8px;
+
+        cursor: pointer;
+        transition: background-color 120ms ease, border-color 120ms ease;
+        text-decoration: none;
+    }
+
+    .tyf-audio-stop:hover {
+        background: rgb(226 232 240);
+        border-color: rgb(203 213 225);
+    }
+
+    .tyf-audio-stop:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .tyf-audio-stop:hover {
+            color: rgb(15 23 42);
+        }
+    }
+
+    /* Bouton play/pause: on garde ta classe unique + ses états data-state */
+    .tyf-audio-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        height: 38px;
+        min-width: 38px;
+        padding: 0 0.85rem;
+
+        border-radius: 9999px;
+        border: 1px solid rgb(226 232 240);
+        background: #ffffff;
+
+        font-weight: 900;
+        font-size: 0.9rem;
+        color: rgb(15 23 42);
+
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+        cursor: pointer;
+
+        transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .tyf-audio-btn:hover:not(:disabled) {
+            background: rgb(241 245 249);
+            border-color: rgb(203 213 225);
+        }
+
+        .tyf-audio-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+    }
+
+    .tyf-audio-btn:focus-visible {
+        outline: none;
+        border-color: rgb(var(--color-primary));
+        box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
+    }
+
+    .tyf-audio-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .tyf-audio-btn[data-state="playing"] {
+        border-color: rgba(56, 189, 248, 0.45);
+        background: rgba(56, 189, 248, 0.10);
+    }
+
+    .tyf-audio-btn[data-state="replay"] {
+        border-color: rgba(22, 163, 74, 0.40);
+        background: rgba(22, 163, 74, 0.10);
     }
 
     .tyf-question-kicker {

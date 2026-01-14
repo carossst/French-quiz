@@ -105,7 +105,19 @@ window.resourceManagerConfig = {
 // ===============================
 window.TYF_UTILS = {
     normalizeText: function (s) {
-        return String(s || "")
+        var str = String(s == null ? "" : s);
+
+        // Fix UTF-8 mojibake (ex: "ÃŠtre" -> "Être")
+        // Only run when markers appear to avoid unnecessary transforms
+        if (/[ÃÂ]/.test(str)) {
+            try {
+                str = decodeURIComponent(escape(str));
+            } catch (e) {
+                // keep original if conversion fails
+            }
+        }
+
+        return str
             .replace(/â€“|â€”|[–—]/g, "-")
             .replace(/[·•]/g, "|")
             .replace(/\u00A0/g, " ")
