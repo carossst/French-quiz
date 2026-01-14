@@ -538,39 +538,61 @@
                 ? this.getCurrentThemeName()
                 : (resultsData.themeName ? this.normalizeText(resultsData.themeName) : "This theme");
 
-        var insight = this.getResultsInsight ? this.getResultsInsight(resultsData) : "This quiz gave you a clear snapshot.";
-        var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Replay now and focus on the pattern.";
-
-        // Visibilité safe par défaut: si non-premium et themes lockés, on l'affiche.
-        // Ensuite setupResultsEvents() peut affiner (ou remplacer par next-unlock).
-        var premiumNudgeHiddenClass =
-            (!this.storageManager.isPremiumUser?.() && this._hasLockedThemes?.())
-                ? ""
-                : " hidden";
-
-
-        // Phrase signature: stable, mémorisable
-        var signatureTitle = "This is a real French diagnostic.";
-
-
-        // Support line: 1 seule idée, dépend du score
+        // One-liner synthesis (no repetition)
         var signatureSub =
-            (pct >= 80) ? "It confirms you can handle real French situations."
-                : (pct >= 60) ? "It shows a solid base. One replay will stabilize it."
-                    : (pct >= 40) ? "It reveals the pattern you need to lock in."
-                        : "It highlights exactly what blocks you. One replay will make it click.";
+            (pct >= 80) ? "Clear signal: you can handle real French situations."
+                : (pct >= 60) ? "Solid base: one replay will stabilize it."
+                    : (pct >= 40) ? "Useful signal: you found the pattern to lock in."
+                        : "Early signal: you found what blocks you. One replay will make it click.";
 
-        // Level box (kept, but avoid repeating the same low-score message)
         var levelLabel = this.getCECRLevel ? this.getCECRLevel(pct) : "Your level";
         var levelClass = this.getCECRColorClass ? this.getCECRColorClass(pct) : "bg-gray-50 border-gray-200 text-gray-800";
-
         var levelMsg = this.getCECRMessage ? this.getCECRMessage(pct) : "Keep practicing to progress.";
-        if (pct < 50) {
-            levelMsg = "This is a normal starting point with authentic French speed and nuance.";
+        if (pct < 50) levelMsg = "Normal starting point with authentic French speed and nuance.";
+
+        // Action card (single, concrete)
+        var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Replay now and focus on the pattern.";
+
+        // Reward line (best-effort, no placeholders)
+        // Goal: show LAST quiz reward if available, not total FP.
+        var lastReward = null;
+        try {
+            // Prefer an explicit getter if you add it later
+            if (typeof this.storageManager.getLastReward === "function") {
+                lastReward = this.storageManager.getLastReward();
+            } else {
+                // Fallback: look inside UI state or raw data if exposed
+                var uiState = (this.storageManager.getUIState && this.storageManager.getUIState()) || {};
+                if (uiState && uiState.lastReward) lastReward = uiState.lastReward;
+                if (!lastReward && this.storageManager.data && this.storageManager.data.lastReward) {
+                    lastReward = this.storageManager.data.lastReward;
+                }
+            }
+        } catch (e) {
+            lastReward = null;
         }
 
+        var streakDays = null;
+        try {
+            var uiState2 = (this.storageManager.getUIState && this.storageManager.getUIState()) || {};
+            var s = null;
+            if (uiState2 && uiState2.fpStats && uiState2.fpStats.streakDays != null) s = uiState2.fpStats.streakDays;
+            if (uiState2 && uiState2.currentStreak != null) s = uiState2.currentStreak;
+            streakDays = (s == null) ? null : (Number(s) || 0);
+        } catch (e) {
+            streakDays = null;
+        }
 
-        // Waitlist / Early access (mailto). If not configured, do not render.
+        var rewardBits = [];
+        // Show earned points only if the snapshot exists and is numeric
+        if (lastReward && lastReward.amount != null && Number.isFinite(Number(lastReward.amount))) {
+            rewardBits.push("+" + String(Number(lastReward.amount)) + " French Points earned");
+        }
+        if (streakDays != null && streakDays > 0) rewardBits.push("Streak: day " + String(streakDays));
+        var rewardLine = rewardBits.length ? rewardBits.join(" | ") : "";
+
+
+        // Waitlist (kept but moved to Options)
         var waitlistEmail = this._getWaitlistEmail ? this._getWaitlistEmail() : "";
         var waitlistHref = this._buildWaitlistMailto
             ? this._buildWaitlistMailto(resultsData, pct, scoreLine, levelLabel, titleTheme)
@@ -579,47 +601,140 @@
         var waitlistHTML = "";
         if (waitlistEmail && waitlistHref) {
             waitlistHTML =
-                '\n    <div class="tyf-stats-card mb-4" aria-label="Early access">' +
-                '\n      <div class="flex items-center justify-between gap-3">' +
-                '\n        <div class="text-sm text-gray-700">' +
-                '\n          <strong class="text-gray-900">Want a more precise A1/A2 diagnostic?</strong> Get early access.' +
+                '\n      <div class="tyf-stats-card" aria-label="Early access">' +
+                '\n        <div class="flex items-center justify-between gap-3">' +
+                '\n          <div class="text-sm text-gray-700">' +
+                '\n            <strong class="text-gray-900">Want a more precise A1/A2 diagnostic?</strong> Get early access.' +
+                '\n          </div>' +
+                '\n          <div class="shrink-0">' +
+                '\n            <a id="results-waitlist-link" class="text-sm underline font-semibold text-blue-700 hover:text-blue-900" href="' + this.escapeHTML(waitlistHref) + '">' +
+                '\n              Request' +
+                '\n            </a>' +
+                '\n          </div>' +
                 '\n        </div>' +
-                '\n        <div class="shrink-0">' +
-                '\n          <a id="results-waitlist-link" class="text-sm underline font-semibold text-blue-700 hover:text-blue-900" href="' + this.escapeHTML(waitlistHref) + '">' +
-                '\n            Request' +
-                '\n          </a>' +
-                '\n        </div>' +
-                '\n      </div>' +
-                '\n    </div>';
+                '\n      </div>';
         }
 
+        // Premium visibility stays secondary
+        var isPremium = false;
+        try {
+            if (typeof this.storageManager.isPremiumUser === "function") {
+                isPremium = !!this.storageManager.isPremiumUser();
+            } else if (this.storageManager.data && this.storageManager.data.isPremiumUser != null) {
+                isPremium = !!this.storageManager.data.isPremiumUser;
+            }
+        } catch (e) {
+            isPremium = false;
+        }
+
+        var hasLockedThemes = false;
+        try {
+            hasLockedThemes = (typeof this._hasLockedThemes === "function") ? !!this._hasLockedThemes() : false;
+        } catch (e) {
+            hasLockedThemes = false;
+        }
+
+        var premiumNudgeHiddenClass = (!isPremium && hasLockedThemes) ? "" : " hidden";
+
+
+        // Conversion rule (best-effort): if user can unlock next theme now, make it the primary CTA
+        var nextId = null;
+        var needed = null;
+
+        // 1) Prefer Storage (more reliable than scanning themeIndexCache)
+        try {
+            if (typeof this.storageManager.getNextUnlockableTheme === "function") {
+                var nextThemeObj = this.storageManager.getNextUnlockableTheme();
+                if (nextThemeObj && nextThemeObj.id != null) nextId = Number(nextThemeObj.id);
+            }
+            if (nextId == null && typeof this.storageManager.getFpToNextTheme === "function") {
+                var missing = Number(this.storageManager.getFpToNextTheme());
+                if (Number.isFinite(missing)) needed = Math.max(0, missing);
+            }
+        } catch (e) {
+            nextId = null;
+            needed = null;
+        }
+
+        // 2) Fallback: compute from costs if needed not known
+        try {
+            if (nextId != null && (needed == null) &&
+                (typeof this.storageManager.getFrenchPoints === "function") &&
+                (typeof this.storageManager.getThemeCost === "function")) {
+                var fpNow = Number(this.storageManager.getFrenchPoints()) || 0;
+                var cost = Number(this.storageManager.getThemeCost(nextId));
+                if (Number.isFinite(cost)) needed = Math.max(0, cost - fpNow);
+            }
+        } catch (e) {
+            // keep needed null
+        }
+
+        // 3) Last resort: scan themeIndexCache (only if nextId still unknown)
+        if (nextId == null) {
+            try {
+                var themes = (this.themeIndexCache || [])
+                    .filter(function (t) { return t && t.id != null; })
+                    .map(function (t) {
+                        var copy = {};
+                        for (var k in t) copy[k] = t[k];
+                        copy.id = Number(t.id);
+                        return copy;
+                    })
+                    .filter(function (t) { return Number.isFinite(t.id); })
+                    .sort(function (a, b) { return a.id - b.id; });
+
+                for (var i = 0; i < themes.length; i++) {
+                    var t = themes[i];
+                    if (t.id === 1) continue;
+
+                    var unlocked = (typeof this.storageManager.isThemeUnlocked === "function") ? !!this.storageManager.isThemeUnlocked(t.id) : false;
+                    var prev = themes[i - 1];
+                    var prevUnlocked = !prev
+                        ? true
+                        : (prev.id === 1 ? true : ((typeof this.storageManager.isThemeUnlocked === "function") ? !!this.storageManager.isThemeUnlocked(prev.id) : false));
+
+                    if (!unlocked && prevUnlocked) { nextId = t.id; break; }
+                }
+
+                if (nextId != null && needed == null &&
+                    (typeof this.storageManager.getFrenchPoints === "function") &&
+                    (typeof this.storageManager.getThemeCost === "function")) {
+                    var fpNow2 = Number(this.storageManager.getFrenchPoints()) || 0;
+                    var cost2 = Number(this.storageManager.getThemeCost(nextId));
+                    if (Number.isFinite(cost2)) needed = Math.max(0, cost2 - fpNow2);
+                }
+            } catch (e) {
+                nextId = null;
+                needed = null;
+            }
+        }
+
+        var primaryCTAHTML = "";
+        if (nextId != null && needed === 0) {
+            primaryCTAHTML =
+                '\n<button id="results-unlock-next-btn" type="button" class="quiz-button">Unlock next theme</button>';
+        } else {
+            primaryCTAHTML = this.generateNextActionButton(resultsData);
+        }
 
 
         return (
             '\n<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" role="main" aria-label="Results screen">' +
             '\n  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">' +
 
+            // Header nav: back to theme selection + home
             '\n    <div class="flex items-center justify-between gap-2 mb-4">' +
             '\n      <button id="back-to-theme-btn" type="button">' + this.getBackToThemeLabel() + '</button>' +
+            '\n      <button id="back-home-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">Home</button>' +
             '\n    </div>' +
 
-            '\n    <div class="text-center mb-5">' +
+            '\n    <div class="text-center mb-4">' +
             '\n      <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Results</h1>' +
             '\n      <p class="text-sm text-gray-700 mt-1">Theme: <strong>' + this.escapeHTML(titleTheme) + '</strong></p>' +
             '\n    </div>' +
 
-            // 1) Signature (remplace Honest diagnostic)
-            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Summary">' +
-            '\n      <div class="tyf-nudge-inner">' +
-            '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">' + this.escapeHTML(signatureTitle) + '</div>' +
-            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(signatureSub) + '</div>' +
-            '\n        </div>' +
-            '\n      </div>' +
-            '\n    </div>' +
-
-            // 2) Score + accuracy
-            '\n    <div class="theme-card mb-4">' +
+            // 1) RESULT (single card): score + badge + level + one line
+            '\n    <div class="theme-card mb-4" aria-label="Result summary">' +
             '\n      <div class="flex items-center justify-between gap-3">' +
             '\n        <div>' +
             '\n          <div class="text-sm text-gray-600">Result</div>' +
@@ -640,30 +755,19 @@
             '</span>' +
             '\n        </div>' +
             '\n      </div>' +
-            '\n    </div>' +
 
+            '\n      <div class="mt-3 p-3 border rounded-lg ' + levelClass + '">' +
+            '\n        <div class="font-bold text-sm">' + this.escapeHTML(levelLabel) + '</div>' +
+            '\n        <div class="text-sm mt-1">' + this.escapeHTML(levelMsg) + '</div>' +
+            '\n      </div>' +
 
-            // 3) Level
-            '\n    <div class="p-4 border rounded-lg mb-4 ' + levelClass + '">' +
-            '\n      <div class="font-bold text-base">' + this.escapeHTML(levelLabel) + '</div>' +
-            '\n      <div class="text-sm mt-1">' + this.escapeHTML(levelMsg) + '</div>' +
-            '\n    </div>' +
-
-            // NEW: waitlist / early access
-            waitlistHTML +
-
-            // 4) Insight
-            '\n    <div class="tyf-stats-card tyf-nudge mb-3" aria-label="Your key insight">' +
-            '\n      <div class="tyf-nudge-inner">' +
-            '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Your key insight</div>' +
-            '\n          <div class="tyf-nudge-sub">' + this.escapeHTML(insight) + '</div>' +
-            '\n        </div>' +
+            '\n      <div class="text-sm text-gray-700 mt-3">' +
+            '\n        <strong class="text-gray-900">Real diagnostic:</strong> ' + this.escapeHTML(signatureSub) +
             '\n      </div>' +
             '\n    </div>' +
 
-            // 5) Action immédiate
-            '\n    <div class="tyf-stats-card tyf-nudge mb-4" aria-label="Next step">' +
+            // 2) ACTION (single card) + CTA immediately after (no scroll needed)
+            '\n    <div class="tyf-stats-card tyf-nudge mb-3" aria-label="Next step">' +
             '\n      <div class="tyf-nudge-inner">' +
             '\n        <div>' +
             '\n          <div class="tyf-nudge-title">Do this now</div>' +
@@ -672,47 +776,47 @@
             '\n      </div>' +
             '\n    </div>' +
 
-            // 6) CTA principal
             '\n    <div class="flex justify-center mb-2">' +
-            this.generateNextActionButton(resultsData) +
-            '\n    </div>' +
-            '\n    <div class="text-xs text-gray-600 text-center mb-4">' +
-            (this.escapeHTML(pct >= 70 ? "Keep momentum: 2 minutes." : "One replay makes the pattern stick.")) +
+            primaryCTAHTML +
             '\n    </div>' +
 
+            (rewardLine
+                ? '\n    <div class="text-xs text-gray-600 text-center mb-3">' + this.escapeHTML(rewardLine) + '</div>'
+                : '\n    <div class="text-xs text-gray-600 text-center mb-3">' +
+                this.escapeHTML(pct >= 70 ? "Keep momentum: 2 minutes." : "One replay makes the pattern stick.") +
+                '\n    </div>') +
 
-
-            // 7) Tomorrow mantra
-            '\n    <div class="tyf-stats-card tyf-nudge mb-5" aria-label="Come back tomorrow">' +
-            '\n      <div class="tyf-nudge-inner">' +
-            '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Tomorrow</div>' +
-            '\n          <div class="tyf-nudge-sub">One quiz a day. A clearer diagnostic.</div>' +
-            '\n        </div>' +
-            '\n      </div>' +
-            '\n    </div>' +
-
-            // 8) Secondary: next unlock / premium
-            '\n    <div id="next-unlock-slot" class="mb-4"></div>' +
-
-            '\n    <div id="premium-success-nudge" class="tyf-stats-card tyf-nudge mb-4' + premiumNudgeHiddenClass + '" aria-label="Premium success nudge">' +
-            '\n      <div class="tyf-nudge-inner">' +
-            '\n        <div>' +
-            '\n          <div class="tyf-nudge-title">Unlock everything</div>' +
-            '\n          <div class="tyf-nudge-sub">Premium unlocks all themes instantly. One payment. No subscription.</div>' +
-            '\n        </div>' +
-            '\n        <div class="shrink-0">' +
-            '\n          <button id="results-premium-nudge-btn" type="button" class="text-sm underline font-semibold text-purple-700 hover:text-purple-900">' +
-            '\n            Unlock all themes - ' + this._getPremiumPriceHTML() + ' one-time' +
-            '\n          </button>' +
-            '\n        </div>' +
-            '\n      </div>' +
-            '\n    </div>' +
-
-            '\n    <div class="mt-3">' +
+            // Review mistakes stays visible but secondary (no wall of text)
+            '\n    <div class="flex justify-center mb-4">' +
             '\n      <button id="toggle-details-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">Review mistakes</button>' +
             '\n    </div>' +
 
+            // 3) OPTIONS (secondary, collapsed by default)
+            '\n    <div class="text-center mb-2">' +
+            '\n      <button id="toggle-options-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">More options</button>' +
+            '\n    </div>' +
+
+            '\n    <div id="results-options" class="hidden space-y-3">' +
+            '\n      <div id="next-unlock-slot"></div>' +
+
+            '\n      <div id="premium-success-nudge" class="tyf-stats-card tyf-nudge' + premiumNudgeHiddenClass + '" aria-label="Premium success nudge">' +
+            '\n        <div class="tyf-nudge-inner">' +
+            '\n          <div>' +
+            '\n            <div class="tyf-nudge-title">Unlock everything</div>' +
+            '\n            <div class="tyf-nudge-sub">One payment. No subscription. All themes instantly.</div>' +
+            '\n          </div>' +
+            '\n          <div class="shrink-0">' +
+            '\n            <button id="results-premium-nudge-btn" type="button" class="text-sm underline font-semibold text-purple-700 hover:text-purple-900">' +
+            '\n              Unlock all themes - ' + this._getPremiumPriceHTML() + ' one-time' +
+            '\n            </button>' +
+            '\n          </div>' +
+            '\n        </div>' +
+            '\n      </div>' +
+
+            (waitlistHTML ? waitlistHTML : "") +
+            '\n    </div>' +
+
+            // Details panel stays as-is
             '\n    <div id="secondary-actions" class="hidden mt-4 text-center">' +
             '\n      <button id="retry-quiz-btn" type="button" class="text-sm underline">Retry this quiz</button>' +
             '\n    </div>' +
@@ -725,6 +829,7 @@
             '\n</div>\n'
         );
     };
+
 
 
     /* ----------------------------------------
@@ -1806,18 +1911,13 @@
             '\n    <div class="space-y-3">' +
 
             '\n      <div class="tyf-card-soft p-4">' +
-            '\n        <div class="font-bold text-gray-900 mb-1">Option 1: Progress with French Points</div>' +
-            '\n        <div class="text-sm text-gray-700">Complete quizzes, earn French Points, unlock themes step by step.</div>' +
-            '\n        <div class="text-xs text-gray-600 mt-2">Tip: finish the previous theme to access the next one.</div>' +
-            '\n      </div>' +
-
-            '\n      <div class="tyf-card-soft p-4">' +
             '\n        <div class="font-bold text-gray-900 mb-1">Option 2: Premium (all themes instantly)</div>' +
             '\n        <div class="text-sm text-gray-700">One payment. No subscription. Unlock everything now.</div>' +
-            '\n        <div class="text-sm text-gray-700 mt-2"><strong>Today:</strong> ' + priceHTML + ' one-time</div>' +
+            '\n        <button id="roadmap-premium-pay-btn" type="button" class="text-sm underline font-semibold text-purple-700 hover:text-purple-900 mt-2">' +
+            '\n          <strong>Today:</strong> ' + priceHTML + ' one-time' +
+            '\n        </button>' +
             '\n      </div>' +
 
-            '\n    </div>' +
 
             '\n    <div class="mt-4 flex flex-col sm:flex-row gap-2">' +
             '\n      <button id="roadmap-enter-code-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">Enter a premium code</button>' +
@@ -1863,6 +1963,7 @@
         const closeBtn = modal.querySelector("#close-roadmap-btn");
         const codeBtnTop = modal.querySelector("#roadmap-enter-code-btn");
         const codeBtnBottom = modal.querySelector("#roadmap-enter-code-btn-bottom");
+        const premiumBtn = modal.querySelector("#roadmap-premium-pay-btn");
         let cleaned = false;
 
         var self = this;
@@ -1955,13 +2056,43 @@
             }
         };
 
+        var openPremiumPay = function (e) {
+            if (e) e.preventDefault();
+
+            try {
+                self._track("roadmap_premium_clicked", { source: "roadmap" });
+            } catch (err) { }
+
+            cleanup();
+            try { modal.remove(); } catch (err) { }
+
+            const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
+            if (stripeUrl) {
+                window.open(stripeUrl, "_blank", "noopener,noreferrer");
+                return;
+            }
+
+            if (self.features && typeof self.features.showPaywallModal === "function") {
+                self.features.showPaywallModal("roadmap-premium");
+                return;
+            }
+
+            if (typeof window.showErrorMessage === "function") {
+                window.showErrorMessage("Payment is unavailable. Please refresh the page.");
+            } else {
+                console.error("Payment is unavailable.");
+            }
+        };
+
         if (codeBtnTop) codeBtnTop.addEventListener("click", openCodeModal);
         if (codeBtnBottom) codeBtnBottom.addEventListener("click", openCodeModal);
+        if (premiumBtn) premiumBtn.addEventListener("click", openPremiumPay);
 
         modal.addEventListener("tyf:close", cleanup, { once: true });
 
         document.addEventListener("keydown", handleEscape);
         document.addEventListener("keydown", handleTabTrap);
+
 
         if (closeBtn) {
             closeBtn.addEventListener("click", function (e) {
@@ -2526,47 +2657,104 @@
     UICore.prototype.setupResultsEvents = function () {
         const self = this;
 
-        // 1) NAV CRITIQUE D’ABORD (doit toujours marcher)
+        // Back to theme selection (label matches action)
         this.addClickHandler("back-to-theme-btn", function () {
+            const themeId =
+                self.quizManager?.currentThemeId ||
+                Math.floor((self.quizManager?.currentQuizId || 0) / 100);
+
+            if (themeId) {
+                self.quizManager.currentThemeId = Number(themeId);
+                self.showQuizSelection();
+                return;
+            }
             self.showWelcomeScreen();
         });
 
+        // Home is explicit
+        this.addClickHandler("back-home-btn", function () {
+            self.showWelcomeScreen();
+        });
 
+        // Review mistakes (secondary)
         this.addClickHandler("toggle-details-btn", function () {
             const detailsDiv = document.getElementById("detailed-stats");
             const btn = document.getElementById("toggle-details-btn");
-            if (detailsDiv) {
-                const isHidden = detailsDiv.classList.contains("hidden");
-                detailsDiv.classList.toggle("hidden");
-                if (isHidden && !detailsDiv.dataset.loaded) {
+            if (!detailsDiv) return;
+
+            const wasHidden = detailsDiv.classList.contains("hidden");
+            detailsDiv.classList.toggle("hidden");
+
+            if (wasHidden && !detailsDiv.dataset.loaded) {
+                try {
                     self.generateDetailedReview();
                     detailsDiv.dataset.loaded = "1";
+                } catch (e) {
+                    console.error("generateDetailedReview failed:", e);
                 }
+            }
 
-                if (btn) {
-                    btn.textContent = detailsDiv.classList.contains("hidden")
-                        ? "Review mistakes"
-                        : "Hide review";
-                }
+            if (btn) {
+                btn.textContent = detailsDiv.classList.contains("hidden")
+                    ? "Review mistakes"
+                    : "Hide review";
+            }
 
-                if (!detailsDiv.classList.contains("hidden")) {
-                    const hasNext = !!document.getElementById("next-quiz-btn");
-                    const sec = document.getElementById("secondary-actions");
-                    if (sec && hasNext) sec.classList.remove("hidden");
-                }
+            // Make secondary actions visible when review is open (if present)
+            if (!detailsDiv.classList.contains("hidden")) {
+                const sec = document.getElementById("secondary-actions");
+                if (sec) sec.classList.remove("hidden");
+
+                // Best-effort focus: move focus to first actionable element inside the panel
+                setTimeout(function () {
+                    try {
+                        const focusable = detailsDiv.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+                        if (focusable) focusable.focus();
+                    } catch (e) { }
+                }, 0);
             }
         });
 
-        // 2) LE RESTE: PROTÉGÉ POUR NE PAS CASSER LES BOUTONS
+        // Options accordion
+        this.addClickHandler("toggle-options-btn", function () {
+            const box = document.getElementById("results-options");
+            const btn = document.getElementById("toggle-options-btn");
+            if (!box) return;
+
+            box.classList.toggle("hidden");
+
+            if (btn) btn.textContent = box.classList.contains("hidden") ? "More options" : "Hide options";
+
+            // Best-effort focus when opening options
+            if (!box.classList.contains("hidden")) {
+                setTimeout(function () {
+                    try {
+                        const focusable = box.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+                        if (focusable) focusable.focus();
+                    } catch (e) { }
+                }, 0);
+            }
+        });
+
         try {
+            // Primary CTA: unlock next theme (if present)
+            this.addClickHandler("results-unlock-next-btn", function () {
+                try { self._track("results_unlock_next_clicked", { source: "results" }); } catch (e) { }
+                // Themes screen lives under Welcome (returning user)
+                self.showWelcomeScreen();
+            });
+
+            // Next quiz
             this.addClickHandler("next-quiz-btn", function () {
                 const nextQuiz =
-                    self.features && self.features.getNextQuizInTheme
+                    self.features && typeof self.features.getNextQuizInTheme === "function"
                         ? self.features.getNextQuizInTheme()
                         : null;
 
                 if (nextQuiz) {
-                    self.storageManager?.markQuizStarted?.({ themeId: nextQuiz.themeId, quizId: nextQuiz.quizId });
+                    try {
+                        self.storageManager?.markQuizStarted?.({ themeId: nextQuiz.themeId, quizId: nextQuiz.quizId });
+                    } catch (e) { }
 
                     self.quizManager.loadQuiz(nextQuiz.themeId, nextQuiz.quizId).catch(function (e) {
                         console.error("Failed to load next quiz:", e);
@@ -2577,117 +2765,115 @@
                 }
             });
 
-            // 🔒 PREMIUM BUTTON: binder une fois, indépendamment de la logique d'affichage
+            // Premium (secondary)
             self.addClickHandler("results-premium-nudge-btn", function (e) {
                 if (e && typeof e.preventDefault === "function") e.preventDefault();
 
-                self._track("premium_nudge_clicked", { source: "results" });
+                try { self._track("premium_nudge_clicked", { source: "results" }); } catch (e) { }
 
                 const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
                 if (stripeUrl) {
                     window.open(stripeUrl, "_blank", "noopener,noreferrer");
                     return;
                 }
-                if (self.features?.showPaywallModal) {
+                if (self.features && typeof self.features.showPaywallModal === "function") {
                     self.features.showPaywallModal("results-success");
                 }
             });
 
-            // 🔒 PREMIUM NUDGE OU PROGRESSION (EXCLUSIF)
-            const canComputeNextUnlock =
-                (typeof self.storageManager.canUnlockTheme === "function") &&
-                (typeof self.storageManager.getFrenchPoints === "function") &&
-                (typeof self.storageManager.getThemeCost === "function");
-
-            const showPremiumOnly =
-                !self.storageManager.isPremiumUser?.() &&
-                self._hasLockedThemes?.() &&
-                !canComputeNextUnlock;
-
-            if (showPremiumOnly) {
-                const nudge = document.getElementById("premium-success-nudge");
-                if (nudge) {
-                    nudge.classList.remove("hidden");
-                    self._track("premium_nudge_visible", { source: "results" });
+            // Safe premium flags (avoid isPremiumUser?.() assumptions)
+            let isPremium = false;
+            try {
+                if (typeof self.storageManager.isPremiumUser === "function") {
+                    isPremium = !!self.storageManager.isPremiumUser();
+                } else if (self.storageManager.data && self.storageManager.data.isPremiumUser != null) {
+                    isPremium = !!self.storageManager.data.isPremiumUser;
                 }
+            } catch (e) {
+                isPremium = false;
+            }
 
-            } else {
-                // EXCLUSIF: si on entre dans la voie "next unlock", on cache le nudge premium
-                const nudge = document.getElementById("premium-success-nudge");
-                if (nudge) nudge.classList.add("hidden");
+            let hasLockedThemes = false;
+            try {
+                hasLockedThemes = (typeof self._hasLockedThemes === "function") ? !!self._hasLockedThemes() : false;
+            } catch (e) {
+                hasLockedThemes = false;
+            }
 
-                const slot = document.getElementById("next-unlock-slot");
-                if (slot) {
-                    slot.innerHTML = "";
+            // Next unlock slot (secondary) — prefer Storage helpers, fallback to nothing
+            const slot = document.getElementById("next-unlock-slot");
+            if (slot) {
+                slot.innerHTML = "";
 
-                    const canCompute =
-                        (typeof self.storageManager.canUnlockTheme === "function") &&
-                        (typeof self.storageManager.getFrenchPoints === "function") &&
-                        (typeof self.storageManager.getThemeCost === "function");
+                let nextId = null;
+                let needed = null;
 
-                    if (canCompute) {
-                        const themes = (self.themeIndexCache || [])
-                            .filter(t => t && t.id != null)
-                            .map(t => ({ ...t, id: Number(t.id) }))
-                            .filter(t => Number.isFinite(t.id))
-                            .sort((a, b) => a.id - b.id);
+                try {
+                    if (typeof self.storageManager.getNextUnlockableTheme === "function") {
+                        const nextThemeObj = self.storageManager.getNextUnlockableTheme();
+                        if (nextThemeObj && nextThemeObj.id != null) nextId = Number(nextThemeObj.id);
+                    }
+                } catch (e) { }
 
-                        let nextId = null;
-                        for (let i = 0; i < themes.length; i++) {
-                            const t = themes[i];
-                            if (t.id === 1) continue;
+                try {
+                    if (typeof self.storageManager.getFpToNextTheme === "function") {
+                        const missing = Number(self.storageManager.getFpToNextTheme());
+                        if (Number.isFinite(missing)) needed = Math.max(0, missing);
+                    }
+                } catch (e) { }
 
-                            const unlocked = !!self.storageManager.isThemeUnlocked?.(t.id);
-                            const prev = themes[i - 1];
-                            const prevUnlocked = !prev
-                                ? true
-                                : (prev.id === 1 ? true : !!self.storageManager.isThemeUnlocked?.(prev.id));
+                // If we have nextId but no needed, compute from cost/fp
+                try {
+                    if (nextId != null && needed == null &&
+                        typeof self.storageManager.getFrenchPoints === "function" &&
+                        typeof self.storageManager.getThemeCost === "function") {
+                        const fp = Number(self.storageManager.getFrenchPoints()) || 0;
+                        const cost = Number(self.storageManager.getThemeCost(nextId));
+                        if (Number.isFinite(cost)) needed = Math.max(0, cost - fp);
+                    }
+                } catch (e) { }
 
-                            if (!unlocked && prevUnlocked) {
-                                nextId = t.id;
-                                break;
-                            }
-                        }
+                if (nextId != null && needed != null) {
+                    if (needed <= 0) {
+                        slot.innerHTML =
+                            '<div class="tyf-stats-card tyf-nudge">' +
+                            '<div class="tyf-nudge-inner">' +
+                            '<div>' +
+                            '<div class="tyf-nudge-title">Ready to unlock your next theme</div>' +
+                            '<div class="tyf-nudge-sub">You have enough French Points. Go back and unlock it.</div>' +
+                            '</div>' +
+                            '<div class="shrink-0">' +
+                            '<button id="results-back-unlock-btn" type="button" class="quiz-button">Back to themes</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
 
-                        if (nextId) {
-                            const fp = Number(self.storageManager.getFrenchPoints()) || 0;
-                            const cost = Number(self.storageManager.getThemeCost(nextId));
-
-                            if (Number.isFinite(cost)) {
-                                const needed = Math.max(0, cost - fp);
-
-                                if (needed <= 0) {
-                                    slot.innerHTML =
-                                        '<div class="tyf-stats-card tyf-nudge">' +
-                                        '<div class="tyf-nudge-inner">' +
-                                        '<div>' +
-                                        '<div class="tyf-nudge-title">Ready to unlock your next theme</div>' +
-                                        '<div class="tyf-nudge-sub">You have enough French Points. Go back and unlock it.</div>' +
-                                        '</div>' +
-                                        '<div class="shrink-0">' +
-                                        '<button id="results-back-unlock-btn" type="button" class="quiz-button">Back to themes</button>' +
-                                        '</div>' +
-                                        '</div>' +
-                                        '</div>';
-
-                                    self.addClickHandler("results-back-unlock-btn", function () {
-                                        self.showWelcomeScreen();
-                                    });
-                                } else {
-                                    slot.innerHTML =
-                                        '<div class="tyf-stats-card">' +
-                                        '<div class="tyf-row">' +
-                                        '<div class="tyf-row-title">Next unlock</div>' +
-                                        '<div class="tyf-row-meta">' + needed + ' FP to go</div>' +
-                                        '</div>' +
-                                        '<div class="tyf-caption">Complete a few more quizzes, or unlock everything with Premium.</div>' +
-                                        '</div>';
-                                }
-                            }
-                        }
+                        self.addClickHandler("results-back-unlock-btn", function () {
+                            self.showWelcomeScreen();
+                        });
+                    } else {
+                        slot.innerHTML =
+                            '<div class="tyf-stats-card">' +
+                            '<div class="tyf-row">' +
+                            '<div class="tyf-row-title">Next unlock</div>' +
+                            '<div class="tyf-row-meta">' + needed + ' FP to go</div>' +
+                            '</div>' +
+                            '<div class="tyf-caption">Complete a few more quizzes to unlock your next theme.</div>' +
+                            '</div>';
                     }
                 }
             }
+
+            // Keep premium nudge visibility purely driven by HTML + locked themes
+            // (Premium stays secondary; no competing primary logic here)
+            try {
+                if (!isPremium && hasLockedThemes) {
+                    const nudge = document.getElementById("premium-success-nudge");
+                    if (nudge && !nudge.classList.contains("hidden")) {
+                        self._track("premium_nudge_visible", { source: "results" });
+                    }
+                }
+            } catch (e) { }
 
             ["retry-quiz-primary-btn", "retry-quiz-btn"].forEach(function (id) {
                 self.addClickHandler(id, function () {
@@ -2699,7 +2885,9 @@
                         return;
                     }
 
-                    self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
+                    try {
+                        self.storageManager?.markQuizStarted?.({ themeId: currentThemeId, quizId: currentQuizId });
+                    } catch (e) { }
 
                     self.quizManager.loadQuiz(currentThemeId, currentQuizId).catch(function (e) {
                         console.error("Failed to reload quiz:", e);
@@ -2710,9 +2898,10 @@
 
         } catch (e) {
             console.error("setupResultsEvents aborted (non-critical):", e);
-            // Important: on ne casse pas la nav
         }
     };
+
+
 
 
 

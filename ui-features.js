@@ -957,60 +957,48 @@ UIFeatures.prototype.handlePurchase = function () {
 
 UIFeatures.prototype.getCompletionMessage = function (percentage, fpEarned) {
     let message = "";
-    const score = Math.round(percentage * 20 / 100);
+    const pct = Number(percentage) || 0;
+    const score = Math.round(pct * 20 / 100);
     const isMobile = window.innerWidth < 640;
 
-    if (percentage >= 90) {
-        message = isMobile ? `Excellent! (${score}/20)` : `Excellent! Near-native level (${score}/20)`;
-
-        if (percentage < 100) {
+    // 1) Résultat : simple, lisible, sans marketing
+    if (pct >= 90) {
+        message = isMobile ? `Excellent! (${score}/20)` : `Excellent. Near-native level (${score}/20)`;
+        if (pct < 100) {
             message += isMobile
-                ? `\nSo close to 100%. Try once more?`
-                : `\nSo close to perfect. One more try for 100%?`;
+                ? `\nTry once more for 100%.`
+                : `\nOne more try for a perfect score.`;
         }
-    } else if (percentage >= 70) {
-        message = isMobile ? `Fantastic! (${score}/20)` : `Fantastic work! Real skills developing (${score}/20)`;
-    } else if (percentage >= 50) {
-        message = isMobile ? `Great work! (${score}/20)` : `Great work! You're building skills (${score}/20)`;
+    } else if (pct >= 70) {
+        message = isMobile ? `Very good! (${score}/20)` : `Very good. Solid progress (${score}/20)`;
+    } else if (pct >= 50) {
+        message = isMobile ? `Good job! (${score}/20)` : `Good job. Keep going (${score}/20)`;
     } else {
-        message = isMobile ? `Great start! (${score}/20)` : `Great start! Real French progress (${score}/20)`;
+        message = isMobile ? `Good start! (${score}/20)` : `Good start. This builds real listening skills (${score}/20)`;
     }
 
+    // 2) Récompense : seulement ce qui est connu
+    const earned = Number(fpEarned) || 0;
+    if (earned > 0) message += `\n+${earned} French Points earned`;
 
-    message += `\n+${fpEarned} French Points earned`;
+    // 3) Streak (optionnel) : uniquement si Storage expose une valeur fiable
+    let streakDay = null;
+    try {
+        if (typeof this.storageManager?.getStreakDay === "function") streakDay = Number(this.storageManager.getStreakDay());
+        else if (typeof this.storageManager?.getDailyStreak === "function") streakDay = Number(this.storageManager.getDailyStreak());
+    } catch { streakDay = null; }
 
-    const currentFP = Number(this.storageManager.getFrenchPoints?.() ?? 0);
-    const isPremium = (typeof this.storageManager.isPremiumUser === "function")
-        ? !!this.storageManager.isPremiumUser()
-        : false;
-
-    if (isPremium) {
-        message += `\n🚀 Premium active - unlimited learning!`;
-        message += `\n🏆 You're mastering authentic French`;
-    } else if (currentFP < 10) {
-
-        message += `\n🌟 You're building authentic skills!`;
-        const price = UIFeatures.PRICE_DISPLAY?.current || "$12";
-
-        message += isMobile
-            ? `\nLove this? All themes ${price}`
-            : `\nLove the progress? Unlock all themes instantly for ${price}`;
-
-    } else if (currentFP < 25) {
-
-        message += `\n🔥 Your French breakthrough is happening!`;
-        message += isMobile ?
-            `\n✨ Ready to accelerate? All themes $12` :
-            `\n✨ Ready to accelerate your progress? All themes $12`;
-    } else {
-        message += `\n🏆 Your dedication shows in every quiz`;
-        message += isMobile ?
-            `\n✨ Complete your journey - All themes $12` :
-            `\n✨ Complete your French journey - All themes $12`;
+    if (Number.isFinite(streakDay) && streakDay > 0) {
+        message += `\nStreak: day ${streakDay}`;
     }
+
+    // 4) Projection légère (pas de Premium ici)
+    message += isMobile ? `\nCome back tomorrow.` : `\nCome back tomorrow for your daily chest.`;
 
     return message;
 };
+
+
 
 //================================================================================
 // THEME PREVIEW MODAL
