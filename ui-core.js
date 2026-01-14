@@ -1886,6 +1886,7 @@
     /* ----------------------------------------
        ROADMAP MODAL (HTML GENERATOR)
        ---------------------------------------- */
+
     UICore.prototype.generateUnlockRoadmapHTML = function () {
         var priceHTML = "";
         try {
@@ -1906,6 +1907,13 @@
             '\n    <p class="text-sm text-gray-700 mb-4">Two ways to unlock themes. Pick what fits you.</p>' +
 
             '\n    <div class="space-y-3">' +
+
+            '\n      <div class="tyf-card-soft p-4">' +
+            '\n        <div class="font-bold text-gray-900 mb-1">Option 1: Free progression (earn French Points)</div>' +
+            '\n        <div class="text-sm text-gray-700">Play quizzes, earn French Points, and unlock themes progressively.</div>' +
+            '\n        <div class="text-xs text-gray-600 mt-2">No payment. Slower, but fully playable.</div>' +
+            '\n      </div>' +
+
             '\n      <div class="tyf-card-soft p-4">' +
             '\n        <div class="font-bold text-gray-900 mb-1">Option 2: Premium (all themes instantly)</div>' +
             '\n        <div class="text-sm text-gray-700">One payment. No subscription. Unlock everything now.</div>' +
@@ -1913,6 +1921,7 @@
             '\n          <strong>Today:</strong> ' + priceHTML + ' one-time' +
             '\n        </button>' +
             '\n      </div>' +
+
             '\n    </div>' +
 
             (function () {
@@ -1933,6 +1942,7 @@
             '\n</div>'
         );
     };
+
 
     UICore.prototype.showUnlockRoadmap = function () {
         const existing = document.getElementById("roadmap-modal");
