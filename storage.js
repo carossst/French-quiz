@@ -1,11 +1,11 @@
 // storage.js - Version 3.0
 
-// Daily reward: base + streak bonus (système calendaire depuis v3.0)
-const DAILY_REWARD_BASE = 3;
-const DAILY_STREAK_MULTIPLIER = 0.5; // FP entiers: +1 FP tous les 2 jours de streak (plafonné à +5)
-const DAILY_REWARD_STREAK_BONUS_MAX = 5;
+// Daily chest — règle simple et fixe
+const DAILY_REWARD_BASE = 1;
 
-// Bonus (désactivé par défaut) - évite ReferenceError dans collectDailyReward()
+// Désactivation totale des mécaniques annexes
+const DAILY_REWARD_STREAK_MULTIPLIER = 0;
+const DAILY_REWARD_STREAK_BONUS_MAX = 0;
 const DAILY_REWARD_BONUS_AMOUNT = 0;
 const DAILY_REWARD_BONUS_CHANCE = 0;
 
@@ -556,8 +556,7 @@ StorageManager.prototype._touchAnalyticsActiveDay = function () {
   }
 };
 
-// IMPORTANT: ne touche pas StorageManager.prototype.track existant
-StorageManager.prototype.trackAnalytics = function (name, payload) {
+StorageManager.prototype.trackAnalytics = function (name, payload, options = {}) {
   if (!name) return false;
 
   if (typeof this.ensureAnalyticsStructure === "function") {
@@ -572,7 +571,6 @@ StorageManager.prototype.trackAnalytics = function (name, payload) {
     this._touchAnalyticsActiveDay();
   }
 
-  // Incréments KISS
   if (n === "quiz_started") a.quizzesStarted += 1;
   else if (n === "quiz_completed") {
     a.quizzesCompleted += 1;
@@ -584,8 +582,14 @@ StorageManager.prototype.trackAnalytics = function (name, payload) {
   else if (n === "paywall_clicked") a.paywallClicked += 1;
   else if (n === "premium_unlocked") a.premiumUnlocked += 1;
 
+  const inTx = (typeof this.isInTransaction === "function") ? this.isInTransaction() : false;
+  if (!inTx && options.skipSave !== true) {
+    this.save();
+  }
+
   return true;
 };
+
 
 StorageManager.prototype.getAnalyticsSummary = function () {
   if (typeof this.ensureAnalyticsStructure === "function") {
@@ -957,16 +961,10 @@ StorageManager.prototype.getDailyRewardPoints = function () {
 
 // UI/Tooltip: afficher le montant réel "aujourd’hui" (base + streak bonus), sans effets de bord
 StorageManager.prototype.getTodayDailyRewardAmount = function () {
-  const streakDays = Number(this.data && this.data.fpStats && this.data.fpStats.streakDays) || 0;
-
-  const streakBonus = Math.min(
-    DAILY_REWARD_STREAK_BONUS_MAX,
-    Math.floor(streakDays * DAILY_STREAK_MULTIPLIER)
-  );
-
-  const amount = DAILY_REWARD_BASE + streakBonus;
-  return (Number.isFinite(amount) && amount > 0) ? amount : DAILY_REWARD_BASE;
+  // Règle produit: coffre simple et fixe (pas de streak)
+  return DAILY_REWARD_BASE;
 };
+
 
 
 // Calendaire local: 1 chest par jour (timezone de l'appareil)
@@ -1259,27 +1257,18 @@ StorageManager.prototype.getAvailableChests = function () {
 };
 
 
+
 StorageManager.prototype.collectDailyReward = function () {
   if (!this.isDailyRewardAvailable()) {
     return { success: false, reason: "DAILY_LOCKED", nextAt: this.getNextDailyRewardTime() };
   }
 
-  const prevTs = this.getLastDailyRewardTimestamp();
   const fpBefore = this.getFrenchPoints();
   const oldLevel = this.getUserLevel();
 
-  // Base + streak bonus (plafonné à +5) — source unique pour UI + collecte
-  let earned =
-    (typeof this.getTodayDailyRewardAmount === "function")
-      ? this.getTodayDailyRewardAmount()
-      : DAILY_REWARD_BASE;
+  // Règle fixe: 1 FP par jour, sans bonus, sans streak
+  const earned = this.getTodayDailyRewardAmount(); // ou DAILY_REWARD_BASE
 
-  if (!Number.isFinite(earned) || earned <= 0) earned = DAILY_REWARD_BASE;
-
-  // Bonus aléatoire optionnel (désactivé par défaut)
-  if (DAILY_REWARD_BONUS_AMOUNT > 0 && DAILY_REWARD_BONUS_CHANCE > 0) {
-    if (Math.random() < DAILY_REWARD_BONUS_CHANCE) earned += DAILY_REWARD_BONUS_AMOUNT;
-  }
 
   // Transaction robuste: snapshot + rollback + un seul save
   this.runInTransaction(() => {
@@ -1291,7 +1280,8 @@ StorageManager.prototype.collectDailyReward = function () {
     }
     this.data.fpStats.dailyRewardsCount = (Number(this.data.fpStats.dailyRewardsCount) || 0) + 1;
 
-    this.updateStreakDaysFromPrevious(prevTs || 0);
+    // Neutralise toute mécanique de streak côté données
+    this.data.fpStats.streakDays = 0;
   });
 
   const fpAfter = this.getFrenchPoints();
@@ -1308,7 +1298,7 @@ StorageManager.prototype.collectDailyReward = function () {
   this.dispatchFPEvent("daily-reward-collected", {
     earned: gained,
     total: fpAfter,
-    streakDays: this.data.fpStats.streakDays,
+    streakDays: 0,
     nextAt: this.getNextDailyRewardTime()
   });
 
@@ -1318,10 +1308,9 @@ StorageManager.prototype.collectDailyReward = function () {
     fpEarned: gained,
     totalFP: fpAfter,
     nextAt: this.getNextDailyRewardTime(),
-    streakDays: this.data.fpStats.streakDays
+    streakDays: 0
   };
 };
-
 
 
 
@@ -1333,35 +1322,9 @@ StorageManager.prototype.updateStreakDays = function () {
 };
 
 
-StorageManager.prototype.updateStreakDaysFromPrevious = function (previousTs) {
-  const todayKey = this._getLocalDateKey();
 
-  // Premier coffre
-  if (!previousTs) {
-    this.data.fpStats.streakDays = 1;
-    this.data.fpStats._lastDailyRewardDayKey = todayKey;
-    return;
-  }
-
-  const prevKey = this._getLocalDateKey(new Date(previousTs));
-
-  if (prevKey === todayKey) {
-    this.data.fpStats._lastDailyRewardDayKey = todayKey;
-    return;
-  }
-
-  // DST-safe: "hier" en calendrier local
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayKey = this._getLocalDateKey(yesterday);
-
-  if (prevKey === yesterdayKey) {
-    this.data.fpStats.streakDays = (Number(this.data.fpStats.streakDays) || 0) + 1;
-  } else {
-    this.data.fpStats.streakDays = 1;
-  }
-
-  this.data.fpStats._lastDailyRewardDayKey = todayKey;
+StorageManager.prototype.updateStreakDaysFromPrevious = function () {
+  return; // streak daily chest désactivé (règle produit)
 };
 
 StorageManager.prototype.getBadges = function () {
@@ -1392,15 +1355,9 @@ StorageManager.prototype.updateBadges = function (score, total, options = {}) {
     }
   }
 
-  // Streak badges - anti-clone (irregular milestones)
-  const streakMilestones = [2, 5, 9, 16, 25];
-  streakMilestones.forEach((days) => {
-    const badgeId = "streak-" + days;
-    if ((Number(this.data.fpStats?.streakDays) || 0) >= days && !this.data.badges.includes(badgeId)) {
-      newBadges.push(badgeId);
-      this.data.badges.push(badgeId);
-    }
-  });
+  // Streak badges: désactivés (règle produit: pas de streak daily chest)
+  // (On garde le code “off” volontairement pour éviter des badges fantômes.)
+
 
 
   // Pas de dispatch ici: l’event badges-earned est émis après commit (markQuizCompleted).
@@ -1501,8 +1458,9 @@ StorageManager.prototype.markQuizCompleted = function (
   const newLevel = this.getUserLevel();
 
   if (gained > 0) {
-    this.dispatchFPEvent("fp-gained", { amount: gained, reason: "quiz_completion", total: fpAfter });
+    this.dispatchFPEvent("fp-gained", { amount: gained, reason: "quiz_completed", total: fpAfter });
   }
+
   if (newLevel > oldLevel) {
     this.dispatchFPEvent("level-up", { newLevel, oldLevel });
   }
@@ -1785,11 +1743,6 @@ StorageManager.prototype.getPremiumQuizCompleted = function () {
 
 
 
-
-
-StorageManager.prototype.getPremiumQuizCompleted = function () {
-  return this.data.conversionTracking.premiumQuizCompleted || 0;
-};
 
 //================================================================================
 // ENDREGION: CONVERSION TRACKING & BUSINESS

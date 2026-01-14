@@ -101,6 +101,17 @@ window.resourceManagerConfig = {
 };
 
 // ===============================
+// TYF_WORDING – shared UI copy
+// ===============================
+window.TYF_WORDING = window.TYF_WORDING || {
+    premium: {
+        ctaEnter: "Enter a premium code",
+        ctaAlreadyHave: "I already have a code"
+    }
+};
+
+
+// ===============================
 // TYF_UTILS – shared helpers
 // ===============================
 window.TYF_UTILS = {

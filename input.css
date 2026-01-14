@@ -1296,6 +1296,9 @@
         cursor: pointer;
         box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
         transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease, opacity 120ms ease;
+
+        align-items: flex-start;
+        gap: 0.55rem;
     }
 
     #premium-unlock-btn:hover:not(:disabled) {

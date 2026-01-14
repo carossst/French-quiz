@@ -111,13 +111,20 @@
 
         <!-- Block 2: Premium CTA (separate, no layout jumps) -->
         <a href="https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03" id="premium-unlock-btn"
-          class="inline-flex items-center gap-2 whitespace-nowrap"
-          aria-label="Unlock premium access for $12. Launch price. Regular price $99.">
+          class="inline-flex items-center"
+          aria-label="Unlock premium access: $12 one-time launch price. Regular price $99.">
           <span class="text-base" aria-hidden="true">💎</span>
-          <span class="text-base">$12</span>
-          <span class="text-[11px] font-semibold opacity-90">launch</span>
-          <span class="text-[11px] line-through opacity-50">$99</span>
+
+          <span class="flex flex-col leading-tight text-left">
+            <span class="text-base font-extrabold">$12 one-time</span>
+            <span class="text-[11px] font-semibold opacity-90">
+              <span class="line-through opacity-70">$99</span> regular
+            </span>
+          </span>
         </a>
+
+
+
       </div>
     </div>
   </div>
@@ -174,19 +181,20 @@
 
   <!-- Footer - Amélioré pour mobile et accessibilité -->
   <footer class="text-xs text-gray-500 text-center py-6 mt-10">
-    <p class="mb-2 text-gray-600">
-      Written by Carole, a real French native from Paris. Not AI-generated.
-    </p>
+    <div class="mb-3 text-gray-600" data-tyf-brand="creatorLine"></div>
 
     <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
-      <a href="./privacy.html">Privacy</a>
-      <span aria-hidden="true">·</span>
-      <a href="./terms.html">Terms</a>
-      <span aria-hidden="true">·</span>
-      <a id="contact-mail" ...>Contact</a>
-      <span aria-hidden="true">·</span>
-      <span class="text-gray-400">v3.0</span>
-    </div>
+
+
+      <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
+        <a href="./privacy.html">Privacy</a>
+        <span aria-hidden="true">·</span>
+        <a href="./terms.html">Terms</a>
+        <span aria-hidden="true">·</span>
+        <a id="contact-mail" ...>Contact</a>
+        <span aria-hidden="true">·</span>
+        <span class="text-gray-400">v3.0</span>
+      </div>
   </footer>
 
 </body>

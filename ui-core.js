@@ -540,15 +540,16 @@
 
         // One-liner synthesis (no repetition)
         var signatureSub =
-            (pct >= 80) ? "Clear signal: you can handle real French situations."
-                : (pct >= 60) ? "Solid base: one replay will stabilize it."
-                    : (pct >= 40) ? "Useful signal: you found the pattern to lock in."
-                        : "Early signal: you found what blocks you. One replay will make it click.";
+            (pct >= 80) ? "You can handle real-speed French. Keep momentum."
+                : (pct >= 60) ? "One replay will stabilize your understanding."
+                    : (pct >= 40) ? "You found the pattern. Replay once to lock it in."
+                        : "This is normal. One anchor word will flip the meaning on replay.";
 
         var levelLabel = this.getCECRLevel ? this.getCECRLevel(pct) : "Your level";
         var levelClass = this.getCECRColorClass ? this.getCECRColorClass(pct) : "bg-gray-50 border-gray-200 text-gray-800";
         var levelMsg = this.getCECRMessage ? this.getCECRMessage(pct) : "Keep practicing to progress.";
-        if (pct < 50) levelMsg = "Normal starting point with authentic French speed and nuance.";
+        if (pct < 50) levelMsg = "This is normal with real-speed French. Replay once and focus on one anchor word.";
+
 
         // Action card (single, concrete)
         var action = this.getResultsAction ? this.getResultsAction(resultsData) : "Replay now and focus on the pattern.";
@@ -729,15 +730,16 @@
             '\n    </div>' +
 
             '\n    <div class="text-center mb-4">' +
-            '\n      <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Results</h1>' +
+            '\n      <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Quiz recap</h1>' +
             '\n      <p class="text-sm text-gray-700 mt-1">Theme: <strong>' + this.escapeHTML(titleTheme) + '</strong></p>' +
             '\n    </div>' +
+
 
             // 1) RESULT (single card): score + badge + level + one line
             '\n    <div class="theme-card mb-4" aria-label="Result summary">' +
             '\n      <div class="flex items-center justify-between gap-3">' +
             '\n        <div>' +
-            '\n          <div class="text-sm text-gray-600">Result</div>' +
+            '\n          <div class="text-sm text-gray-600">Score</div>' +
             '\n          <div class="text-2xl font-extrabold text-gray-900">' + this.escapeHTML(scoreLine) +
             ' <span class="text-base font-semibold text-gray-600">(' + Math.round(pct) + '%)</span></div>' +
             '\n        </div>' +
@@ -748,9 +750,9 @@
                     'bg-slate-100 text-slate-700') +
             '">' +
             (this.escapeHTML(
-                pct >= 70 ? 'Clear signal' :
-                    pct >= 40 ? 'Useful signal' :
-                        'Early signal'
+                pct >= 70 ? 'Strong result' :
+                    pct >= 40 ? 'Good diagnosis' :
+                        'Starting point'
             )) +
             '</span>' +
             '\n        </div>' +
@@ -762,10 +764,10 @@
             '\n      </div>' +
 
             '\n      <div class="text-sm text-gray-700 mt-3">' +
-            '\n        <strong class="text-gray-900">Real diagnostic:</strong> ' + this.escapeHTML(signatureSub) +
+            '\n        <strong class="text-gray-900">Takeaway:</strong> ' + this.escapeHTML(signatureSub) +
             '\n      </div>' +
-            '\n    </div>' +
 
+            '\n    </div>' +
             // 2) ACTION (single card) + CTA immediately after (no scroll needed)
             '\n    <div class="tyf-stats-card tyf-nudge mb-3" aria-label="Next step">' +
             '\n      <div class="tyf-nudge-inner">' +
@@ -791,12 +793,8 @@
             '\n      <button id="toggle-details-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">Review mistakes</button>' +
             '\n    </div>' +
 
-            // 3) OPTIONS (secondary, collapsed by default)
-            '\n    <div class="text-center mb-2">' +
-            '\n      <button id="toggle-options-btn" type="button" class="text-sm underline font-semibold text-slate-700 hover:text-slate-900">More options</button>' +
-            '\n    </div>' +
-
-            '\n    <div id="results-options" class="hidden space-y-3">' +
+            // 3) OPTIONS (always visible, no accordion)
+            '\n    <div class="mt-2 space-y-3" aria-label="Options">' +
             '\n      <div id="next-unlock-slot"></div>' +
 
             '\n      <div id="premium-success-nudge" class="tyf-stats-card tyf-nudge' + premiumNudgeHiddenClass + '" aria-label="Premium success nudge">' +
@@ -815,6 +813,7 @@
 
             (waitlistHTML ? waitlistHTML : "") +
             '\n    </div>' +
+
 
             // Details panel stays as-is
             '\n    <div id="secondary-actions" class="hidden mt-4 text-center">' +
@@ -1888,7 +1887,6 @@
        ROADMAP MODAL (HTML GENERATOR)
        ---------------------------------------- */
     UICore.prototype.generateUnlockRoadmapHTML = function () {
-        // Prix (utilise ton helper existant)
         var priceHTML = "";
         try {
             priceHTML = this._getPremiumPriceHTML ? this._getPremiumPriceHTML() : "$99 $12";
@@ -1896,7 +1894,6 @@
             priceHTML = "$99 $12";
         }
 
-        // KISS: une seule modale, 1 bouton close, 2 boutons "enter code"
         return (
             '\n<div id="roadmap-modal" class="tyf-modal-backdrop" role="dialog" aria-modal="true" aria-label="Unlock roadmap">' +
             '\n  <div class="tyf-modal" role="document">' +
@@ -1909,7 +1906,6 @@
             '\n    <p class="text-sm text-gray-700 mb-4">Two ways to unlock themes. Pick what fits you.</p>' +
 
             '\n    <div class="space-y-3">' +
-
             '\n      <div class="tyf-card-soft p-4">' +
             '\n        <div class="font-bold text-gray-900 mb-1">Option 2: Premium (all themes instantly)</div>' +
             '\n        <div class="text-sm text-gray-700">One payment. No subscription. Unlock everything now.</div>' +
@@ -1917,19 +1913,26 @@
             '\n          <strong>Today:</strong> ' + priceHTML + ' one-time' +
             '\n        </button>' +
             '\n      </div>' +
-
-
-            '\n    <div class="mt-4 flex flex-col sm:flex-row gap-2">' +
-            '\n      <button id="roadmap-enter-code-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">Enter a premium code</button>' +
-            '\n      <button id="roadmap-enter-code-btn-bottom" type="button" class="text-sm underline w-full sm:w-auto">I already have a code</button>' +
             '\n    </div>' +
 
+            (function () {
+                var wording = (window.TYF_WORDING && window.TYF_WORDING.premium) || {};
+                return (
+                    '\n    <div class="mt-4 flex flex-col sm:flex-row gap-2">' +
+                    '\n      <button id="roadmap-enter-code-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">' +
+                    (wording.ctaEnter || "Enter a premium code") +
+                    '</button>' +
+                    '\n      <button id="roadmap-enter-code-btn-bottom" type="button" class="text-sm underline w-full sm:w-auto">' +
+                    (wording.ctaAlreadyHave || "I already have a code") +
+                    '</button>' +
+                    '\n    </div>'
+                );
+            })() +
+
             '\n  </div>' +
-            '\n</div>\n'
+            '\n</div>'
         );
     };
-
-
 
     UICore.prototype.showUnlockRoadmap = function () {
         const existing = document.getElementById("roadmap-modal");
@@ -2037,13 +2040,11 @@
             cleanup();
             try { modal.remove(); } catch (err) { }
 
-            // Source of truth: UIFeatures instance attached to uiCore
             if (self.features && typeof self.features.showPremiumCodeModal === "function") {
                 self.features.showPremiumCodeModal();
                 return;
             }
 
-            // Fallback if instance is globalized elsewhere
             if (window.uiCore && window.uiCore.features && typeof window.uiCore.features.showPremiumCodeModal === "function") {
                 window.uiCore.features.showPremiumCodeModal();
                 return;
@@ -2059,14 +2060,12 @@
         var openPremiumPay = function (e) {
             if (e) e.preventDefault();
 
-            try {
-                self._track("roadmap_premium_clicked", { source: "roadmap" });
-            } catch (err) { }
+            try { self._track("roadmap_premium_clicked", { source: "roadmap" }); } catch (err) { }
 
             cleanup();
             try { modal.remove(); } catch (err) { }
 
-            const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
+            const stripeUrl = window.TYF_CONFIG && window.TYF_CONFIG.stripePaymentUrl ? window.TYF_CONFIG.stripePaymentUrl : "";
             if (stripeUrl) {
                 window.open(stripeUrl, "_blank", "noopener,noreferrer");
                 return;
@@ -2093,7 +2092,6 @@
         document.addEventListener("keydown", handleEscape);
         document.addEventListener("keydown", handleTabTrap);
 
-
         if (closeBtn) {
             closeBtn.addEventListener("click", function (e) {
                 if (e) e.preventDefault();
@@ -2117,7 +2115,6 @@
             }
         });
     };
-
 
 
 
@@ -2190,6 +2187,14 @@
 
         if (!quizzes.length) return "";
 
+        // ✅ Règle produit: si le thème est déverrouillé, tous les quiz le sont aussi
+        const themeId = Number(self.quizManager && self.quizManager.currentThemeId);
+        const isPremium = !!self.storageManager.isPremiumUser?.();
+        const themeUnlocked =
+            (Number.isFinite(themeId) && themeId === 1) ||
+            isPremium ||
+            !!self.storageManager.isThemeUnlocked?.(themeId);
+
         return quizzes
             .map(function (quiz, idx) {
                 const quizId = Number(quiz && quiz.id);
@@ -2198,14 +2203,16 @@
                 const quizNameSafe = self.escapeHTML(self.normalizeText(quiz.name || "Quiz"));
                 const quizDescSafe = self.escapeHTML(self.normalizeText(quiz.description || ""));
 
-                const isUnlocked =
-                    typeof self.storageManager.isQuizUnlocked === "function"
-                        ? self.storageManager.isQuizUnlocked(quizId)
-                        : true;
+                // ✅ Thème unlocked => quiz unlocked (court-circuit total)
+                const isUnlocked = themeUnlocked
+                    ? true
+                    : (typeof self.storageManager.isQuizUnlocked === "function"
+                        ? !!self.storageManager.isQuizUnlocked(quizId)
+                        : true);
 
                 const isCompleted =
                     typeof self.storageManager.isQuizCompleted === "function"
-                        ? self.storageManager.isQuizCompleted(quizId)
+                        ? !!self.storageManager.isQuizCompleted(quizId)
                         : false;
 
                 const classes =
@@ -2558,9 +2565,18 @@
                     return;
                 }
 
-                const unlocked =
-                    (typeof self.storageManager.isQuizUnlocked !== "function") ||
-                    self.storageManager.isQuizUnlocked(quizId);
+                // ✅ Règle produit: thème unlocked => tous les quiz unlocked
+                const themeIdNum = Number(themeId);
+                const isPremium = !!self.storageManager.isPremiumUser?.();
+                const themeUnlocked =
+                    (Number.isFinite(themeIdNum) && themeIdNum === 1) ||
+                    isPremium ||
+                    !!self.storageManager.isThemeUnlocked?.(themeIdNum);
+
+                const unlocked = themeUnlocked
+                    ? true
+                    : ((typeof self.storageManager.isQuizUnlocked !== "function") ||
+                        !!self.storageManager.isQuizUnlocked(quizId));
 
                 if (unlocked) {
                     self.storageManager?.markQuizStarted?.({ themeId: Number(themeId), quizId: quizId });
@@ -2572,6 +2588,7 @@
                 } else if (self.features && self.features.showPaywallModal) {
                     self.features.showPaywallModal("unlock-quiz-" + quizId);
                 }
+
 
             };
 
@@ -2715,26 +2732,8 @@
             }
         });
 
-        // Options accordion
-        this.addClickHandler("toggle-options-btn", function () {
-            const box = document.getElementById("results-options");
-            const btn = document.getElementById("toggle-options-btn");
-            if (!box) return;
+        /// Options are always visible now -> no toggle needed.
 
-            box.classList.toggle("hidden");
-
-            if (btn) btn.textContent = box.classList.contains("hidden") ? "More options" : "Hide options";
-
-            // Best-effort focus when opening options
-            if (!box.classList.contains("hidden")) {
-                setTimeout(function () {
-                    try {
-                        const focusable = box.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
-                        if (focusable) focusable.focus();
-                    } catch (e) { }
-                }, 0);
-            }
-        });
 
         try {
             // Primary CTA: unlock next theme (if present)
@@ -3186,18 +3185,19 @@
 
     // Single source of truth (CEFR naming)
     UICore.prototype.getCEFRLevel = function (percentage) {
-        if (percentage >= 80) return "Strong range (confident in France)";
-        if (percentage >= 60) return "Solid range (you will manage well)";
-        if (percentage >= 50) return "Growing range (on your way)";
-        return "Discovery range (good starting point)";
+        if (percentage >= 80) return "Confident (real-life French)";
+        if (percentage >= 60) return "Solid (daily situations)";
+        if (percentage >= 50) return "Building (needs one replay)";
+        return "Baseline (good place to start)";
     };
 
     UICore.prototype.getCEFRMessage = function (percentage) {
-        if (percentage >= 80) return "You handle authentic daily French very well.";
-        if (percentage >= 60) return "You can deal with most everyday situations in French.";
-        if (percentage >= 50) return "You are starting to grasp real-life French patterns.";
-        return "Authentic French is challenging. Keep testing to progress step by step.";
+        if (percentage >= 80) return "You can handle real-life French with speed and nuance.";
+        if (percentage >= 60) return "You manage most everyday situations. One replay improves stability.";
+        if (percentage >= 50) return "You are building the right patterns. Replay once and lock in one key word.";
+        return "Real-speed French is tough at first. Replay once and focus on one anchor word.";
     };
+
 
     UICore.prototype.getCEFRColorClass = function (percentage) {
         if (percentage >= 80) return "bg-green-50 border-green-200 text-green-800";
