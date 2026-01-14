@@ -16,6 +16,15 @@ window.TYF_CONFIG = {
     // Stripe Checkout - achat tous thèmes
     stripePaymentUrl: "https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03",
 
+    // Waitlist / Early access (A1/A2 etc.) - ultra simple (mailto)
+    // Tu reçois les demandes dans ta boîte, réponse manuelle au début.
+    waitlist: {
+        enabled: true,
+        toEmail: "bonjour@testyourfrench.com",
+        subjectPrefix: "[TYF Early Access]",
+        topicLabel: "A1/A2-specific diagnostic"
+    },
+
     // Mode debug uniquement en local
     debug: {
         enabled: isLocalhost,
@@ -33,6 +42,41 @@ window.TYF_CONFIG = {
         }
     }
 };
+
+// ===============================
+// TYF_BRAND – shared product claims
+// ===============================
+window.TYF_BRAND = window.TYF_BRAND || {
+    creatorLine: "Created by Carole, a real French native from Paris. Includes native French audio. Not AI-generated."
+};
+
+// Auto-inject brand lines into static pages (index.html, success.html, etc.)
+(function () {
+    function applyBrandText() {
+        try {
+            var brand = window.TYF_BRAND || {};
+            var text = String(brand.creatorLine || "").trim();
+            if (!text) return;
+
+            var nodes = document.querySelectorAll('[data-tyf-brand="creatorLine"]');
+            if (!nodes || !nodes.length) return;
+
+            nodes.forEach(function (el) {
+                if (!el) return;
+                el.textContent = text;
+            });
+        } catch (e) {
+            // silent
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyBrandText);
+    } else {
+        applyBrandText();
+    }
+})();
+
 
 // Configuration ResourceManager
 window.resourceManagerConfig = {
