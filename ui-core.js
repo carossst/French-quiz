@@ -914,9 +914,9 @@
             '\n        <span class="text-2xl">✨</span>' +
             '\n      </div>' +
             '\n      <div class="text-sm text-gray-700 space-y-1">' +
-            '\n        <p><strong class="text-purple-700">Quizzes</strong> -> earn French Points</p>' +
-            '\n        <p><strong class="text-purple-700">Unlock</strong> -> access new themes (or go Premium)</p>' +
-            '\n        <p><strong class="text-purple-700">Progress</strong> -> see your level history</p>' +
+            '\n        <p><strong class="text-gray-900">Quizzes</strong> -> earn French Points</p>' +
+            '\n        <p><strong class="text-gray-900">Unlock</strong> -> access new themes (or go Premium)</p>' +
+            '\n        <p><strong class="text-gray-900">Progress</strong> -> see your level history</p>' +
             '\n      </div>' +
             '\n    </div>' +
 

@@ -921,16 +921,22 @@ UIFeatures.prototype.collectDailyReward = function () {
     if (result && result.success) {
         this._lastDailyRewardAtCache = Date.now();
 
-        const amount = Number(
-            result.earned ?? result.fpEarned ?? result.pointsEarned ?? 0
-        );
+        // Fermer tooltip (évite texte "Available now" qui reste affiché)
+        try { this._closeChestTooltip?.(); } catch { }
+
+        const amount = Number(result.earned ?? result.fpEarned ?? result.pointsEarned ?? 0);
 
         if (amount > 0) this.showDailyRewardAnimation(amount);
+
+        // Refresh header + état aria + handlers
         try { this.updateXPHeader(); } catch { }
+        try { this.addChestIconToHeader(); } catch { }
+        try { this.setupChestTooltip(); } catch { }
     }
 
     return result;
 };
+
 
 
 //================================================================================
@@ -1632,8 +1638,9 @@ UIFeatures.prototype.getChestInfo = function () {
     const points = Number(
         (typeof this.storageManager?.getTodayDailyRewardAmount === "function")
             ? this.storageManager.getTodayDailyRewardAmount()
-            : this.storageManager?.getDailyRewardPoints?.()
+            : 1
     ) || 1;
+
 
     // Source of truth: StorageManager (calendar-based)
     const available = (typeof this.storageManager?.isDailyRewardAvailable === "function")

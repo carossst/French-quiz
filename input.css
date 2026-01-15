@@ -1083,13 +1083,9 @@
         border-color: rgb(239, 68, 68) !important;
         color: rgb(153, 27, 27) !important;
         font-weight: 850 !important;
-
         box-shadow: 0 3px 0 rgba(15, 23, 42, 0.10);
     }
 
-    /* =========================
-       BUTTONS (KISS + no conflict)
-       ========================= */
     /* =========================
        BUTTONS (KISS + no conflict)
        ========================= */
@@ -1849,10 +1845,33 @@
 
     /* État erreur (optionnel) */
     .tyf-input-error {
-        border-color: rgb(var(--color-danger));
+        border-color: rgb(var(--color-danger)) !important;
+        background: rgb(var(--color-danger) / 0.06) !important;
         box-shadow: 0 0 0 4px rgb(var(--color-danger) / 0.14) !important;
     }
 
+    /* Focus global: visible par défaut */
+    :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible {
+        outline: 2px solid rgb(var(--color-primary));
+        outline-offset: 2px;
+    }
+
+    /* IMPORTANT: éviter le double focus (outline + ring) sur tes inputs designés */
+    :is(#premium-code-input, #user-email, #user-firstname):focus-visible {
+        outline: none;
+    }
+
+    /* Bonus UX discret */
+    :is(#premium-code-input, #user-email, #user-firstname) {
+        caret-color: rgb(var(--color-primary));
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        :is(#premium-code-input, #user-email, #user-firstname):hover:not(:disabled) {
+            border-color: rgb(203 213 225);
+            background: #ffffff;
+        }
+    }
 
     /* Accessibilité */
     .skip-link {
@@ -1874,12 +1893,6 @@
         width: auto;
         height: auto;
         text-decoration: none;
-    }
-
-    /* Focus global: visible par défaut */
-    :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible {
-        outline: 2px solid rgb(var(--color-primary));
-        outline-offset: 2px;
     }
 
     /* Les composants qui ont déjà un focus “box-shadow” suppriment l’outline */
