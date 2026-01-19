@@ -23,15 +23,15 @@
   <meta property="og:title" content="Test Your French - Interactive French Learning">
   <meta property="og:description"
     content="Test Your French with interactive quizzes! Free Colors theme + premium content. Privacy-first learning with gamification.">
-  <meta property="og:url" content="https://carossst.github.io/French-quiz/">
+  <meta property="og:url" content="https://app.testyourfrench.com/">
   <meta property="og:site_name" content="Test Your French">
-  <meta property="og:image" content="https://carossst.github.io/French-quiz/icons/icon-192x192.png">
+  <meta property="og:image" content="https://app.testyourfrench.com/icons/icon-512x512.png">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Test Your French - Authentic Daily French Quizzes">
   <meta name="twitter:description" content="Discover your real French level with authentic daily French quizzes.">
-  <meta name="twitter:image" content="https://carossst.github.io/French-quiz/icons/icon-192x192.png">
+  <meta name="twitter:image" content="https://app.testyourfrench.com/icons/icon-512x512.png">
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
@@ -46,29 +46,27 @@
       "price": "12.00",
       "priceCurrency": "USD"
     },
-    "url": "https://carossst.github.io/French-quiz/",
+    "url": "https://app.testyourfrench.com/",
     "description": "Test your real French level with authentic, daily French quizzes.",
     "inLanguage": "en"
   }
   </script>
 
   <!-- Icons & manifest -->
-  <link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="./icons/icon-48x48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="./icons/icon-96x96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192x192.png">
-  <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
-  <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
+  <link rel="apple-touch-icon" href="/icons/icon-180x180.png">
+
+
 
   <!-- Preconnect pour Stripe (performance) -->
   <link rel="preconnect" href="https://buy.stripe.com" crossorigin>
   <link rel="preconnect" href="https://js.stripe.com" crossorigin>
 
   <!-- Styles -->
-  <link rel="preload" href="./style.css" as="style">
-  <link rel="stylesheet" href="./style.css">
-
+  <link rel="preload" href="/style.css" as="style">
+  <link rel="stylesheet" href="/style.css">
 
   <!-- CSP - Amélioré pour meilleure sécurité -->
   <meta http-equiv="Content-Security-Policy"
@@ -76,8 +74,25 @@
 </head>
 
 <body>
+
+  <!-- Fallback sans JavaScript -->
+  <noscript>
+    <div class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50"
+      style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;">
+      <div class="text-center max-w-md mx-auto px-4">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">JavaScript Required</h2>
+        <p class="text-gray-600 mb-6">
+          Test Your French requires JavaScript to run.
+          Please enable JavaScript in your browser settings and reload this page.
+        </p>
+      </div>
+    </div>
+  </noscript>
+
   <!-- Skip link pour accessibilité -->
   <a href="#app-container" class="skip-link">Skip to main content</a>
+
 
   <!-- Header XP compact avec meilleur espacement et hiérarchie -->
   <div id="xp-header" class="py-2 bg-gray-50 border-b border-gray-200">
@@ -101,7 +116,6 @@
               🎁
             </button>
 
-
             <div id="daily-chest-tooltip" class="tyf-tooltip-panel hidden" role="tooltip" aria-hidden="true">
               <div class="font-semibold mb-1">Daily chest</div>
               <div id="daily-chest-tooltip-text"></div>
@@ -123,13 +137,9 @@
           </span>
         </a>
 
-
-
       </div>
     </div>
   </div>
-
-
 
   <!-- H1 pour SEO et accessibilité (invisible visuellement) -->
   <h1 class="sr-only">Test Your French - Interactive French Learning</h1>
@@ -145,58 +155,41 @@
     class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
     aria-live="polite"></div>
 
-  <!-- Fallback sans JavaScript -->
-  <noscript>
-    <div class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
-      <div class="text-center max-w-md mx-auto px-4">
-        <div class="text-6xl mb-4">⚠️</div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">JavaScript Required</h2>
-        <p class="text-gray-600 mb-6">
-          This app needs JavaScript to run. Open this page in Chrome/Safari and reload.
-          If you use an ad blocker or strict privacy mode, disable it for this site and reload.
-        </p>
 
-      </div>
-    </div>
-  </noscript>
 
   <!-- Scripts -->
-  <script src="./config.js" defer></script>
-  <script src="./storage.js" defer></script>
-  <script src="./resourceManager.js" defer></script>
-  <script src="./quizManager.js" defer></script>
-  <script src="./ui-core.js" defer></script>
-  <script src="./ui-features.js" defer></script>
-  <script src="./ui-charts.js" defer></script>
-  <script src="./email.js" defer></script>
-  <script src="./main.js" defer></script>
+  <script src="/config.js" defer></script>
+  <script src="/storage.js" defer></script>
+  <script src="/resourceManager.js" defer></script>
+  <script src="/quizManager.js" defer></script>
+  <script src="/ui-core.js" defer></script>
+  <script src="/ui-features.js" defer></script>
+  <script src="/ui-charts.js" defer></script>
+  <script src="/email.js" defer></script>
+  <script src="/main.js" defer></script>
 
+  <footer class="text-xs leading-relaxed text-gray-500 text-center py-6 mt-10">
 
-
-
-  <!-- Fallback JS bloqué / erreur -->
-  <!-- supprimé : écran #js-failed (fallback non implémenté, code mort) -->
-
-
-
-  <!-- Footer - Amélioré pour mobile et accessibilité -->
-  <footer class="text-xs text-gray-500 text-center py-6 mt-10">
     <div class="mb-3 text-gray-600" data-tyf-brand="creatorLine"></div>
 
     <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
+      <a href="/privacy.html">Privacy</a>
+      <span aria-hidden="true">·</span>
+      <a href="/terms.html">Terms</a>
+      <span aria-hidden="true">·</span>
+
+      <!-- Contact (email obfusqué, injecté par /email.js) -->
+      <a id="contact-mail-footer" href="#" data-user="bonjour" data-domain="testyourfrench.com">Contact</a>
 
 
-      <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
-        <a href="./privacy.html">Privacy</a>
-        <span aria-hidden="true">·</span>
-        <a href="./terms.html">Terms</a>
-        <span aria-hidden="true">·</span>
-        <a id="contact-mail" ...>Contact</a>
-        <span aria-hidden="true">·</span>
-        <span class="text-gray-400">v3.0</span>
-      </div>
+      <span aria-hidden="true">·</span>
+      <span class="text-gray-400">v3.0</span>
+    </div>
   </footer>
 
+
 </body>
+
+
 
 </html>

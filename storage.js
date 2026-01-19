@@ -1856,6 +1856,16 @@ StorageManager.prototype.getUIState = function () {
   // Calculer UNE fois pour éviter les effets de bord temporels
   const dailyAvailable = this.isDailyRewardAvailable();
 
+  // NEW: dernière activité quiz (ISO) -> clé locale YYYY-MM-DD
+  const lastQuizIso = this.data?.globalStats?.lastQuizDate;
+  let lastActiveDate = null;
+  if (typeof lastQuizIso === "string" && lastQuizIso) {
+    const ts = Date.parse(lastQuizIso);
+    if (Number.isFinite(ts)) {
+      lastActiveDate = this._getLocalDateKey(new Date(ts));
+    }
+  }
+
   return {
     frenchPoints: this.data.frenchPoints,
     level: levelProgress.level,
@@ -1863,8 +1873,13 @@ StorageManager.prototype.getUIState = function () {
     isPremium: this.isPremiumUser(),
     completedQuizzes: completedQuizzes,
     completedThemes: this.getCompletedThemesCount(),
+
+    // NEW: consommé par UICore.renderDailyGoalNudge
+    lastActiveDate: lastActiveDate,
+
+
     currentStreak: Number(this.data.fpStats?.streakDays) || 0,
-    bestStreak: 0, // ou supprime la ligne si l’UI peut
+    bestStreak: 0,
     accuracy: this.getGlobalAccuracy(),
     badges: this.data.badges.length,
     dailyReward: {

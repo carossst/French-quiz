@@ -1,0 +1,129 @@
+{
+    "id": 903,
+    "themeId": 9,
+    "name": "Listening boulangerie – Quiz 3",
+    "description": "Practice listening comprehension focusing on boulangerie vocabulary.",
+    "version": "2.2.3",
+    "questions": [
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bonjour, une baguette tradition s'il vous plait ?",
+                "B. Bonjour, deux baguettes tradition ?",
+                "C. Bonjour, une baguette s'il vous plait ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Bonjour, une baguette tradition s'il vous plait ?",
+            "audio": "TYF_Boulangerie_3_1.mp3",
+            "explanation": "Hello, can I have a traditional baguette please? (formal)"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bien cuite ?",
+                "B. Pas cuite ?",
+                "C. Trop cuite ?",
+                "D. Bonne cuite ?"
+            ],
+            "correctAnswer": "A. Bien cuite ?",
+            "audio": "TYF_Boulangerie_3_2.mp3",
+            "explanation": "Well done?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Pas trop cuite s'il vous plait.",
+                "B. Non trop cuite s'il vous plait.",
+                "C. Non toute cuite s'il vous plait.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Pas trop cuite s'il vous plait.",
+            "audio": "TYF_Boulangerie_3_3.mp3",
+            "explanation": "Not too cooked, please."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Ce sera tout ?",
+                "B. Voilà. Ce sera toute ?",
+                "C. Voilà. Ce sera tout ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. Voilà. Ce sera tout ?",
+            "audio": "TYF_Boulangerie_3_4.mp3",
+            "explanation": "Here it is. Will that be all?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. J'aimerais acheter une sandwich s'il vous plait.",
+                "B. J'aimerais aussi acheter un sandwich s'il vous plait.",
+                "C. J'aimerai aussi acheter le sandwich s'il vous plait.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. J'aimerais aussi acheter un sandwich s'il vous plait.",
+            "audio": "TYF_Boulangerie_3_5.mp3",
+            "explanation": "I'd also like to buy a sandwich, please."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. D'accord. Je te chauffe ?",
+                "B. D'accord. Je vous le chauffe ?",
+                "C. D'accord. Je vous chauffe ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "B. D'accord. Je vous le chauffe ?",
+            "audio": "TYF_Boulangerie_3_6.mp3",
+            "explanation": "All right. Shall I heat it for you?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Non ça ira. Merci. Et un chausson aux pommes s'il vous plait ?",
+                "B. Oui. Merci. Et un chausson aux pommes s'il vous plait ?",
+                "C. Non ça n'ira pas. Merci. Et un chausson aux pommes s'il vous plait ?",
+                "D. All of the above"
+            ],
+            "correctAnswer": "A. Non ça ira. Merci. Et un chausson aux pommes s'il vous plait ?",
+            "audio": "TYF_Boulangerie_3_7.mp3",
+            "explanation": "No, that's all right. Thank you. And an apple turnover as well, please?"
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. On en a plus. J'ai vendu il y a 5 minutes.",
+                "B. On n'en a plus. J'ai vendu le dernier il y a 5 minutes.",
+                "C. On en a encore. Je vous vends le dernier dans 5 minutes.",
+                "D. On n'en a plus. J'ai vendu il y a 5 minutes."
+            ],
+            "correctAnswer": "B. On n'en a plus. J'ai vendu le dernier il y a 5 minutes.",
+            "audio": "TYF_Boulangerie_3_8.mp3",
+            "explanation": "We're all out. I sold the last one 5 minutes ago."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Bon ce sera alors. Merci.",
+                "B. Bon vous serez tout alors. Merci.",
+                "C. Bon on sera toute alors. Merci.",
+                "D. Bon ce sera tout alors. Merci."
+            ],
+            "correctAnswer": "D. Bon ce sera tout alors. Merci.",
+            "audio": "TYF_Boulangerie_3_9.mp3",
+            "explanation": "That'll be all, then. Thank you."
+        },
+        {
+            "question": "Listen to this. What is she saying?",
+            "options": [
+                "A. Cela est 8,50 euros.",
+                "B. Entendu. C'est fait 8,50 euros.",
+                "C. Entendu. Cela fait 8,50 euros.",
+                "D. All of the above"
+            ],
+            "correctAnswer": "C. Entendu. Cela fait 8,50 euros.",
+            "audio": "TYF_Boulangerie_3_10.mp3",
+            "explanation": "All right. That's 8.50 euros."
+        }
+    ]
+}

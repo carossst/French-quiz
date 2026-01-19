@@ -75,8 +75,6 @@
 
     body {
         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-
-        /* 2025: fond propre, soft, moins “gadget”, plus stable */
         background:
             radial-gradient(1100px 780px at 18% -10%, rgba(56, 189, 248, 0.18) 0%, transparent 58%),
             radial-gradient(900px 640px at 92% 0%, rgba(168, 85, 247, 0.16) 0%, transparent 58%),
@@ -85,6 +83,60 @@
         color: var(--text);
         min-height: 100vh;
         margin: 0;
+
+        /* NEW: layout global pour que le footer reste en bas */
+        display: flex;
+        flex-direction: column;
+    }
+
+    #app-container {
+        /* NEW: pousse le footer en bas */
+        flex: 1 0 auto;
+    }
+
+    /* Footer: liens lisibles + cohérents */
+    footer {
+        /* Fallback robuste: si la structure DOM bouge */
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    /* Footer: liens lisibles + cohérents */
+    footer a {
+        color: rgb(100 116 139);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        transition: color var(--transition-fast);
+    }
+
+    footer a:hover {
+        color: rgb(15 23 42);
+    }
+
+    footer a:focus-visible {
+        outline: 2px solid rgb(var(--color-primary));
+        outline-offset: 2px;
+        border-radius: 6px;
+    }
+
+    #contact-mail,
+    #contact-mail-footer {
+        color: rgb(var(--color-primary));
+        text-decoration: none;
+        font-weight: 700;
+        transition: color var(--transition-fast);
+    }
+
+    #contact-mail:hover,
+    #contact-mail-footer:hover {
+        color: rgb(2 132 199);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    footer span[aria-hidden="true"] {
+        display: inline-block;
+        margin: 0 0.25rem;
     }
 }
 
@@ -1925,12 +1977,6 @@
         padding: var(--spacing-lg);
     }
 
-    #contact-mail {
-        color: rgb(var(--color-primary));
-        text-decoration: none;
-        font-weight: 500;
-        transition: color var(--transition-fast);
-    }
 
     /* Responsive desktop compact */
     @media (min-width: 1024px) {

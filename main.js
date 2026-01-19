@@ -28,56 +28,58 @@ window.Logger = Logger;
 
 
 
-/**
- * showErrorMessage UNIQUE (évite les doubles définitions et les références cassées)
- * CSP-safe (pas d'inline handler)
- */
 function showErrorMessage(message) {
-
-
-  const existing = document.querySelector(".tyf-error-message");
+  const existing = document.querySelector(".tyf-global-error");
   if (existing) existing.remove();
 
   const errorDiv = document.createElement("div");
-  errorDiv.className =
-    "tyf-error-message fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white p-4 rounded-lg shadow-xl z-[10000] max-w-md text-center";
+  // IMPORTANT: ne pas réutiliser feedback-content/incorrect (styles quiz)
+  errorDiv.className = "tyf-global-error";
   errorDiv.setAttribute("role", "alert");
   errorDiv.setAttribute("aria-live", "assertive");
 
-  const title = document.createElement("div");
-  title.className = "font-bold mb-2";
-  title.textContent = "⚠️ Error";
+  // Layout overlay
+  errorDiv.style.position = "fixed";
+  errorDiv.style.top = "50%";
+  errorDiv.style.left = "50%";
+  errorDiv.style.transform = "translate(-50%, -50%)";
+  errorDiv.style.zIndex = "var(--z-overlay)";
+  errorDiv.style.maxWidth = "min(92%, 520px)";
+  errorDiv.style.opacity = "1";
 
-  const body = document.createElement("p");
-  body.className = "text-sm mb-3";
+  // Lisibilité forcée (pas dépendant du CSS existant)
+  errorDiv.style.background = "#fee2e2";
+  errorDiv.style.color = "#7f1d1d";
+  errorDiv.style.border = "1px solid #fecaca";
+  errorDiv.style.borderRadius = "12px";
+  errorDiv.style.padding = "14px 16px";
+  errorDiv.style.boxShadow = "0 18px 50px rgba(0,0,0,0.18)";
+  errorDiv.style.fontWeight = "600";
+  errorDiv.style.lineHeight = "1.35";
+
+  const body = document.createElement("div");
   body.textContent = String(message || "Unknown error");
 
   const btn = document.createElement("button");
   btn.type = "button";
-  btn.setAttribute("data-close-overlay", "");
-  btn.className =
-    "bg-white text-red-600 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-white";
+  btn.className = "tyf-btn-secondary";
+  btn.style.marginTop = "0.75rem";
+  btn.style.width = "100%";
   btn.textContent = "Close";
+  btn.addEventListener("click", () => {
+    errorDiv.style.opacity = "0";
+    setTimeout(() => errorDiv.remove(), 200);
+  });
 
-  errorDiv.appendChild(title);
   errorDiv.appendChild(body);
   errorDiv.appendChild(btn);
 
   (document.getElementById("app-container") || document.body).appendChild(errorDiv);
 
-  errorDiv.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-close-overlay]");
-    if (b) {
-      errorDiv.classList.add("tyf-error-message--out");
-      setTimeout(() => errorDiv.remove(), 300);
-    }
-  });
-
   setTimeout(() => {
-    if (errorDiv.parentNode) {
-      errorDiv.classList.add("tyf-error-message--out");
-      setTimeout(() => errorDiv.remove(), 300);
-    }
+    if (!errorDiv.parentNode) return;
+    errorDiv.style.opacity = "0";
+    setTimeout(() => errorDiv.remove(), 200);
   }, 10000);
 }
 
@@ -97,10 +99,64 @@ function initServiceWorker() {
     }
 
     window.addEventListener("load", function () {
+      // Cache-bust SW script so browsers don't reuse an old sw.js from HTTP cache
+      const v = encodeURIComponent(String(window.TYF_CONFIG?.version || "0"));
+
+      // Root-domain PWA: always use absolute paths (avoids scope/path edge cases)
+      const swUrl = `/sw.js?v=${v}`;
+
       navigator.serviceWorker
-        .register("./sw.js", { scope: "./" })
+        .register(swUrl, {
+          scope: "/",
+          updateViaCache: "none" // critical: don't serve sw.js from cache
+        })
+
         .then(function (registration) {
           Logger.log("✅ Service Worker registered:", registration.scope);
+
+          // If there's a waiting SW, activate it immediately
+          try {
+            if (registration.waiting) {
+              registration.waiting.postMessage({ type: "SKIP_WAITING" });
+            }
+
+            registration.addEventListener("updatefound", function () {
+              const newWorker = registration.installing;
+              if (!newWorker) return;
+
+              newWorker.addEventListener("statechange", function () {
+                if (newWorker.state === "installed") {
+                  // New SW installed. If there's an existing controller, it's an update.
+                  if (navigator.serviceWorker.controller) {
+                    try {
+                      registration.waiting &&
+                        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+                    } catch { }
+                  }
+                }
+              });
+            });
+          } catch { }
+
+          // Reload once when the new SW takes control (ensures fresh assets)
+          try {
+            let reloaded = false;
+            navigator.serviceWorker.addEventListener("controllerchange", function () {
+              if (reloaded) return;
+
+              // Only reload when we know we’re on the shell screen (avoid interrupting quizzes/modals)
+              const isBusy =
+                document.getElementById("sophie-paywall-modal") ||
+                document.getElementById("premium-code-modal") ||
+                document.getElementById("theme-preview-modal");
+
+              if (isBusy) return;
+
+              reloaded = true;
+              window.location.reload();
+            });
+          } catch { }
+
 
           // Best effort: check updates hourly
           setInterval(function () {
@@ -118,6 +174,8 @@ function initServiceWorker() {
     Logger.warn("Service Worker init failed:", e);
   }
 }
+
+
 
 // Exposition globale (cohérence avec le reste de main.js)
 window.initServiceWorker = initServiceWorker;
@@ -157,6 +215,10 @@ window.addEventListener("unhandledrejection", (event) => {
   );
 });
 
+// PWA – Service Worker (appel indispensable)
+// Doit être appelé dès que main.js est évalué (évite toute course)
+initServiceWorker();
+
 document.addEventListener("DOMContentLoaded", function () {
   Logger.log(
     `Initializing Test Your French v${window.TYF_CONFIG?.version || "2.6.0"} (${window.TYF_CONFIG?.environment || "unknown"})`
@@ -189,13 +251,8 @@ document.addEventListener("DOMContentLoaded", function () {
     Logger.warn("Stripe header binding failed", e);
   }
 
-
-  // PWA – Service Worker (appel indispensable)
-  initServiceWorker();
-
   startApplication();
 });
-
 
 
 
@@ -223,7 +280,7 @@ function validatePrerequisites() {
 }
 
 function validateJavaScriptModules() {
-  const requiredModules = ["StorageManager", "ResourceManager", "QuizManager", "UICore"];
+  const requiredModules = ["StorageManager", "ResourceManager", "QuizManager", "UICore", "UIFeatures"];
   const missing = requiredModules.filter((name) => !window[name]);
 
   if (missing.length > 0) {
@@ -235,6 +292,7 @@ function validateJavaScriptModules() {
   }
   return true;
 }
+
 
 
 async function startApplication() {

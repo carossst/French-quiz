@@ -1,5 +1,6 @@
 // ui-features.js v3 - UX refined features (XP, paywall, chest, feedback)
 
+// APRÈS
 function UIFeatures(uiCore, storageManager, resourceManager) {
     if (!uiCore) throw new Error("UIFeatures: uiCore parameter is required");
     if (!storageManager) throw new Error("UIFeatures: storageManager parameter is required");
@@ -35,11 +36,23 @@ function UIFeatures(uiCore, storageManager, resourceManager) {
         ]
     };
 
-    // Conversion engine will start when XP system is initialized (controlled moment)
+    // PWA install CTA (UI only)
+    this._pwa = {
+        deferredPrompt: null,
+        installable: false,
+        installed: false,
+        ctaShown: false
+    };
 
+    this._onBeforeInstallPrompt = null;
+    this._onAppInstalled = null;
+    this._onInstallBtnClick = null;
+
+    // Conversion engine will start when XP system is initialized (controlled moment)
 
     // No auto-activation: user must paste code manually
 }
+
 
 // =======================================
 // PRICING (UI ONLY – Stripe stays at $12)
@@ -170,12 +183,16 @@ UIFeatures.prototype.initializeXPSystem = function () {
     this.addChestIconToHeader();
     this.setupChestTooltip();
 
+    // PWA install listeners (bind once)
+    this.setupInstallCTA();
+
     // Initial paint
     this.updateXPHeader();
 
     this.initializeNotifications();
     this.startConversionTimer();
 };
+
 
 
 
@@ -265,11 +282,15 @@ UIFeatures.prototype.setupGamificationUXEvents = function () {
 
     this._onQuizCompleted = (e) => {
         try {
+            // ✅ After first completed quiz, we may show install CTA (mobile only)
+            try { this.maybeShowInstallCTA("quiz_completed"); } catch { }
+
             if (this.storageManager?.isUserIdentified?.()) return;
             if (!this.storageManager?.shouldShowProfileModal?.()) return;
             this.showUserProfileModal();
         } catch { /* no-op */ }
     };
+
 
 
     window.addEventListener("badges-earned", this._onBadgesEarned);
@@ -1548,6 +1569,312 @@ UIFeatures.prototype.updateUserGreeting = function () {
 // UTILITIES
 //================================================================================
 
+UIFeatures.prototype._isStandalonePWA = function () {
+    try {
+        const mm = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+        const iosStandalone = !!window.navigator?.standalone; // iOS Safari legacy
+        const persisted = localStorage.getItem("tyf:pwaInstalled") === "1";
+        return !!(mm || iosStandalone || persisted);
+    } catch {
+        return false;
+    }
+};
+
+UIFeatures.prototype._isIOS = function () {
+    try {
+        const ua = navigator.userAgent || "";
+        const platform = navigator.platform || "";
+        const maxTouch = Number(navigator.maxTouchPoints || 0);
+
+        const iOSUA = /iPad|iPhone|iPod/i.test(ua);
+        const iPadOSDesktopMode = (platform === "MacIntel" && maxTouch > 1);
+
+        const isMSStream = !!window.MSStream;
+        return (iOSUA || iPadOSDesktopMode) && !isMSStream;
+    } catch {
+        return false;
+    }
+};
+
+
+UIFeatures.prototype._isMobileLike = function () {
+    try {
+        const mqCoarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        const mqNoHover = window.matchMedia && window.matchMedia("(hover: none)").matches;
+        const small = window.innerWidth < 900;
+        return !!(mqCoarse || mqNoHover || small);
+    } catch {
+        return window.innerWidth < 900;
+    }
+};
+
+// ===================================================
+// PWA INSTALL (UX: toast post-valeur, pas de CTA header)
+// ===================================================
+
+// ===================================================
+// PWA INSTALL (listeners)
+// ===================================================
+UIFeatures.prototype.setupInstallCTA = function () {
+    // Idempotent
+    if (!this._pwa) {
+        this._pwa = { deferredPrompt: null, installable: false, installed: false, ctaShown: false };
+    }
+    if (this._pwa._bound === true) return;
+    this._pwa._bound = true;
+
+    // If already installed, stop
+    if (this._isStandalonePWA()) {
+        this._pwa.installed = true;
+        try { localStorage.setItem("tyf:pwaInstalled", "1"); } catch { }
+        try { localStorage.setItem("tyf:pwaInstallHidden", "1"); } catch { }
+        this._hideInstallToast?.();
+        return;
+    }
+
+    this._onBeforeInstallPrompt = (e) => {
+        try { e.preventDefault?.(); } catch { }
+        this._pwa.deferredPrompt = e;
+        this._pwa.installable = true;
+
+        // Optional: don't force open here; gating happens after quiz-completed
+        try { this.maybeShowInstallCTA?.("installable"); } catch { }
+    };
+
+    this._onAppInstalled = () => {
+        this._pwa.installed = true;
+        this._pwa.installable = false;
+        this._pwa.deferredPrompt = null;
+
+        try { localStorage.setItem("tyf:pwaInstalled", "1"); } catch { }
+        try { localStorage.setItem("tyf:pwaInstallHidden", "1"); } catch { }
+        this._hideInstallToast?.();
+    };
+
+    try { window.addEventListener("beforeinstallprompt", this._onBeforeInstallPrompt); } catch { }
+    try { window.addEventListener("appinstalled", this._onAppInstalled); } catch { }
+};
+
+
+UIFeatures.prototype._dismissInstallPermanently = function (reason) {
+    try { localStorage.setItem("tyf:pwaInstallHidden", "1"); } catch { }
+    try { localStorage.setItem("tyf:pwaInstallDismissedAt", String(Date.now())); } catch { }
+    try { localStorage.setItem("tyf:pwaInstallDismissReason", String(reason || "dismiss")); } catch { }
+};
+
+UIFeatures.prototype._getOrCreateInstallToast = function () {
+    let toast = document.getElementById("pwa-install-toast");
+    if (toast) return toast;
+
+    toast = document.createElement("div");
+    toast.id = "pwa-install-toast";
+    toast.setAttribute("role", "dialog");
+    toast.setAttribute("aria-live", "polite");
+    toast.setAttribute("aria-labelledby", "pwa-install-title");
+    toast.setAttribute("aria-describedby", "pwa-install-text");
+    toast.setAttribute("tabindex", "-1");
+
+    toast.style.position = "fixed";
+    toast.style.left = "12px";
+    toast.style.right = "12px";
+    toast.style.bottom = "12px";
+    toast.style.zIndex = "9999";
+    toast.style.maxWidth = "560px";
+    toast.style.margin = "0 auto";
+    toast.style.background = "#ffffff";
+    toast.style.border = "1px solid rgba(0,0,0,0.10)";
+    toast.style.borderRadius = "16px";
+    toast.style.boxShadow = "0 18px 50px rgba(0,0,0,0.16)";
+    toast.style.padding = "12px 12px";
+    toast.style.display = "none";
+
+    toast.innerHTML = `
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="font-size:20px; line-height:1;" aria-hidden="true">📲</div>
+        <div style="flex:1; min-width:0;">
+          <div id="pwa-install-title" style="font-weight:800; color:#111827; margin-bottom:2px;">
+            Install the app
+          </div>
+          <div id="pwa-install-text" style="font-size:13px; color:#374151; line-height:1.35; white-space:pre-line;">
+            Faster access. Works offline.
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button id="pwa-install-primary" type="button"
+              style="appearance:none; border:0; border-radius:12px; padding:10px 12px; font-weight:800; background:#2563eb; color:#fff; cursor:pointer;">
+              Install
+            </button>
+            <button id="pwa-install-secondary" type="button"
+              style="appearance:none; border:1px solid rgba(0,0,0,0.12); border-radius:12px; padding:10px 12px; font-weight:700; background:#fff; color:#111827; cursor:pointer;">
+              Not now
+            </button>
+            <button id="pwa-install-never" type="button"
+              style="appearance:none; border:0; background:transparent; color:#6b7280; font-weight:700; padding:10px 8px; cursor:pointer;">
+              Don’t show again
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(toast);
+    return toast;
+};
+
+UIFeatures.prototype._hideInstallToast = function () {
+    try {
+        const t = document.getElementById("pwa-install-toast");
+        if (!t) return;
+
+        t.style.display = "none";
+
+        // Remove Escape handler when hidden
+        try {
+            if (t._tyfEscHandler) document.removeEventListener("keydown", t._tyfEscHandler);
+            t._tyfEscHandler = null;
+        } catch { }
+    } catch { }
+};
+
+UIFeatures.prototype._showInstallToast = function () {
+    const toast = this._getOrCreateInstallToast?.();
+    if (!toast) return;
+
+    const isIOS = this._isIOS?.();
+    const canPrompt = !!this._pwa?.deferredPrompt && typeof this._pwa.deferredPrompt.prompt === "function";
+
+    const title = toast.querySelector("#pwa-install-title");
+    const text = toast.querySelector("#pwa-install-text");
+    const primary = toast.querySelector("#pwa-install-primary");
+    const secondary = toast.querySelector("#pwa-install-secondary");
+    const never = toast.querySelector("#pwa-install-never");
+
+    if (!title || !text || !primary || !secondary || !never) return;
+
+    if (isIOS) {
+        title.textContent = "Add to Home Screen";
+        text.textContent = "On iPhone: tap Share, then “Add to Home Screen”.\nIt keeps your progress offline.";
+        primary.textContent = "How to do it";
+    } else {
+        title.textContent = "Install the app";
+        text.textContent = "Faster access. Works offline.\nInstall takes a few seconds.";
+        primary.textContent = "Install";
+    }
+
+    // Bind handlers once per toast instance
+    if (toast.dataset.bound !== "1") {
+        toast.dataset.bound = "1";
+
+        primary.addEventListener("click", async () => {
+            if (this._isIOS?.()) {
+                try { localStorage.setItem("tyf:pwaInstallClickedAt", String(Date.now())); } catch { }
+                try { localStorage.setItem("tyf:pwaInstallDismissedAt", String(Date.now())); } catch { }
+                this.showFeedbackMessage?.("info", "On iPhone: tap Share → Add to Home Screen.");
+                this._hideInstallToast?.();
+                return;
+            }
+
+            const dp = this._pwa?.deferredPrompt;
+            if (!dp || typeof dp.prompt !== "function") return;
+
+            try { await dp.prompt(); } catch { }
+
+            this._pwa.deferredPrompt = null;
+            this._pwa.installable = false;
+
+            this._hideInstallToast?.();
+            try { localStorage.setItem("tyf:pwaInstallDismissedAt", String(Date.now())); } catch { }
+        });
+
+        secondary.addEventListener("click", () => {
+            try { localStorage.setItem("tyf:pwaInstallDismissedAt", String(Date.now())); } catch { }
+            this._hideInstallToast?.();
+        });
+
+        never.addEventListener("click", () => {
+            this._dismissInstallPermanently?.("never");
+            this._hideInstallToast?.();
+        });
+    }
+
+    // Non-iOS requires an actual prompt
+    if (!isIOS && !canPrompt) {
+        toast.style.display = "none";
+        return;
+    }
+
+    toast.style.display = "";
+
+    // Escape closes (mobile UX)
+    if (!toast._tyfEscHandler) {
+        toast._tyfEscHandler = (e) => {
+            if (e.key !== "Escape") return;
+            try { localStorage.setItem("tyf:pwaInstallDismissedAt", String(Date.now())); } catch { }
+            this._hideInstallToast?.();
+        };
+        document.addEventListener("keydown", toast._tyfEscHandler);
+    }
+
+    // Focus for accessibility + predictability
+    setTimeout(() => {
+        try {
+            (toast.querySelector("#pwa-install-primary") || toast).focus?.();
+        } catch { }
+    }, 0);
+};
+
+
+
+
+UIFeatures.prototype.maybeShowInstallCTA = function (reason) {
+    try {
+        // 0) Jamais si déjà en mode app
+        if (this._isStandalonePWA?.()) return;
+
+        // 1) Jamais si user a dit "ne plus montrer"
+        const hidden = localStorage.getItem("tyf:pwaInstallHidden") === "1";
+        if (hidden) return;
+
+        // 2) Mobile only (sinon tu pollues desktop + tu dilues Premium)
+        if (!this._isMobileLike?.()) return;
+
+        // 3) Ne jamais afficher si un modal important est ouvert
+        if (
+            document.getElementById("sophie-paywall-modal") ||
+            document.getElementById("premium-code-modal") ||
+            document.getElementById("theme-preview-modal")
+        ) {
+            return;
+        }
+
+        // 4) Condition "post-valeur": au moins 1 quiz complété
+        const completed = Number(this.storageManager?.getCompletedQuizzesCount?.() ?? 0);
+        if (!Number.isFinite(completed) || completed < 1) return;
+
+        // 5) Cooldown 24h (anti-spam)
+        const dismissedAt = Number(localStorage.getItem("tyf:pwaInstallDismissedAt") || 0);
+        if (Number.isFinite(dismissedAt) && dismissedAt > 0) {
+            const hours24 = 24 * 60 * 60 * 1000;
+            if ((Date.now() - dismissedAt) < hours24) return;
+        }
+
+        // 6) Ne pas re-spammer la session
+        if (!this._pwa) this._pwa = { deferredPrompt: null, installable: false, installed: false, ctaShown: false };
+        if (this._pwa.ctaShown) return;
+
+        // 7) iOS: pas de native prompt -> on autorise le toast "How to" quand même
+        const isIOS = this._isIOS?.();
+
+        // Non-iOS: on exige deferredPrompt (sinon ça sert à rien)
+        if (!isIOS) {
+            const canPrompt = !!this._pwa.deferredPrompt && typeof this._pwa.deferredPrompt.prompt === "function";
+            if (!canPrompt) return;
+        }
+
+        this._pwa.ctaShown = true;
+        this._showInstallToast?.();
+    } catch { }
+};
+
 
 UIFeatures.prototype._getFocusableIn = function (root) {
     if (!root) return [];
@@ -1560,7 +1887,7 @@ UIFeatures.prototype._getFocusableIn = function (root) {
         '[tabindex]:not([tabindex="-1"])'
     ].join(',');
     return Array.from(root.querySelectorAll(selectors))
-        .filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+        .filter(el => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true");
 };
 
 UIFeatures.prototype._applyFocusTrap = function (modal) {
@@ -1583,14 +1910,12 @@ UIFeatures.prototype._applyFocusTrap = function (modal) {
         const last = focusables[focusables.length - 1];
         const active = document.activeElement;
 
-        // Shift+Tab on first => go to last
         if (e.shiftKey && active === first) {
             e.preventDefault();
             last.focus();
             return;
         }
 
-        // Tab on last => go to first
         if (!e.shiftKey && active === last) {
             e.preventDefault();
             first.focus();
@@ -1598,11 +1923,9 @@ UIFeatures.prototype._applyFocusTrap = function (modal) {
         }
     };
 
-    // Store handler ref on the node for clean removal
     modal._tyfTrapHandler = onKeyDown;
     modal.addEventListener("keydown", onKeyDown);
 
-    // Ensure something inside is focused
     setTimeout(() => {
         try {
             const focusables = getFocusables();
@@ -1610,6 +1933,8 @@ UIFeatures.prototype._applyFocusTrap = function (modal) {
         } catch { }
     }, 0);
 };
+
+
 
 UIFeatures.prototype._removeFocusTrap = function (modal) {
     if (!modal) return;
@@ -1710,7 +2035,7 @@ UIFeatures.prototype.setupChestTooltip = function () {
             document.removeEventListener("click", h.onDocClick);
             document.removeEventListener("keydown", h.onDocKeydown);
             window.removeEventListener("resize", h.onResize);
-            window.removeEventListener("scroll", h.onScroll, h._scrollOptions || false);
+            window.removeEventListener("scroll", h.onScroll);
         } catch { }
 
         h.node = null;
@@ -1731,16 +2056,17 @@ UIFeatures.prototype.setupChestTooltip = function () {
                 document.removeEventListener("click", h.onDocClick);
                 document.removeEventListener("keydown", h.onDocKeydown);
                 window.removeEventListener("resize", h.onResize);
-                window.removeEventListener("scroll", h.onScroll, h._scrollOptions || false);
+                window.removeEventListener("scroll", h.onScroll);
             } catch { }
 
             try { delete trigger.dataset.chestTooltipBound; } catch { }
-        } else {
-            return;
         }
+        // IMPORTANT: pas de "else { return; }"
+        // On continue pour réassigner _open/_close/_toggle et garder cohérence.
     }
 
     trigger.dataset.chestTooltipBound = "1";
+
 
     if (!tip.id) tip.id = "daily-chest-tooltip";
     trigger.setAttribute("aria-controls", tip.id);
@@ -1875,8 +2201,8 @@ UIFeatures.prototype.setupChestTooltip = function () {
     document.addEventListener("keydown", h.onDocKeydown);
     window.addEventListener("resize", h.onResize);
 
-    h._scrollOptions = { passive: true };
-    window.addEventListener("scroll", h.onScroll, h._scrollOptions);
+    window.addEventListener("scroll", h.onScroll);
+
 
     close();
 
@@ -1996,7 +2322,8 @@ UIFeatures.prototype.destroy = function () {
         try { window.removeEventListener("resize", th.onResize); } catch { }
 
         // remove scroll with same options
-        try { window.removeEventListener("scroll", th.onScroll, th._scrollOptions || false); } catch { }
+        try { window.removeEventListener("scroll", th.onScroll); } catch { }
+
 
         // close tooltip visually if still present
         try { document.getElementById("daily-chest-tooltip")?.classList.add("hidden"); } catch { }
@@ -2050,6 +2377,35 @@ UIFeatures.prototype.destroy = function () {
             try { m.remove(); } catch { }
         } catch { }
     };
+
+
+    // PWA install cleanup (toast-based)
+    try {
+        if (this._onBeforeInstallPrompt) window.removeEventListener("beforeinstallprompt", this._onBeforeInstallPrompt);
+        if (this._onAppInstalled) window.removeEventListener("appinstalled", this._onAppInstalled);
+    } catch { }
+
+    this._onBeforeInstallPrompt = null;
+    this._onAppInstalled = null;
+    this._onInstallBtnClick = null;
+
+    try {
+        const toast = document.getElementById("pwa-install-toast");
+        if (toast) toast.remove();
+    } catch { }
+
+    try {
+        if (this._pwa) {
+            this._pwa.deferredPrompt = null;
+            this._pwa.installable = false;
+            this._pwa.installed = false;
+            this._pwa._bound = false;
+        }
+    } catch { }
+
+
+
+
 
     cleanupModal("sophie-paywall-modal");
     cleanupModal("premium-code-modal");
