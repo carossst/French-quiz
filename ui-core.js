@@ -1878,10 +1878,11 @@
             return (
                 '<div class="text-xs text-gray-400 mt-2">' +
                 '🔒 Complete <strong>' + previousThemeSafe + '</strong> first | ' +
-                '<a href="#" class="text-purple-600 hover:underline" data-action="show-roadmap" role="button" tabindex="0">' +
-                'See roadmap</a>' +
+                '<a href="#" class="text-purple-700 hover:underline" data-action="show-roadmap" role="button" tabindex="0">' +
+                'How to unlock</a>' +
                 '</div>'
             );
+
 
 
 
