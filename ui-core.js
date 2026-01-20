@@ -2477,17 +2477,26 @@
             tile.dataset.themeBound = "1";
 
             const activate = function (e) {
+                // Si clic sur le lien "How to unlock", on ouvre le même modal directement (robuste)
+                try {
+                    var t = e && e.target;
+                    if (t && t.nodeType === 3) t = t.parentElement; // TEXT_NODE
+                    if (t && t.closest && t.closest('[data-action="show-roadmap"]')) {
+                        if (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                        if (typeof self.showUnlockRoadmap === "function") {
+                            self.showUnlockRoadmap();
+                        }
+                        return;
+                    }
+                } catch (err) { }
+
                 if (e) {
                     e.preventDefault();
                     e.stopPropagation();
                 }
-
-                // Si clic sur le lien "See roadmap" à l’intérieur, on laisse la délégation roadmap gérer
-                try {
-                    if (e && e.target && e.target.closest && e.target.closest('[data-action="show-roadmap"]')) {
-                        return;
-                    }
-                } catch (err) { }
 
                 const themeId = Number(tile.dataset.themeId);
                 if (!Number.isFinite(themeId)) {
@@ -2563,7 +2572,12 @@
             const handler = function (e) {
                 if (self.currentScreen !== "welcome") return;
 
-                const target = e.target.closest('[data-action="show-roadmap"]');
+                // closest() safe: support Text nodes / odd targets
+                var t = e && e.target;
+                if (t && t.nodeType === 3) t = t.parentElement; // TEXT_NODE
+                if (!t || !t.closest) return;
+
+                const target = t.closest('[data-action="show-roadmap"]');
                 if (!target) return;
 
                 const isKey = e && e.type === "keydown";
@@ -2579,6 +2593,7 @@
                     self.showUnlockRoadmap();
                 }
             };
+
 
 
             this._roadmapDelegatedHandler = handler;
