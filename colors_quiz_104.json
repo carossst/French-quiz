@@ -1,129 +1,129 @@
 {
-  "id": 303,
-  "themeId": 3,
-  "name": "Listening Gender â€“ Quiz 3",
-  "description": "Practice listening comprehension focusing on Gender vocabulary and phrases.",
+  "id": 104,
+  "themeId": 1,
+  "name": "Listening Conversation Colors – Quiz 4",
+  "description": "Practice listening comprehension in conversation scenarios using Colors vocabulary.",
   "version": "2.2.3",
   "questions": [
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. Une amie",
-        "B. Un ami",
-        "C. Une année",
-        "D. All of the above"
+        "A. On va manger une glace ?",
+        "B. On va manger deux glaces ?",
+        "C. On va manger sur glace ?",
+        "D. On va manger sur place ?"
       ],
-      "correctAnswer": "A. Une amie",
-      "audio": "TYI_Gender_3_1.mp3",
-      "explanation": "A friend"
+      "correctAnswer": "A. On va manger une glace ?",
+      "audio": "TYF_Colors_4_1.mp3",
+      "explanation": "How about some ice cream?"
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. La tourelle",
-        "B. Le tour",
-        "C. La tour",
-        "D. Le tourniquet"
+        "A. Oui super. Allons tester le magasin, avec la devanture blanche et noire.",
+        "B. Oui super. Allons tester ce nouveau magasin de glaces, avec la devanture blanche et noire.",
+        "C. Oui super. Allons tester ce nouveau magasin deux glaces, avec la devanture blanche et noire.",
+        "D. Oui super. Allons tester ce magasin deux glaces, avec la devanture blanche et noire."
       ],
-      "correctAnswer": "C. La tour",
-      "audio": "TYI_Gender_3_2.mp3",
-      "explanation": "The tower"
+      "correctAnswer": "B. Oui super. Allons tester ce nouveau magasin de glaces, avec la devanture blanche et noire.",
+      "audio": "TYF_Colors_4_2.mp3",
+      "explanation": "Great! Let's check out that new ice cream shop with the black and white storefront."
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. La poubelle",
-        "B. Le beaubelle",
-        "C. La boubelle",
-        "D. Le poubelle"
+        "A. Ok. On y va. J'ai leu feu vert de mes parents.",
+        "B. Ok. On y va. J'ai les feux verts de mes parents.",
+        "C. Ok. On y va. J'ai le feu vert des parents.",
+        "D. Ok. On y va. J'ai le feu vert de mes parents."
       ],
-      "correctAnswer": "A. La poubelle",
-      "audio": "TYI_Gender_3_3.mp3",
-      "explanation": "Trash\nFrom the surname Poubelle, named after Eugène Poubelle, prefect of the Seine (i.e. chief administrator of Paris), who promulgated an ordinance in 1884 that all apartments should have trash cans."
+      "correctAnswer": "D. Ok. On y va. J'ai le feu vert de mes parents.",
+      "audio": "TYF_Colors_4_3.mp3",
+      "explanation": "Alright, let's go! I got the green light from my parents."
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. Elle n'est pas grande.",
-        "B. Elle est grand.",
-        "C. Il est grand.",
-        "D. Elle est grande."
+        "A. Cool. On y est ! Bonjour, pourrions-nous tester quelques parfums ?",
+        "B. Cool. On y est ! Bonjour, pourrions-nous tester quelques uns des parfums ?",
+        "C. Cool. On y est ! Bonjour, pourrions-nous tester quelques parfums s'il vous plaît ?",
+        "D. Cool. On y est ! Bonjour, pourrons-nous tester vos parfums s'il vous plaît ?"
       ],
-      "correctAnswer": "D. Elle est grande.",
-      "audio": "TYI_Gender_3_4.mp3",
-      "explanation": "She's tall"
+      "correctAnswer": "C. Cool. On y est ! Bonjour, pourrions-nous tester quelques parfums s'il vous plaît ?",
+      "audio": "TYF_Colors_4_4.mp3",
+      "explanation": "Cool, we're here! Hello, could we try a few flavors, please?"
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. Le beurre est mou.",
-        "B. Le beurre a moulu.",
-        "C. Le beurre a mu.",
-        "D. Le beurre est tout mou."
+        "A. Oui bien sûr. J'ai cette délicieuse glace surprise bleu marine.",
+        "B. Oui bien sûr. J'ai cette glace surprise bleu marine.",
+        "C. Oui bien sûr. J'ai cette surprise bleu marine.",
+        "D. Oui bien sûr. J'ai cette délicieuse glace surprise bleue marine."
       ],
-      "correctAnswer": "A. Le beurre est mou.",
-      "audio": "TYI_Gender_3_5.mp3",
-      "explanation": "The butter is soft"
+      "correctAnswer": "A. Oui bien sûr. J'ai cette délicieuse glace surprise bleu marine.",
+      "audio": "TYF_Colors_4_5.mp3",
+      "explanation": "Sure, I have this delicious blue marine surprise ice cream."
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. Les montagnes sont belles.",
-        "B. La montagne est trop belle.",
-        "C. Le mont est assez beau.",
-        "D. La montagne est belle."
+        "A. Ah c'est rigolo. Moi je la vois bleu clair. Miam, c'est trop bon !",
+        "B. Ah. Moi je la vois plutôt bleu. Miam, c'est bon !",
+        "C. Ah. Moi je la vois bleu clair. Miam, c'est bon !",
+        "D. Ah c'est rigolo. Moi je la vois plutôt bleu clair. Miam, c'est bon !"
       ],
-      "correctAnswer": "D. La montagne est belle.",
-      "audio": "TYI_Gender_3_6.mp3",
-      "explanation": "The mountain is beautiful"
+      "correctAnswer": "D. Ah c'est rigolo. Moi je la vois plutôt bleu clair. Miam, c'est bon !",
+      "audio": "TYF_Colors_4_6.mp3",
+      "explanation": "Oh, that's funny. I see it more as light blue. Yum, it's good!"
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. La loi de la jungle",
-        "B. La loi de la ville",
-        "C. Les lois de la jungle",
-        "D. Ta loi de ta jungle"
+        "A. Je peux aussi tester celle qui a une couleur s'il vous plaît ?",
+        "B. Je peux aussi tester celle qui a une couleur cerise s'il vous plaît ?",
+        "C. Je peux aussi tester celle qui a cerise ?",
+        "D. Je peux aussi tester celle qui a une couleur rouge cerise ?"
       ],
-      "correctAnswer": "A. La loi de la jungle",
-      "audio": "TYI_Gender_3_7.mp3",
-      "explanation": "The law of the jungle"
+      "correctAnswer": "B. Je peux aussi tester celle qui a une couleur cerise s'il vous plaît ?",
+      "audio": "TYF_Colors_4_7.mp3",
+      "explanation": "Could I also try the cherry colored one, please?"
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. Elles sont parties faire une randonnée.",
-        "B. Elles ne sont pas parties faire une randonnée.",
-        "C. Elles sont parties faire de la randonnée en montagne.",
-        "D. Ils sont partis faire une randonnée."
+        "A. Miam. Elle est très bonne aussi. Et vous avez de la glace aux marrons ?",
+        "B. Miam. Elle est bonne aussi. Et vous glace aux marrons ?",
+        "C. Miam. Elle est très bonne aussi. Vous avez glace aux marrons ?",
+        "D. Miam. Elle est bonne aussi. Et vous avez de la glace avec des marrons ?"
       ],
-      "correctAnswer": "A. Elles sont parties faire une randonnée.",
-      "audio": "TYI_Gender_3_8.mp3",
-      "explanation": "They went on a hike"
+      "correctAnswer": "A. Miam. Elle est très bonne aussi. Et vous avez de la glace aux marrons ?",
+      "audio": "TYF_Colors_4_8.mp3",
+      "explanation": "Yum, this one is also very good. Do you have any chestnut ice cream?"
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. Sa casquette et sa short sont assorties.",
-        "B. Sa casquette et son short sont bien assortis.",
-        "C. Son casquette et sa short sont bien assorties.",
-        "D. Son casquette et son short sont bien assortis."
+        "A. Oui, voilà. Vous voulez commander quoi ?",
+        "B. Oui, voilà. Que voulez-vous commander ?",
+        "C. Oui, voilà. Et vous voulez commander s'il vous plaît ?",
+        "D. Oui, voilà. Et vous voulez commander pour quoi ?"
       ],
-      "correctAnswer": "B. Sa casquette et son short sont bien assortis.",
-      "audio": "TYI_Gender_3_9.mp3",
-      "explanation": "Her hat and her shorts go well together"
+      "correctAnswer": "B. Oui, voilà. Que voulez-vous commander ?",
+      "audio": "TYF_Colors_4_9.mp3",
+      "explanation": "Yes, here you go. What would you like to order"
     },
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. J'aime son assureur.",
-        "B. J'aime sa assurance.",
-        "C. J'aime son assurance.",
-        "D. Je n'aime pas son assurance."
+        "A. On va reprendre deux glaces aux marrons avec un peu d'orange, s'il vous plaît.",
+        "B. On va prendre de la glace aux marrons avec d'orange, s'il vous plaît.",
+        "C. On va prendre des glaces marrons avec un peu d'orange, s'il vous plaît.",
+        "D. On va prendre deux glaces aux marrons avec un peu d'orange, s'il vous plaît."
       ],
-      "correctAnswer": "C. J'aime son assurance.",
-      "audio": "TYI_Gender_3_10.mp3",
-      "explanation": "I like her/his assertiveness"
+      "correctAnswer": "D. On va prendre deux glaces aux marrons avec un peu d'orange, s'il vous plaît.",
+      "audio": "TYF_Colors_4_10.mp3",
+      "explanation": "We'll have two scoops of chestnut ice cream with a bit of orange, please."
     }
   ]
 }
