@@ -101,9 +101,15 @@
 
         <!-- Block 1: Level + flag + FP (always stable) -->
         <div class="flex items-center gap-3">
+          <span class="font-extrabold tracking-tight text-slate-800 whitespace-nowrap text-[13px] sm:text-base">
+            Daily French
+          </span>
+
           <span class="text-blue-700 font-extrabold text-base sm:text-lg whitespace-nowrap">
             ⭐ Level <span id="user-level">1</span>
           </span>
+
+
 
           <span class="text-xl sm:text-2xl" aria-hidden="true">🇫🇷</span>
 
@@ -125,17 +131,18 @@
 
         <!-- Block 2: Premium CTA (separate, no layout jumps) -->
         <a href="https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03" id="premium-unlock-btn"
-          class="inline-flex items-center"
+          class="inline-flex items-center gap-2 rounded-xl px-3 py-2 bg-sky-600 text-white shadow-sm ring-1 ring-sky-600/30 hover:bg-sky-700 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2"
           aria-label="Unlock premium access: $12 one-time launch price. Regular price $99.">
           <span class="text-base" aria-hidden="true">💎</span>
 
           <span class="flex flex-col leading-tight text-left">
             <span class="text-base font-extrabold">$12 one-time</span>
             <span class="text-[11px] font-semibold opacity-90">
-              <span class="line-through opacity-70">$99</span> regular
+              <span class="line-through opacity-80">$99</span> regular
             </span>
           </span>
         </a>
+
 
       </div>
     </div>
@@ -169,7 +176,7 @@
   <script src="/main.js" defer></script>
 
   <footer class="text-xs leading-relaxed text-gray-500 text-center py-6 mt-10">
-
+    <div class="mb-2 font-extrabold text-slate-700">Test Your French</div>
     <div class="mb-3 text-gray-600" data-tyf-brand="creatorLine"></div>
 
     <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
@@ -178,14 +185,16 @@
       <a href="/terms.html">Terms</a>
       <span aria-hidden="true">·</span>
 
-      <!-- Contact (email obfusqué, injecté par /email.js) -->
-      <a id="contact-mail-footer" href="#" data-user="bonjour" data-domain="testyourfrench.com">Contact</a>
-
+      <!-- Contact (ouvre une modale in-app, sans sortir de la PWA) -->
+      <a id="contact-mail-footer" href="#" data-user="bonjour" data-domain="testyourfrench.com"
+        data-email-mode="modal">Write us</a>
 
       <span aria-hidden="true">·</span>
-      <span class="text-gray-400">v3.0</span>
+      <span class="text-gray-400" data-tyf-version>v3.0</span>
     </div>
   </footer>
+
+
 
 
 </body>
