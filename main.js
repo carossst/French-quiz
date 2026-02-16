@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Binder le lien Stripe du header depuis la config (source unique)
   try {
-    const btn = document.getElementById("premium-unlock-btn");
+    const btn = document.querySelector("[data-premium-unlock-btn]");
     const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl;
 
     const isValidStripeUrl =
@@ -250,6 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } catch (e) {
     Logger.warn("Stripe header binding failed", e);
   }
+
 
   startApplication();
 });
