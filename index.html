@@ -69,9 +69,9 @@
   <link rel="preload" href="/style.css" as="style">
   <link rel="stylesheet" href="/style.css">
 
-  <!-- CSP - Amélioré pour meilleure sécurité -->
+  <!-- CSP - Production (Stripe + inline styles autorisés) -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://buy.stripe.com; upgrade-insecure-requests;">
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://buy.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.stripe.com; connect-src 'self' https://api.stripe.com https://checkout.stripe.com; font-src 'self'; upgrade-insecure-requests;">
 </head>
 
 <body>
