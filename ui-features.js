@@ -641,7 +641,7 @@ UIFeatures.prototype.generateSophiePaywallHTML = function (sessionMinutes, waitD
 
 <button
   id="paywall-code-btn"
-  class="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors mb-3">
+  class="tyf-btn-secondary w-full mb-3">
   I have a premium code
 </button>
 
