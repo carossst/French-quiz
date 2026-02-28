@@ -1333,20 +1333,24 @@
         box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.16);
     }
 
-    /* Premium unlock (placé APRÈS les états primary, avant secondary) */
     #premium-unlock-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+
         background: #40B0E0;
         color: #fff;
+        text-decoration: none;
+
         font-weight: 900;
         padding: 0.75rem 1.1rem;
         border-radius: 14px;
         border: none;
         cursor: pointer;
+
         box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
         transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease, opacity 120ms ease;
-
-        align-items: flex-start;
-        gap: 0.55rem;
     }
 
     #premium-unlock-btn:hover:not(:disabled) {

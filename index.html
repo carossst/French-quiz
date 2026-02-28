@@ -128,9 +128,10 @@
           </div>
         </div>
 
-        <!-- Block 2: Premium CTA (separate, no layout jumps) -->
+        <!-- APRÈS (visible + “button-like” en Tailwind, sans CSS custom) -->
         <a href="https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03" id="premium-unlock-btn" data-premium-unlock-btn
-          class="inline-flex" aria-label="Unlock premium access: $12 one-time launch price. Regular price $99.">
+          class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Unlock premium access: $12 one-time launch price. Regular price $99.">
           <span class="text-base" aria-hidden="true">💎</span>
           <span class="flex flex-col leading-tight text-left">
             <span class="text-base font-extrabold">$12 one-time</span>
@@ -161,26 +162,25 @@
     class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
     aria-live="polite"></div>
 
-
   <!-- Scripts -->
-  <script src="/config.js" defer></script>
-  <script src="/storage.js" defer></script>
-  <script src="/resourceManager.js" defer></script>
-  <script src="/quizManager.js" defer></script>
-  <script src="/ui-core.js" defer></script>
-  <script src="/ui-features.js" defer></script>
-  <script src="/ui-charts.js" defer></script>
-  <script src="/email.js" defer></script>
-  <script src="/main.js" defer></script>
+  <script src="./config.js" defer></script>
+  <script src="./storage.js" defer></script>
+  <script src="./resourceManager.js" defer></script>
+  <script src="./quizManager.js" defer></script>
+  <script src="./ui-core.js" defer></script>
+  <script src="./ui-features.js" defer></script>
+  <script src="./ui-charts.js" defer></script>
+  <script src="./email.js" defer></script>
+  <script src="./main.js" defer></script>
 
   <footer class="text-xs leading-relaxed text-gray-500 text-center py-6 mt-10">
     <div class="mb-2 font-extrabold text-slate-700">Daily French</div>
     <div class="mb-3 text-gray-600" data-tyf-brand="creatorLine"></div>
 
     <div class="flex flex-wrap justify-center gap-x-3 gap-y-2">
-      <a href="/privacy.html">Privacy</a>
+      <a href="./privacy.html">Privacy</a>
       <span aria-hidden="true">·</span>
-      <a href="/terms.html">Terms</a>
+      <a href="./terms.html">Terms</a>
       <span aria-hidden="true">·</span>
 
       <!-- Contact (ouvre une modale in-app, sans sortir de la PWA) -->
