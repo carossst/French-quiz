@@ -737,6 +737,38 @@
             primaryCTAHTML = this.generateNextActionButton(resultsData);
         }
 
+        // Theme-complete celebration (shown once, the quiz that pushes a theme to 5/5)
+        var themeCompleteHTML = "";
+        if (resultsData.justCompletedTheme) {
+            var nextThemeName = null;
+            if (nextId != null) {
+                try {
+                    var foundNext = (this.themeIndexCache || []).filter(function (t) { return Number(t && t.id) === nextId; })[0];
+                    if (foundNext) nextThemeName = this.normalizeText(foundNext.name);
+                } catch (e) { nextThemeName = null; }
+            }
+
+            var themeCompleteBody;
+            if (nextId != null && needed === 0) {
+                themeCompleteBody = nextThemeName
+                    ? ('Next up: <strong>' + this.escapeHTML(nextThemeName) + '</strong>, ready to unlock.')
+                    : 'The next theme is ready to unlock.';
+            } else if (nextId != null && needed > 0) {
+                themeCompleteBody = (nextThemeName ? ('<strong>' + this.escapeHTML(nextThemeName) + '</strong> is next — ') : 'The next theme needs ') +
+                    needed + ' more FP to unlock it, or go Premium to skip the wait.';
+            } else if (isPremium) {
+                themeCompleteBody = 'Pick any other theme to keep going.';
+            } else {
+                themeCompleteBody = "That was the last theme in the free progression path. Go Premium to unlock what's left.";
+            }
+
+            themeCompleteHTML =
+                '\n    <div class="tyf-stats-card mb-4 bg-green-50 border-green-200" role="status">' +
+                '\n      <div class="font-bold text-green-800 mb-1">Theme complete: ' + this.escapeHTML(titleTheme) + '</div>' +
+                '\n      <p class="text-sm text-green-800">' + themeCompleteBody + '</p>' +
+                '\n    </div>';
+        }
+
 
         return (
             '\n<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" role="main" aria-label="Results screen">' +
@@ -753,6 +785,7 @@
             '\n      <p class="text-sm text-gray-700 mt-1">Theme: <strong>' + this.escapeHTML(titleTheme) + '</strong></p>' +
             '\n    </div>' +
 
+            themeCompleteHTML +
 
             // 1) RESULT (single card): score + badge + level + one line
             '\n    <div class="theme-card mb-4" aria-label="Result summary">' +
@@ -882,6 +915,17 @@
                 });
             } catch (e) {
                 // silent fail
+            }
+
+            // Daily reminder opt-in: ask right after a natural high-engagement
+            // moment (finishing a whole theme), not on every single quiz
+            if (resultsData.justCompletedTheme) {
+                try {
+                    this._track("theme_completed", { themeId: resultsData.themeId });
+                } catch (e) { }
+                setTimeout(() => {
+                    try { this.features?.maybeShowNotifCTA?.("theme_completed"); } catch (e) { }
+                }, 800);
             }
 
             return html;

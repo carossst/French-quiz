@@ -551,6 +551,7 @@ QuizManager.prototype.finishQuiz = function () {
   }
 
   const fpBefore = this.storageManager.getFrenchPoints?.() ?? 0;
+  const themeAlreadyCompletedBefore = !!this.storageManager.isThemeCompleted?.(this.currentThemeId);
 
   if (typeof this.storageManager.markQuizCompleted !== "function") {
     getLogger().error("QuizManager: storageManager.markQuizCompleted is missing");
@@ -577,6 +578,11 @@ QuizManager.prototype.finishQuiz = function () {
   if (!didSave) {
     resultsData.revisionMode = true;
   }
+
+  // Theme just fully completed by THIS quiz (not on replays / already-completed themes)
+  resultsData.justCompletedTheme = didSave &&
+    !themeAlreadyCompletedBefore &&
+    !!this.storageManager.isThemeCompleted?.(this.currentThemeId);
 
   if (this.ui && this.ui.showResults) {
     this.ui.showResults(resultsData);

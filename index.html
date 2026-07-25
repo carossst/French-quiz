@@ -71,9 +71,9 @@
   <link rel="preload" href="/style.css" as="style">
   <link rel="stylesheet" href="/style.css">
 
-  <!-- CSP - Production (Stripe + inline styles + GA4 autorisés) -->
+  <!-- CSP - Production (Stripe + inline styles + GA4 + push server autorisés) -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://buy.stripe.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.stripe.com; connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; font-src 'self'; upgrade-insecure-requests;">
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://buy.stripe.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.stripe.com; connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.workers.dev; font-src 'self'; upgrade-insecure-requests;">
 
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MSVVBG559E"></script>

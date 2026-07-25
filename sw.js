@@ -1,6 +1,6 @@
-/* sw.js - Service Worker v3.2.2 pour Test Your French */
+/* sw.js - Service Worker v3.3.0 pour Test Your French */
 
-const APP_VERSION = "3.2.2";   // À incrémenter à chaque gros déploiement
+const APP_VERSION = "3.3.0";   // À incrémenter à chaque gros déploiement
 const CACHE_PREFIX = "tyf";
 
 const CACHE_NAME = `${CACHE_PREFIX}-cache-${APP_VERSION}`;
@@ -476,6 +476,37 @@ async function cleanOldDynamicCache() {
   }
 }
 
+
+/* ============================================================
+   PUSH NOTIFICATIONS (daily reminder)
+   The push server sends an empty payload on purpose (it never sees or
+   stores the notification text) - this is where the actual wording lives.
+============================================================ */
+self.addEventListener("push", event => {
+  const title = "Daily French";
+  const options = {
+    body: "Your daily chest is waiting - come practice today's French!",
+    tag: "tyf-daily-reminder",
+    renotify: true,
+    icon: "./icons/icon-192x192.png",
+    badge: "./icons/icon-192x192.png"
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if ("focus" in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow("./");
+    })
+  );
+});
 
 /* ============================================================
    GLOBAL ERROR HANDLERS

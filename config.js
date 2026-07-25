@@ -38,7 +38,16 @@ window.TYF_CONFIG = {
         showUpdateNotifications: true,
         notifications: {
             enabled: true,
-            dailyReminder: true
+            dailyReminder: true,
+            // Public by design (embedded client-side, same key sent to the
+            // push service on every subscribe call). The matching private
+            // key lives only in the push server's Cloudflare secrets.
+            vapidPublicKey: "BLFmfN-qDruGto2Fztfy2hoiJ8hUx_4fT6zJxYAwPQzaFcXhRoljHcXHFtRyeK3ELOvgIZeQrwoYPr6HSPgs_f4",
+            // TODO: replace with the real Worker URL after deploying
+            // testyourfrench-push (see its README) - looks like
+            // "https://testyourfrench-push.<subdomain>.workers.dev".
+            subscribeUrl: "https://testyourfrench-push.example.workers.dev/subscribe",
+            unsubscribeUrl: "https://testyourfrench-push.example.workers.dev/unsubscribe"
         }
     }
 };
