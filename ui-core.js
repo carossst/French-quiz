@@ -928,9 +928,7 @@
 
             '\n    <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-5 mb-5">' +
             '\n      <div class="flex items-center justify-center gap-2 mb-2">' +
-            '\n        <span class="text-2xl">✨</span>' +
             '\n        <h2 class="text-lg font-bold text-gray-900">How it works</h2>' +
-            '\n        <span class="text-2xl">✨</span>' +
             '\n      </div>' +
             '\n      <div class="text-sm text-gray-700 space-y-1">' +
             '\n        <p><strong class="text-gray-900">Quizzes</strong> -> earn French Points</p>' +

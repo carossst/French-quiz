@@ -1397,7 +1397,6 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
 
     return `
         <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative animate-fade-in">
-            <div class="text-4xl mb-4">🎉</div>
             <h2 id="profile-modal-title" class="text-xl font-bold text-gray-800 mb-3">
                 Excellent progress!
             </h2>
