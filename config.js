@@ -145,6 +145,13 @@ window.TYF_UTILS = {
             .replace(/\s+/g, " ")
             .replace(/[“”]/g, '"')
             .trim();
+    },
+
+    // Security: only ever navigate to a well-formed Stripe checkout URL.
+    // Centralizes the check previously duplicated (inconsistently) across
+    // main.js, ui-core.js, ui-features.js and ui-charts.js.
+    isValidStripeUrl: function (url) {
+        return typeof url === "string" && url.startsWith("https://buy.stripe.com/");
     }
 };
 

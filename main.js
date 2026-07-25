@@ -230,10 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
   try {
     const btn = document.querySelector("[data-premium-unlock-btn]");
     const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl;
-
-    const isValidStripeUrl =
-      typeof stripeUrl === "string" &&
-      stripeUrl.startsWith("https://buy.stripe.com/");
+    const isValidStripeUrl = window.TYF_UTILS?.isValidStripeUrl(stripeUrl) || false;
 
     if (btn && isValidStripeUrl) {
       btn.setAttribute("href", stripeUrl);

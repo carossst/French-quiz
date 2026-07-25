@@ -579,7 +579,7 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
         buyBtn.addEventListener("click", () => {
             try { this.storageManager?.track?.("paywall_click_buy", { source: "sophie_modal" }); } catch { }
             const url = window?.TYF_CONFIG?.stripePaymentUrl;
-            if (url) window.location.href = url;
+            if (window.TYF_UTILS?.isValidStripeUrl(url)) window.location.href = url;
         });
     }
 
@@ -971,6 +971,7 @@ UIFeatures.prototype.collectDailyReward = function () {
 
 UIFeatures.prototype.handlePurchase = function () {
     const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "https://buy.stripe.com/your-payment-link";
+    if (!window.TYF_UTILS?.isValidStripeUrl(stripeUrl)) return;
     window.location.href = stripeUrl;
     try {
         if (window.gtag) {
@@ -1208,7 +1209,7 @@ UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme, opts) {
     const buyBtn = modal.querySelector("#premium-buy-btn");
     if (buyBtn) buyBtn.addEventListener("click", () => {
         const url = window?.TYF_CONFIG?.stripePaymentUrl;
-        if (url) window.location.href = url;
+        if (window.TYF_UTILS?.isValidStripeUrl(url)) window.location.href = url;
     });
 
     const colorsBtn = modal.querySelector("#colors-first-btn");
@@ -1337,7 +1338,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     const buyBtn = modal.querySelector('#buy-premium-btn');
     if (buyBtn) buyBtn.addEventListener('click', () => {
         const url = window?.TYF_CONFIG?.stripePaymentUrl;
-        if (url) window.location.href = url;
+        if (window.TYF_UTILS?.isValidStripeUrl(url)) window.location.href = url;
     });
 };
 

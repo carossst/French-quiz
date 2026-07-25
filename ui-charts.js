@@ -292,7 +292,7 @@
         ? String(global.TYF_CONFIG.stripePaymentUrl)
         : "";
 
-    if (!stripeUrl) return "";
+    if (!global.TYF_UTILS || !global.TYF_UTILS.isValidStripeUrl(stripeUrl)) return "";
 
     return (
       '\n<section aria-label="Premium" class="tyf-stats-card tyf-nudge">' +
