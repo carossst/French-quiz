@@ -1,6 +1,6 @@
 /* sw.js - Service Worker v3.2.1 pour Test Your French */
 
-const APP_VERSION = "3.2.1";   // À incrémenter à chaque gros déploiement
+const APP_VERSION = "3.2.2";   // À incrémenter à chaque gros déploiement
 const CACHE_PREFIX = "tyf";
 
 const CACHE_NAME = `${CACHE_PREFIX}-cache-${APP_VERSION}`;
@@ -22,9 +22,7 @@ const ASSETS_TO_CACHE = [
   "./metadata.json",
   "./icons/icon-192x192.png",
   "./icons/icon-512x512.png",
-  "./email.js",
-  "./noscript.js",
-  "./fallback.js"
+  "./email.js"
 ];
 
 

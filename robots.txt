@@ -3,4 +3,4 @@ Disallow: /success.html
 
 Allow: /
 
-Sitemap: https://carossst.github.io/French-quiz/sitemap.xml
+Sitemap: https://dailyfrench.testyourfrench.com/sitemap.xml
