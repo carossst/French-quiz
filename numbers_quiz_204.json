@@ -1,7 +1,7 @@
 {
   "id": 204,
   "themeId": 2,
-  "name": "Listening Conversation Numbers â€“ Quiz 4",
+  "name": "Listening Conversation Numbers – Quiz 4",
   "description": "Practice listening comprehension in conversation scenarios using Numbers vocabulary.",
   "version": "2.2.3",
   "questions": [
@@ -20,12 +20,12 @@
     {
       "question": "Listen to this. What is she saying?",
       "options": [
-        "A. VoilÃ . Ã‡a fait trois euros cinq s'il vous plaÃ®t.",
-        "B. VoilÃ . Ã‡a fait trois euros cinquante s'il vous plaÃ®t.",
-        "C. VoilÃ . Ã‡a fait trois euros et cinquante centimes s'il vous plaÃ®t.",
+        "A. Voilà. Ça fait trois euros cinq s'il vous plaît.",
+        "B. Voilà. Ça fait trois euros cinquante s'il vous plaît.",
+        "C. Voilà. Ça fait trois euros et cinquante centimes s'il vous plaît.",
         "D. All of the above."
       ],
-      "correctAnswer": "B. VoilÃ . Ã‡a fait trois euros cinquante s'il vous plaÃ®t.",
+      "correctAnswer": "B. Voilà. Ça fait trois euros cinquante s'il vous plaît.",
       "audio": "TYI_Numbers_4_2.mp3",
       "explanation": "Here it is. 3 euros and fifty cents please."
     },

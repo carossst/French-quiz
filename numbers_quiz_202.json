@@ -1,7 +1,7 @@
 {
   "id": 202,
   "themeId": 2,
-  "name": "Writing and Reading Conversation Numbers â€“ Quiz 2",
+  "name": "Writing and Reading Conversation Numbers – Quiz 2",
   "description": "Practice Numbers vocabulary and grammar in conversation scenarios (reading/writing).",
   "version": "2.2.3",
   "questions": [
@@ -26,7 +26,7 @@
       "correctAnswer": "A. Je sais. J'ai payé treize euros le mardi sept pour récupérer mon colis !"
     },
     {
-      "question": "Translate into French 'They advertise \"Free Shipping Over â‚¬40!\" But who wants to spend 40 euros on this?'",
+      "question": "Translate into French 'They advertise \"Free Shipping Over €40!\" But who wants to spend 40 euros on this?'",
       "options": [
         "A. Ils font de la publicité pour la 'livraison gratuite à partir de quarante euros!' Mais qui a envie de dépenser quarante euros pour ça ?",
         "B. Ils font de la publicité pour la 'livraison gratuite à partir de quarantes euros!' Mais qui a envie de dépenser quarante euros pour ça ?",
@@ -46,7 +46,7 @@
       "correctAnswer": "C. Je te comprends. En parlant de gros chiffres, as-tu regardé les résultats du loto hier soir ?"
     },
     {
-      "question": "Translate into French 'I saw. The jackpot was a whopping â‚¬33,333,000'",
+      "question": "Translate into French 'I saw. The jackpot was a whopping €33,333,000'",
       "options": [
         "A. Le jackpot était de trente-trois millions.",
         "B. Le jackpot était de trente-trois millions trois cents trente milles euros.",

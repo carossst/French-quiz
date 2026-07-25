@@ -1,7 +1,7 @@
 {
   "id": 302,
   "themeId": 3,
-  "name": "Writing and Reading Conversation Gender â€“ Quiz 2",
+  "name": "Writing and Reading Conversation Gender – Quiz 2",
   "description": "Practice Gender vocabulary and grammar in conversation scenarios (reading/writing).",
   "version": "2.2.3",
   "questions": [
@@ -98,9 +98,9 @@
     {
       "question": "Translate into French 'Speaking of children, I need to go and get my daughter and her friend from school. See you soon!'",
       "options": [
-        "A. En parlant de Ã§a, je dois aller chercher ma fille et son amie Ã  l'Ã©cole. Ã€ bientÃ´t !",
-        "B. En parlant de Ã§a, je dois aller chercher ma fille et son ami Ã  l'Ã©cole. Ã€ bientÃ´t !",
-        "C. En parlant de Ã§a, je dois aller chercher ma fille et son ami-e Ã  l'Ã©cole. Ã€ bientÃ´t !",
+        "A. En parlant de ça, je dois aller chercher ma fille et son amie à l'école. À bientôt !",
+        "B. En parlant de ça, je dois aller chercher ma fille et son ami à l'école. À bientôt !",
+        "C. En parlant de ça, je dois aller chercher ma fille et son ami-e à l'école. À bientôt !",
         "D. All of the above"
       ],
       "correctAnswer": "D. All of the above",
