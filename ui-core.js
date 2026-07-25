@@ -429,15 +429,6 @@
                     console.error("Welcome UIFeatures failed (non-blocking):", e);
                 }
 
-                // CTA principal (ne doit jamais casser l’écran)
-                try {
-                    if (typeof this.renderPrimaryCTA === "function") {
-                        this.renderPrimaryCTA();
-                    }
-                } catch (e) {
-                    console.error("renderPrimaryCTA failed (non-blocking):", e);
-                }
-
                 // Daily goal nudge (ne doit jamais casser l’écran)
                 try {
                     if (typeof this.renderDailyGoalNudge === "function") {
@@ -513,9 +504,6 @@
 
 
             '\n    </div>' +
-
-            // CTA principal (piloté par renderPrimaryCTA)
-            '\n    <div id="primary-cta-slot" class="mb-4"></div>' +
 
             '\n    <section id="themes-section" aria-label="Available themes" class="lg:flex-1">' +
             '\n      <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-2 text-center">Choose your next theme</h2>' +
@@ -1980,9 +1968,6 @@
                     '\n      <button id="roadmap-enter-code-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">' +
                     (wording.ctaEnter || "Enter a premium code") +
                     '</button>' +
-                    '\n      <button id="roadmap-enter-code-btn-bottom" type="button" class="text-sm underline w-full sm:w-auto">' +
-                    (wording.ctaAlreadyHave || "I already have a code") +
-                    '</button>' +
                     '\n    </div>'
                 );
             })() +
@@ -2024,7 +2009,6 @@
 
         const closeBtn = modal.querySelector("#close-roadmap-btn");
         const codeBtnTop = modal.querySelector("#roadmap-enter-code-btn");
-        const codeBtnBottom = modal.querySelector("#roadmap-enter-code-btn-bottom");
         const premiumBtn = modal.querySelector("#roadmap-premium-pay-btn");
         let cleaned = false;
 
@@ -2143,7 +2127,6 @@
         };
 
         if (codeBtnTop) codeBtnTop.addEventListener("click", openCodeModal);
-        if (codeBtnBottom) codeBtnBottom.addEventListener("click", openCodeModal);
         if (premiumBtn) premiumBtn.addEventListener("click", openPremiumPay);
 
         modal.addEventListener("tyf:close", cleanup, { once: true });
