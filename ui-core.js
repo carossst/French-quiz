@@ -2151,7 +2151,7 @@
             try { modal.remove(); } catch (err) { }
 
             const stripeUrl = window.TYF_CONFIG && window.TYF_CONFIG.stripePaymentUrl ? window.TYF_CONFIG.stripePaymentUrl : "";
-            if (stripeUrl) {
+            if (window.TYF_UTILS?.isValidStripeUrl(stripeUrl)) {
                 window.open(stripeUrl, "_blank", "noopener,noreferrer");
                 return;
             }
@@ -2913,7 +2913,7 @@
                 try { self._track("premium_nudge_clicked", { source: "results" }); } catch (err) { }
 
                 const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "";
-                if (stripeUrl) {
+                if (window.TYF_UTILS?.isValidStripeUrl(stripeUrl)) {
                     window.open(stripeUrl, "_blank", "noopener,noreferrer");
                     return;
                 }

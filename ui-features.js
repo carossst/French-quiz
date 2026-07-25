@@ -579,7 +579,7 @@ UIFeatures.prototype.setupPaywallEvents = function (modal) {
         buyBtn.addEventListener("click", () => {
             try { this.storageManager?.track?.("paywall_click_buy", { source: "sophie_modal" }); } catch { }
             const url = window?.TYF_CONFIG?.stripePaymentUrl;
-            if (url) window.location.href = url;
+            if (window.TYF_UTILS?.isValidStripeUrl(url)) window.location.href = url;
         });
     }
 
@@ -971,6 +971,7 @@ UIFeatures.prototype.collectDailyReward = function () {
 
 UIFeatures.prototype.handlePurchase = function () {
     const stripeUrl = window.TYF_CONFIG?.stripePaymentUrl || "https://buy.stripe.com/your-payment-link";
+    if (!window.TYF_UTILS?.isValidStripeUrl(stripeUrl)) return;
     window.location.href = stripeUrl;
     try {
         if (window.gtag) {
@@ -1089,7 +1090,7 @@ UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
 
     modal.innerHTML = `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close" data-action="close">
                 <span aria-hidden="true" class="text-lg">✕</span>
             </button>
 
@@ -1208,7 +1209,7 @@ UIFeatures.prototype.setupThemePreviewEvents = function (modal, theme, opts) {
     const buyBtn = modal.querySelector("#premium-buy-btn");
     if (buyBtn) buyBtn.addEventListener("click", () => {
         const url = window?.TYF_CONFIG?.stripePaymentUrl;
-        if (url) window.location.href = url;
+        if (window.TYF_UTILS?.isValidStripeUrl(url)) window.location.href = url;
     });
 
     const colorsBtn = modal.querySelector("#colors-first-btn");
@@ -1337,7 +1338,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
     const buyBtn = modal.querySelector('#buy-premium-btn');
     if (buyBtn) buyBtn.addEventListener('click', () => {
         const url = window?.TYF_CONFIG?.stripePaymentUrl;
-        if (url) window.location.href = url;
+        if (window.TYF_UTILS?.isValidStripeUrl(url)) window.location.href = url;
     });
 };
 
@@ -1895,7 +1896,7 @@ UIFeatures.prototype._urlBase64ToUint8Array = function (base64String) {
 UIFeatures.prototype.subscribeToPush = async function () {
     try {
         const cfg = window.TYF_CONFIG?.serviceWorker?.notifications;
-        if (!cfg?.enabled || !cfg.vapidPublicKey || !cfg.subscribeUrl) return false;
+        if (!cfg?.enabled || !cfg.vapidPublicKey || !window.TYF_UTILS?.isConfiguredPushUrl(cfg.subscribeUrl)) return false;
         if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return false;
 
         const permission = await Notification.requestPermission();
@@ -2045,6 +2046,7 @@ UIFeatures.prototype.maybeShowNotifCTA = function (reason) {
     try {
         const cfg = window.TYF_CONFIG?.serviceWorker?.notifications;
         if (!cfg?.enabled || !cfg.dailyReminder) return;
+        if (!window.TYF_UTILS?.isConfiguredPushUrl(cfg.subscribeUrl)) return;
         if (!("Notification" in window)) return;
 
         // Already decided (granted, denied, or already subscribed): nothing to ask
