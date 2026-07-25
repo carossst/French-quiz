@@ -158,8 +158,11 @@
     </div>
   </div>
 
-  <!-- H1 pour SEO et accessibilité (invisible visuellement) -->
-  <h1 class="sr-only">Daily French - Authentic Interactive French Quizzes</h1>
+  <!-- Description pour SEO et accessibilité (invisible visuellement).
+       Pas un <h1> : chaque écran rendu par JS a déjà son propre h1
+       ("Welcome back", "Quiz recap", ...) ; en avoir deux dupliquait
+       l'annonce pour les lecteurs d'écran. -->
+  <p class="sr-only">Daily French - Authentic Interactive French Quizzes</p>
 
 
   <!-- Conteneur principal rendu par JS -->
