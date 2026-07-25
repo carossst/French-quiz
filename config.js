@@ -138,3 +138,28 @@ window.TYF_UTILS = {
             .trim();
     }
 };
+
+
+// ===============================
+// GA4 - micro-conversion tracking
+// (forwards the events already instrumented throughout the app to GA4;
+// no-ops silently if gtag failed to load, e.g. ad/tracker blockers)
+// ===============================
+window.trackMicroConversion = function (eventName, payload) {
+    try {
+        if (typeof gtag !== "function" || !eventName) return;
+        gtag("event", String(eventName), payload || {});
+    } catch (e) {
+        // silent
+    }
+};
+
+window.initializeAnalyticsIfPremium = function (storageManager) {
+    try {
+        if (typeof gtag !== "function") return;
+        var isPremium = !!(storageManager && typeof storageManager.isPremiumUser === "function" && storageManager.isPremiumUser());
+        gtag("set", "user_properties", { premium_user: isPremium });
+    } catch (e) {
+        // silent
+    }
+};

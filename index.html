@@ -71,9 +71,18 @@
   <link rel="preload" href="/style.css" as="style">
   <link rel="stylesheet" href="/style.css">
 
-  <!-- CSP - Production (Stripe + inline styles autorisés) -->
+  <!-- CSP - Production (Stripe + inline styles + GA4 autorisés) -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://buy.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.stripe.com; connect-src 'self' https://api.stripe.com https://checkout.stripe.com; font-src 'self'; upgrade-insecure-requests;">
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://buy.stripe.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.stripe.com; connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; font-src 'self'; upgrade-insecure-requests;">
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MSVVBG559E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-MSVVBG559E');
+  </script>
 </head>
 
 <body>

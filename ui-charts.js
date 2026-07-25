@@ -144,29 +144,25 @@
 
     return (
       '\n<section aria-label="Overview" class="tyf-stats-grid">' +
-      this._renderStatCard("✨", "French Points", String(fp), "Use FP to unlock themes") +
-      this._renderStatCard("✅", "Quizzes completed", String(completedQuizzes), "Build real momentum") +
+      this._renderStatCard("French Points", String(fp), "Use FP to unlock themes") +
+      this._renderStatCard("Quizzes completed", String(completedQuizzes), "Build real momentum") +
       this._renderStatCard(
-        "🎯",
         "Average accuracy",
         String(this._clamp(Math.round(accuracy || 0), 0, 100)) + "%",
         "Track your level"
       ) +
-      this._renderStatCard("💯", "Perfect quizzes", String(perfect), "100% score") +
+      this._renderStatCard("Perfect quizzes", String(perfect), "100% score") +
       "\n</section>" +
       this._renderProgressCards(fp, accuracy, totalTimeSpent, isPremium)
     );
   };
 
-  UICharts.prototype._renderStatCard = function (emoji, title, value, hint) {
+  UICharts.prototype._renderStatCard = function (title, value, hint) {
     return (
       '\n<div class="tyf-stats-card">' +
       '\n  <div class="tyf-card-top">' +
       '\n    <div class="tyf-label">' +
       this._escapeHTML(title) +
-      "</div>" +
-      '\n    <div class="tyf-pill" aria-hidden="true">' +
-      this._escapeHTML(emoji) +
       "</div>" +
       "\n  </div>" +
       '\n  <div class="tyf-value">' +
@@ -351,30 +347,22 @@
 
   UICharts.prototype._renderSingleBadge = function (badgeId) {
     var id = String(badgeId || "");
-    var icon = "🏅";
     var label = "Badge earned";
 
     if (id === "perfect") {
-      icon = "💯";
       label = "Perfect score";
     } else if (/^fp-\d+$/i.test(id)) {
-      icon = "✨";
       var n = Number(id.split("-")[1]);
       label = Number.isFinite(n) ? (String(n) + " French Points") : "French Points milestone";
     } else if (id === "first-quiz") {
-      icon = "🎯";
       label = "First quiz completed";
     } else if (/^streak-\d+$/i.test(id)) {
-      icon = "🔥";
       var s = Number(id.split("-")[1]);
       label = Number.isFinite(s) ? ("Streak: " + String(s) + " days") : "Streak milestone";
     }
 
     return (
       '\n  <div class="tyf-badge">' +
-      '\n    <span aria-hidden="true">' +
-      this._escapeHTML(icon) +
-      "</span>" +
       "\n    <span>" +
       this._escapeHTML(label) +
       "</span>" +

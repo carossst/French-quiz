@@ -429,15 +429,6 @@
                     console.error("Welcome UIFeatures failed (non-blocking):", e);
                 }
 
-                // CTA principal (ne doit jamais casser l’écran)
-                try {
-                    if (typeof this.renderPrimaryCTA === "function") {
-                        this.renderPrimaryCTA();
-                    }
-                } catch (e) {
-                    console.error("renderPrimaryCTA failed (non-blocking):", e);
-                }
-
                 // Daily goal nudge (ne doit jamais casser l’écran)
                 try {
                     if (typeof this.renderDailyGoalNudge === "function") {
@@ -513,9 +504,6 @@
 
 
             '\n    </div>' +
-
-            // CTA principal (piloté par renderPrimaryCTA)
-            '\n    <div id="primary-cta-slot" class="mb-4"></div>' +
 
             '\n    <section id="themes-section" aria-label="Available themes" class="lg:flex-1">' +
             '\n      <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-2 text-center">Choose your next theme</h2>' +
@@ -940,9 +928,7 @@
 
             '\n    <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-5 mb-5">' +
             '\n      <div class="flex items-center justify-center gap-2 mb-2">' +
-            '\n        <span class="text-2xl">✨</span>' +
             '\n        <h2 class="text-lg font-bold text-gray-900">How it works</h2>' +
-            '\n        <span class="text-2xl">✨</span>' +
             '\n      </div>' +
             '\n      <div class="text-sm text-gray-700 space-y-1">' +
             '\n        <p><strong class="text-gray-900">Quizzes</strong> -> earn French Points</p>' +
@@ -1395,8 +1381,12 @@
         const clean = this._stripChoiceLabel(safe);
         const cleanEsc = this.escapeHTML(clean);
 
+        // Roving tabindex (WAI-ARIA radiogroup pattern): only one option is a Tab
+        // stop at a time; arrow keys move focus among the others.
+        const tabindex = index === 0 ? "0" : "-1";
+
         return (
-            '\n<div class="option" data-option-index="' + index + '" role="radio" aria-checked="false" tabindex="0">' +
+            '\n<div class="option" data-option-index="' + index + '" role="radio" aria-checked="false" tabindex="' + tabindex + '">' +
             '\n  <div class="flex items-center">' +
             '\n    <div class="option-indicator w-5 h-5 rounded-full mr-4 flex-shrink-0" aria-hidden="true">' +
             '\n      <div class="option-indicator-dot w-full h-full rounded-full transform scale-0 transition-transform"></div>' +
@@ -1417,8 +1407,14 @@
 
         options.forEach(function (optionEl, index) {
 
+            function moveRovingTabindex(target) {
+                options.forEach(function (o) { o.setAttribute("tabindex", o === target ? "0" : "-1"); });
+                target.focus();
+            }
+
             optionEl.addEventListener("click", function () {
                 self._lastInputWasKeyboard = false;
+                moveRovingTabindex(optionEl);
                 self.selectOption(index, optionEl);
             });
 
@@ -1433,13 +1429,13 @@
                 if (e.key === "ArrowDown" || e.key === "ArrowRight") {
                     e.preventDefault();
                     const next = options[(index + 1) % options.length];
-                    if (next) next.focus();
+                    if (next) moveRovingTabindex(next);
                     return;
                 }
                 if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
                     e.preventDefault();
                     const prev = options[(index - 1 + options.length) % options.length];
-                    if (prev) prev.focus();
+                    if (prev) moveRovingTabindex(prev);
                     return;
 
 
@@ -1970,9 +1966,6 @@
                     '\n      <button id="roadmap-enter-code-btn" type="button" class="quiz-button w-full sm:w-auto whitespace-normal">' +
                     (wording.ctaEnter || "Enter a premium code") +
                     '</button>' +
-                    '\n      <button id="roadmap-enter-code-btn-bottom" type="button" class="text-sm underline w-full sm:w-auto">' +
-                    (wording.ctaAlreadyHave || "I already have a code") +
-                    '</button>' +
                     '\n    </div>'
                 );
             })() +
@@ -2014,7 +2007,6 @@
 
         const closeBtn = modal.querySelector("#close-roadmap-btn");
         const codeBtnTop = modal.querySelector("#roadmap-enter-code-btn");
-        const codeBtnBottom = modal.querySelector("#roadmap-enter-code-btn-bottom");
         const premiumBtn = modal.querySelector("#roadmap-premium-pay-btn");
         let cleaned = false;
 
@@ -2133,7 +2125,6 @@
         };
 
         if (codeBtnTop) codeBtnTop.addEventListener("click", openCodeModal);
-        if (codeBtnBottom) codeBtnBottom.addEventListener("click", openCodeModal);
         if (premiumBtn) premiumBtn.addEventListener("click", openPremiumPay);
 
         modal.addEventListener("tyf:close", cleanup, { once: true });

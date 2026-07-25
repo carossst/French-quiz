@@ -223,7 +223,12 @@ UIFeatures.prototype.setupFPEvents = function () {
         const amount = Number(e?.detail?.amount ?? 0);
         if (!Number.isFinite(amount) || amount <= 0) return;
 
-        this.showFPGain(amount);
+        // Daily reward already shows its own toast (showDailyRewardAnimation),
+        // triggered via collectDailyReward(). Skip here to avoid firing both
+        // toasts at once for the same gain.
+        if (e?.detail?.reason !== "daily_reward") {
+            this.showFPGain(amount);
+        }
         try { this.updateXPHeader(); } catch { }
     };
 
@@ -1392,7 +1397,6 @@ UIFeatures.prototype.generateUserProfileHTML = function () {
 
     return `
         <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center relative animate-fade-in">
-            <div class="text-4xl mb-4">🎉</div>
             <h2 id="profile-modal-title" class="text-xl font-bold text-gray-800 mb-3">
                 Excellent progress!
             </h2>
