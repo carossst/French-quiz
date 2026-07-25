@@ -1090,7 +1090,7 @@ UIFeatures.prototype.createThemePreviewModal = function (theme, opts) {
 
     modal.innerHTML = `
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative">
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-action="close">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close" data-action="close">
                 <span aria-hidden="true" class="text-lg">✕</span>
             </button>
 
@@ -1896,7 +1896,7 @@ UIFeatures.prototype._urlBase64ToUint8Array = function (base64String) {
 UIFeatures.prototype.subscribeToPush = async function () {
     try {
         const cfg = window.TYF_CONFIG?.serviceWorker?.notifications;
-        if (!cfg?.enabled || !cfg.vapidPublicKey || !cfg.subscribeUrl) return false;
+        if (!cfg?.enabled || !cfg.vapidPublicKey || !window.TYF_UTILS?.isConfiguredPushUrl(cfg.subscribeUrl)) return false;
         if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return false;
 
         const permission = await Notification.requestPermission();
@@ -2046,6 +2046,7 @@ UIFeatures.prototype.maybeShowNotifCTA = function (reason) {
     try {
         const cfg = window.TYF_CONFIG?.serviceWorker?.notifications;
         if (!cfg?.enabled || !cfg.dailyReminder) return;
+        if (!window.TYF_UTILS?.isConfiguredPushUrl(cfg.subscribeUrl)) return;
         if (!("Notification" in window)) return;
 
         // Already decided (granted, denied, or already subscribed): nothing to ask

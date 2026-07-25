@@ -45,3 +45,35 @@ test("isValidStripeUrl rejects empty, missing, or non-string input", () => {
   expect(TYF_UTILS.isValidStripeUrl(undefined)).toBe(false);
   expect(TYF_UTILS.isValidStripeUrl(null)).toBe(false);
 });
+
+// isConfiguredPushUrl gates the push-notification opt-in flow. config.js
+// still ships the placeholder subscribeUrl/unsubscribeUrl from before
+// testyourfrench-push was deployed; without this guard the app would ask
+// real users for a browser notification permission for a backend that
+// can't receive the subscription.
+test("isConfiguredPushUrl rejects the shipped placeholder domain", () => {
+  const TYF_UTILS = loadConfig();
+
+  expect(
+    TYF_UTILS.isConfiguredPushUrl(
+      "https://testyourfrench-push.example.workers.dev/subscribe"
+    )
+  ).toBe(false);
+});
+
+test("isConfiguredPushUrl accepts a real deployed Worker URL", () => {
+  const TYF_UTILS = loadConfig();
+
+  expect(
+    TYF_UTILS.isConfiguredPushUrl(
+      "https://testyourfrench-push.carolestromboni.workers.dev/subscribe"
+    )
+  ).toBe(true);
+});
+
+test("isConfiguredPushUrl rejects empty or missing input", () => {
+  const TYF_UTILS = loadConfig();
+
+  expect(TYF_UTILS.isConfiguredPushUrl("")).toBe(false);
+  expect(TYF_UTILS.isConfiguredPushUrl(undefined)).toBe(false);
+});

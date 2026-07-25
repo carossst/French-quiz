@@ -495,6 +495,8 @@
 
 
     quizData.questions.forEach(function (q, index) {
+      if (q.audio) return; // content JSON already specifies this question's audio file
+      if (audioType === "partial_audio") return; // mixed-skill quizzes intentionally omit audio on some questions
       q.audio =
         "TYF_" + themeName + "_" + quizNumber + "_" + (index + 1) + ".mp3";
     });

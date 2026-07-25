@@ -152,6 +152,15 @@ window.TYF_UTILS = {
     // main.js, ui-core.js, ui-features.js and ui-charts.js.
     isValidStripeUrl: function (url) {
         return typeof url === "string" && url.startsWith("https://buy.stripe.com/");
+    },
+
+    // The push subscribe/unsubscribe URLs still ship with the placeholder
+    // domain from before testyourfrench-push was deployed (see its README).
+    // Treat that placeholder as "not configured" so the app doesn't ask
+    // users for a real OS notification permission for a backend that can't
+    // actually receive the subscription.
+    isConfiguredPushUrl: function (url) {
+        return typeof url === "string" && url.length > 0 && !url.includes(".example.workers.dev");
     }
 };
 
