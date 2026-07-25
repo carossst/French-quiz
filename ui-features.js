@@ -1880,6 +1880,206 @@ UIFeatures.prototype.maybeShowInstallCTA = function (reason) {
 };
 
 
+//================================================================================
+// DAILY REMINDER (push notifications)
+//================================================================================
+UIFeatures.prototype._urlBase64ToUint8Array = function (base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64);
+    const output = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
+    return output;
+};
+
+UIFeatures.prototype.subscribeToPush = async function () {
+    try {
+        const cfg = window.TYF_CONFIG?.serviceWorker?.notifications;
+        if (!cfg?.enabled || !cfg.vapidPublicKey || !cfg.subscribeUrl) return false;
+        if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return false;
+
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return false;
+
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: this._urlBase64ToUint8Array(cfg.vapidPublicKey)
+        });
+
+        await fetch(cfg.subscribeUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(subscription)
+        });
+
+        try { localStorage.setItem("tyf:notifSubscribed", "1"); } catch { }
+        return true;
+    } catch (e) {
+        console.warn("[push] subscribe failed:", e);
+        return false;
+    }
+};
+
+UIFeatures.prototype._getOrCreateNotifToast = function () {
+    let toast = document.getElementById("notif-opt-in-toast");
+    if (toast) return toast;
+
+    toast = document.createElement("div");
+    toast.id = "notif-opt-in-toast";
+    toast.setAttribute("role", "dialog");
+    toast.setAttribute("aria-live", "polite");
+    toast.setAttribute("aria-labelledby", "notif-opt-in-title");
+    toast.setAttribute("aria-describedby", "notif-opt-in-text");
+    toast.setAttribute("tabindex", "-1");
+
+    toast.style.position = "fixed";
+    toast.style.left = "12px";
+    toast.style.right = "12px";
+    toast.style.bottom = "12px";
+    toast.style.zIndex = "9999";
+    toast.style.maxWidth = "560px";
+    toast.style.margin = "0 auto";
+    toast.style.background = "#ffffff";
+    toast.style.border = "1px solid rgba(0,0,0,0.10)";
+    toast.style.borderRadius = "16px";
+    toast.style.boxShadow = "0 18px 50px rgba(0,0,0,0.16)";
+    toast.style.padding = "12px 12px";
+    toast.style.display = "none";
+
+    toast.innerHTML = `
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="flex:1; min-width:0;">
+          <div id="notif-opt-in-title" style="font-weight:800; color:#111827; margin-bottom:2px;">
+            Get a daily reminder
+          </div>
+          <div id="notif-opt-in-text" style="font-size:13px; color:#374151; line-height:1.35; white-space:pre-line;">
+            One notification a day to keep your streak going. No spam, turn it off anytime.
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button id="notif-opt-in-primary" type="button"
+              style="appearance:none; border:0; border-radius:12px; padding:10px 12px; font-weight:800; background:#2563eb; color:#fff; cursor:pointer;">
+              Remind me
+            </button>
+            <button id="notif-opt-in-secondary" type="button"
+              style="appearance:none; border:1px solid rgba(0,0,0,0.12); border-radius:12px; padding:10px 12px; font-weight:700; background:#fff; color:#111827; cursor:pointer;">
+              Not now
+            </button>
+            <button id="notif-opt-in-never" type="button"
+              style="appearance:none; border:0; background:transparent; color:#6b7280; font-weight:700; padding:10px 8px; cursor:pointer;">
+              Don’t show again
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(toast);
+    return toast;
+};
+
+UIFeatures.prototype._hideNotifToast = function () {
+    try {
+        const t = document.getElementById("notif-opt-in-toast");
+        if (!t) return;
+
+        t.style.display = "none";
+
+        try {
+            if (t._tyfEscHandler) document.removeEventListener("keydown", t._tyfEscHandler);
+            t._tyfEscHandler = null;
+        } catch { }
+    } catch { }
+};
+
+UIFeatures.prototype._showNotifToast = function () {
+    const toast = this._getOrCreateNotifToast();
+    if (!toast) return;
+
+    const primary = toast.querySelector("#notif-opt-in-primary");
+    const secondary = toast.querySelector("#notif-opt-in-secondary");
+    const never = toast.querySelector("#notif-opt-in-never");
+    if (!primary || !secondary || !never) return;
+
+    if (toast.dataset.bound !== "1") {
+        toast.dataset.bound = "1";
+
+        primary.addEventListener("click", async () => {
+            this._hideNotifToast();
+            try { localStorage.setItem("tyf:notifDismissedAt", String(Date.now())); } catch { }
+            const ok = await this.subscribeToPush();
+            this.showFeedbackMessage?.(
+                ok ? "success" : "info",
+                ok ? "Daily reminder on. See you tomorrow!" : "Reminder not enabled - you can try again later."
+            );
+        });
+
+        secondary.addEventListener("click", () => {
+            try { localStorage.setItem("tyf:notifDismissedAt", String(Date.now())); } catch { }
+            this._hideNotifToast();
+        });
+
+        never.addEventListener("click", () => {
+            try { localStorage.setItem("tyf:notifHidden", "1"); } catch { }
+            this._hideNotifToast();
+        });
+    }
+
+    toast.style.display = "";
+
+    if (!toast._tyfEscHandler) {
+        toast._tyfEscHandler = (e) => {
+            if (e.key !== "Escape") return;
+            try { localStorage.setItem("tyf:notifDismissedAt", String(Date.now())); } catch { }
+            this._hideNotifToast();
+        };
+        document.addEventListener("keydown", toast._tyfEscHandler);
+    }
+
+    setTimeout(() => {
+        try { (toast.querySelector("#notif-opt-in-primary") || toast).focus?.(); } catch { }
+    }, 0);
+};
+
+UIFeatures.prototype.maybeShowNotifCTA = function (reason) {
+    try {
+        const cfg = window.TYF_CONFIG?.serviceWorker?.notifications;
+        if (!cfg?.enabled || !cfg.dailyReminder) return;
+        if (!("Notification" in window)) return;
+
+        // Already decided (granted, denied, or already subscribed): nothing to ask
+        if (Notification.permission !== "default") return;
+        if (localStorage.getItem("tyf:notifSubscribed") === "1") return;
+
+        // "Don't show again"
+        if (localStorage.getItem("tyf:notifHidden") === "1") return;
+
+        // Never stack on top of another important modal
+        if (
+            document.getElementById("sophie-paywall-modal") ||
+            document.getElementById("premium-code-modal") ||
+            document.getElementById("theme-preview-modal") ||
+            document.getElementById("pwa-install-toast")?.style.display === ""
+        ) {
+            return;
+        }
+
+        // Cooldown 24h (anti-spam)
+        const dismissedAt = Number(localStorage.getItem("tyf:notifDismissedAt") || 0);
+        if (Number.isFinite(dismissedAt) && dismissedAt > 0) {
+            const hours24 = 24 * 60 * 60 * 1000;
+            if ((Date.now() - dismissedAt) < hours24) return;
+        }
+
+        if (!this._notif) this._notif = { ctaShown: false };
+        if (this._notif.ctaShown) return;
+
+        this._notif.ctaShown = true;
+        this._showNotifToast();
+    } catch { }
+};
+
+
 UIFeatures.prototype._getFocusableIn = function (root) {
     if (!root) return [];
     const selectors = [
