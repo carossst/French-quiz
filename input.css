@@ -2217,3 +2217,46 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ====================================
+   ACCESSIBILITY: MINIMUM TOUCH TARGET SIZE
+   Enlarge the hit area of small inline links/buttons without changing
+   their visual size or position (negative margin offsets the padding).
+   ==================================== */
+
+a[data-action="show-roadmap"] {
+    display: inline-block;
+    padding: 6px 3px;
+    margin: -6px -3px;
+}
+
+#show-roadmap-btn {
+    display: inline-block;
+    padding: 8px 4px;
+    margin: -8px -4px;
+}
+
+#daily-chest-wrapper {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ====================================
+   BUGFIX: daily reward toast overlapping the header
+   On mobile the header wraps to two rows (level/FP row, then the premium
+   banner row), so the toast's fixed top offset needs to clear both.
+   Desktop keeps the original single-row offset.
+   ==================================== */
+
+#daily-reward-toast {
+    top: 132px;
+}
+
+@media (min-width: 640px) {
+    #daily-reward-toast {
+        top: 64px;
+    }
+}

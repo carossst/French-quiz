@@ -223,7 +223,12 @@ UIFeatures.prototype.setupFPEvents = function () {
         const amount = Number(e?.detail?.amount ?? 0);
         if (!Number.isFinite(amount) || amount <= 0) return;
 
-        this.showFPGain(amount);
+        // Daily reward already shows its own toast (showDailyRewardAnimation),
+        // triggered via collectDailyReward(). Skip here to avoid firing both
+        // toasts at once for the same gain.
+        if (e?.detail?.reason !== "daily_reward") {
+            this.showFPGain(amount);
+        }
         try { this.updateXPHeader(); } catch { }
     };
 

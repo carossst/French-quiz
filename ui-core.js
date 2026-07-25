@@ -1395,8 +1395,12 @@
         const clean = this._stripChoiceLabel(safe);
         const cleanEsc = this.escapeHTML(clean);
 
+        // Roving tabindex (WAI-ARIA radiogroup pattern): only one option is a Tab
+        // stop at a time; arrow keys move focus among the others.
+        const tabindex = index === 0 ? "0" : "-1";
+
         return (
-            '\n<div class="option" data-option-index="' + index + '" role="radio" aria-checked="false" tabindex="0">' +
+            '\n<div class="option" data-option-index="' + index + '" role="radio" aria-checked="false" tabindex="' + tabindex + '">' +
             '\n  <div class="flex items-center">' +
             '\n    <div class="option-indicator w-5 h-5 rounded-full mr-4 flex-shrink-0" aria-hidden="true">' +
             '\n      <div class="option-indicator-dot w-full h-full rounded-full transform scale-0 transition-transform"></div>' +
@@ -1417,8 +1421,14 @@
 
         options.forEach(function (optionEl, index) {
 
+            function moveRovingTabindex(target) {
+                options.forEach(function (o) { o.setAttribute("tabindex", o === target ? "0" : "-1"); });
+                target.focus();
+            }
+
             optionEl.addEventListener("click", function () {
                 self._lastInputWasKeyboard = false;
+                moveRovingTabindex(optionEl);
                 self.selectOption(index, optionEl);
             });
 
@@ -1433,13 +1443,13 @@
                 if (e.key === "ArrowDown" || e.key === "ArrowRight") {
                     e.preventDefault();
                     const next = options[(index + 1) % options.length];
-                    if (next) next.focus();
+                    if (next) moveRovingTabindex(next);
                     return;
                 }
                 if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
                     e.preventDefault();
                     const prev = options[(index - 1 + options.length) % options.length];
-                    if (prev) prev.focus();
+                    if (prev) moveRovingTabindex(prev);
                     return;
 
 
