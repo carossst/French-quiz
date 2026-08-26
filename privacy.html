@@ -46,7 +46,8 @@
     <section>
         <p><strong>Test Your French</strong> is a privacy-first language assessment app. We do <strong>not</strong>
             collect, sell or share your personal data. Your progress and results are stored only in your browser
-            (localStorage) and are never sent to our servers.</p>
+            (localStorage) and are never sent to our servers, with one exception: entering a device unlock code (see
+            below).</p>
     </section>
 
     <section>
@@ -54,6 +55,10 @@
         <ul>
             <li>Your quiz progress and scores (in your browser only)</li>
             <li>Your first name and email if you choose to save your profile (optional, local only)</li>
+            <li>If you enter a device unlock code (including trial codes we sometimes distribute), a
+                device-generated identifier and the code you entered are sent to our redeem-code service, hosted on
+                Cloudflare, to enforce a usage limit and prevent abuse. This record is kept indefinitely; contact us
+                to request deletion.</li>
             <li>No third-party trackers, except anonymous Google Analytics (for traffic and conversion statistics
                 only)</li>
         </ul>
@@ -74,10 +79,14 @@
             <a href="https://stripe.com/" rel="noopener" target="_blank">Stripe</a>.
             We never store payment information.
         </p>
+        <p>Device unlock code verification (see "What we store" above) is handled by
+            <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener" target="_blank">Cloudflare</a>
+            (Workers and a D1 database), which also processes your IP address for that request to prevent abuse.
+        </p>
     </section>
 
     <section>
-        <p>Last updated: August 2025</p>
+        <p>Last updated: August 2026</p>
     </section>
 
     <footer class="text-xs text-gray-500 text-center py-6 mt-10">
