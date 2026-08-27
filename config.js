@@ -16,6 +16,15 @@ window.TYF_CONFIG = {
     // Stripe Checkout - achat tous thèmes
     stripePaymentUrl: "https://buy.stripe.com/cNi00jeYLeVwcmq3s02Nq03",
 
+    // Server-verified admin/guest redeem codes (see redeem-worker/README.md).
+    // Empty apiBaseUrl means the check is skipped and only the local
+    // TYF-XXXX-XXXX format check applies (current default: no Worker
+    // deployed yet).
+    redeem: {
+        apiBaseUrl: "",
+        requestTimeoutMs: 4000
+    },
+
     // Waitlist / Early access (A1/A2 etc.) - ultra simple (mailto)
     // Tu reçois les demandes dans ta boîte, réponse manuelle au début.
     waitlist: {

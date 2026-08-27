@@ -15,6 +15,23 @@ const DAILY_REWARD_BONUS_CHANCE = 0;
 // REGION: CORE DATA MANAGEMENT
 //================================================================================
 
+function generateLocalUuid() {
+  try {
+    if (
+      typeof crypto !== "undefined" &&
+      crypto &&
+      typeof crypto.randomUUID === "function"
+    ) {
+      return String(crypto.randomUUID());
+    }
+  } catch (e) {
+    // fall through
+  }
+
+  const rand = Math.random().toString(36).slice(2, 10);
+  return "local-" + Date.now().toString(36) + "-" + rand;
+}
+
 // Renomme pour eviter le conflit avec l'API Web "StorageManager"
 function StorageManager() {
   this.storageKey = "frenchQuizProgress";
@@ -93,6 +110,11 @@ function StorageManager() {
       firstName: null,
       isAnonymous: true,
       registeredAt: null
+    },
+
+    // Device identity, used only for server-verified admin/guest redeem codes
+    redeem: {
+      deviceUuid: ""
     }
   };
 
@@ -885,6 +907,100 @@ StorageManager.prototype.unlockPremiumWithCode = function (code) {
   };
 
 
+};
+
+StorageManager.prototype.ensureRedeemDeviceUuid = function () {
+  if (!this.data) return "";
+
+  if (!this.data.redeem || typeof this.data.redeem !== "object") {
+    this.data.redeem = { deviceUuid: "" };
+  }
+
+  const existing = String(this.data.redeem.deviceUuid || "").trim();
+  if (existing) return existing;
+
+  const next = generateLocalUuid();
+  this.data.redeem.deviceUuid = next;
+  this.save();
+  return next;
+};
+
+// Server-verified admin/guest redeem codes (see redeem-worker/README.md).
+// Tries the Worker first; the caller falls back to unlockPremiumWithCode()
+// (format-only, client-side) when this reports REMOTE_UNAVAILABLE or
+// NOT_FOUND, so real customer codes (TYF-XXXX-XXXX) keep working unchanged.
+StorageManager.prototype.tryRedeemPremiumCodeRemote = async function (codeInput) {
+  if (!this.data) return { ok: false, reason: "NO_DATA" };
+  if (this.isPremiumUser()) return { ok: true, reason: "ALREADY" };
+  const code = String(codeInput || "").trim();
+  if (!code) return { ok: false, reason: "EMPTY" };
+  const cfg = (typeof window !== "undefined" && window.TYF_CONFIG) || {};
+  const baseUrl = String(cfg?.redeem?.apiBaseUrl || "").trim().replace(/\/+$/, "");
+  if (!baseUrl) return { ok: false, reason: "REMOTE_UNAVAILABLE" };
+  let deviceUuid = "";
+  try { deviceUuid = String(this.ensureRedeemDeviceUuid() || "").trim(); } catch (e) { deviceUuid = ""; }
+  if (!deviceUuid) return { ok: false, reason: "REMOTE_UNAVAILABLE" };
+  const timeoutMs = Math.max(500, Math.min(15000, Number(cfg?.redeem?.requestTimeoutMs) || 4000));
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  let timerId = 0; let res = null; let json = null;
+  try {
+    if (controller && timeoutMs > 0) { timerId = window.setTimeout(() => controller.abort(), timeoutMs); }
+    res = await fetch(baseUrl + "/redeem-code", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ code: code, device_uuid: deviceUuid }),
+      signal: controller ? controller.signal : undefined
+    });
+    json = await res.json().catch(() => null);
+  } catch (e) { return { ok: false, reason: "REMOTE_UNAVAILABLE" }; }
+  finally { if (timerId) window.clearTimeout(timerId); }
+  if (!res || !json) return { ok: false, reason: "REMOTE_UNAVAILABLE" };
+  if (!res.ok || json.ok !== true) return { ok: false, reason: String(json.reason || ("HTTP_" + res.status)) };
+  const tier = String(json.tier || "").trim();
+  return this._applyRemoteUnlock(tier);
+};
+
+// Grants premium via the same effects as unlockPremiumWithCode() (unlock all
+// quizzes, FP bonus, events, analytics) but without the client-side format
+// check, since the code was already verified server-side by this point.
+StorageManager.prototype._applyRemoteUnlock = function (tier) {
+  const wasAlreadyPremium = this.isPremiumUser();
+  if (wasAlreadyPremium) {
+    this.dispatchFPEvent("premium-unlocked", { wasAlreadyPremium: true });
+    this.save();
+    return { ok: true, reason: "ALREADY" };
+  }
+
+  const oldLevel = this.getUserLevel();
+  const fpBonus = 25;
+
+  this.runInTransaction(() => {
+    this.data.isPremiumUser = true;
+    this.data.redeem = this.data.redeem || { deviceUuid: "" };
+    this.data.redeem.tier = tier;
+    this.unlockAllQuizzes();
+    this.addFrenchPoints(fpBonus, "premium_unlock", { skipEvents: true });
+  });
+
+  const newLevel = this.getUserLevel();
+
+  this.dispatchFPEvent("fp-gained", {
+    amount: fpBonus,
+    reason: "premium_unlock",
+    total: this.data.frenchPoints
+  });
+
+  if (newLevel > oldLevel) {
+    this.dispatchFPEvent("level-up", { newLevel, oldLevel });
+  }
+
+  this.dispatchFPEvent("premium-unlocked", { wasAlreadyPremium: false });
+
+  if (typeof this.trackAnalytics === "function") {
+    this.trackAnalytics("premium_unlocked", { bonusFP: fpBonus });
+  }
+
+  return { ok: true, reason: "UNLOCKED", tier };
 };
 
 

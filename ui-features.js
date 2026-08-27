@@ -1308,8 +1308,50 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
 
     const validateBtn = modal.querySelector('#validate-code-btn');
     if (validateBtn && input) {
-        validateBtn.addEventListener('click', () => {
+        const showInvalid = () => {
+            input.classList.add("tyf-input-error");
+            input.value = "";
+            input.placeholder = "Invalid code - try again";
+
+            const clearError = () => {
+                input.classList.remove("tyf-input-error");
+                input.removeEventListener("input", clearError);
+            };
+            input.addEventListener("input", clearError);
+        };
+
+        validateBtn.addEventListener('click', async () => {
             const code = input.value.trim();
+
+            if (this.storageManager?.tryRedeemPremiumCodeRemote) {
+                validateBtn.disabled = true;
+                input.placeholder = "Checking code...";
+
+                let remoteResult = null;
+                try {
+                    remoteResult = await this.storageManager.tryRedeemPremiumCodeRemote(code);
+                } catch (e) {
+                    remoteResult = null;
+                }
+
+                validateBtn.disabled = false;
+
+                const shouldTryLocalFallback =
+                    !remoteResult ||
+                    (remoteResult.ok !== true &&
+                        (remoteResult.reason === "REMOTE_UNAVAILABLE" || remoteResult.reason === "NOT_FOUND"));
+
+                if (!shouldTryLocalFallback) {
+                    if (remoteResult && remoteResult.ok === true) {
+                        // Fermer la modal immédiatement.
+                        // Le handler global "premium-unlocked" s’occupe du reste.
+                        close();
+                    } else {
+                        showInvalid();
+                    }
+                    return;
+                }
+            }
 
             const result = this.storageManager?.unlockPremiumWithCode
                 ? this.storageManager.unlockPremiumWithCode(code)
@@ -1322,16 +1364,7 @@ UIFeatures.prototype.showPremiumCodeModal = function () {
                 return;
             }
 
-            // Invalid code
-            input.classList.add("tyf-input-error");
-            input.value = "";
-            input.placeholder = "Invalid code - try again";
-
-            const clearError = () => {
-                input.classList.remove("tyf-input-error");
-                input.removeEventListener("input", clearError);
-            };
-            input.addEventListener("input", clearError);
+            showInvalid();
         });
     }
 
